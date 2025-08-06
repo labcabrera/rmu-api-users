@@ -4,10 +4,10 @@ import { UserSettings } from '../../domain/entities/user-settings.entity';
 
 export type UserSettingsDocument = UserSettings & Document;
 
-@Schema({ collection: 'user-settings' })
+@Schema({ collection: 'user-settings', versionKey: false })
 export class UserSettingsModel {
-  @Prop()
-  id: string;
+  @Prop({ required: true })
+  _id: string;
 
   @Prop()
   measurementSystem: 'metric' | 'imperial';

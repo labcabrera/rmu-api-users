@@ -10,16 +10,27 @@ import { DeleteUserUseCase } from './application/use-cases/delete-user.usecase';
 import { UpdateUserUseCase } from './application/use-cases/update-user.usecase';
 import { RsqlParser } from './infrastructure/controllers/rsql-parser';
 import { UserSettingsRepository } from './infrastructure/persistence/user-settings.repository';
-import { UserSettingsController } from './infrastructure/controllers/user-settings.controller';
+import { UserController } from './infrastructure/controllers/user-settings.controller';
+import { GetUserUserSettingsUseCase } from './application/use-cases/get-user-settings.usecase';
+import { UserSettingsModel, UserSettingsSchema } from './infrastructure/persistence/user-settings.schema';
+import { UpdateUserUserSettingsUseCase } from './application/use-cases/update-settings.usecase';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }])],
-  controllers: [UserManagementController, UserSettingsController, KafkaConsumerController],
+  imports: [
+    MongooseModule.forFeature([
+      { name: UserModel.name, schema: UserSchema },
+      { name: UserSettingsModel.name, schema: UserSettingsSchema },
+    ]),
+  ],
+  controllers: [UserManagementController, UserController, KafkaConsumerController],
   providers: [
     KafkaProducerService,
     CreateUserUseCase,
     UpdateUserUseCase,
     DeleteUserUseCase,
+    GetUserUserSettingsUseCase,
+    UpdateUserUserSettingsUseCase,
+    RsqlParser,
     {
       provide: 'UserRepositoryPort',
       useClass: UserRepository,
@@ -28,7 +39,6 @@ import { UserSettingsController } from './infrastructure/controllers/user-settin
       provide: 'UserSettingsRepositoryPort',
       useClass: UserSettingsRepository,
     },
-    RsqlParser,
   ],
 })
 export class UserModule {}

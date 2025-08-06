@@ -16,7 +16,10 @@ export class UserSettingsRepository implements UserSettingsRepositoryPort {
   }
 
   async save(user: Partial<UserSettings>): Promise<UserSettings> {
-    const model = new this.userSettingsModel(user);
+    const model = new this.userSettingsModel({
+      ...user,
+      _id: user.id,
+    });
     const created = await model.save();
     return this.mapToDomain(created);
   }

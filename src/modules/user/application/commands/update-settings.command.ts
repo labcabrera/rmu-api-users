@@ -1,4 +1,4 @@
-export interface UpdateSettingsCommand {
+export interface UpdateUserSettingsCommand {
   readonly id: string;
   readonly measurementSystem: 'metric' | 'imperial';
   readonly language: string;
