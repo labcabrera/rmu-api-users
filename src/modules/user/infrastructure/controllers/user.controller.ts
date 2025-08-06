@@ -9,7 +9,10 @@ import {
   Delete,
   Param,
   Patch,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
+
 import { CreateUserUseCase } from '../../application/use-cases/create-user.usecase';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserCommand } from '../../application/commands/create-user.command';
@@ -20,6 +23,7 @@ import { RsqlParser } from './rsql-parser';
 import { UpdateUserCommand } from '../../application/commands/update-user.command';
 import { UpdateUserUseCase } from '../../application/use-cases/update-user.usecase';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
 
 @Controller('users')
 export class UserController {
@@ -31,6 +35,12 @@ export class UserController {
     @Inject('UserRepositoryPort')
     private readonly userRepository: userRepositoryPort.UserRepositoryPort,
   ) {}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  getProfile(@Request() req) {
+    return req.user;
+  }
 
   @Get()
   async findAll(
