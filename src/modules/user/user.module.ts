@@ -14,6 +14,9 @@ import { UserController } from './infrastructure/controllers/user.controller';
 import { GetUserUserSettingsUseCase } from './application/use-cases/get-user-settings.usecase';
 import { UserSettingsModel, UserSettingsSchema } from './infrastructure/persistence/user-settings.schema';
 import { UpdateUserUserSettingsUseCase } from './application/use-cases/update-settings.usecase';
+import { KeycloakUserSearchClient } from './infrastructure/client/keycloak-user-client';
+import { AuthModule } from 'src/auth/auth.module';
+import { RequestFriendUseCase } from './application/use-cases/request-friend.usecase';
 
 @Module({
   imports: [
@@ -21,6 +24,7 @@ import { UpdateUserUserSettingsUseCase } from './application/use-cases/update-se
       { name: UserModel.name, schema: UserSchema },
       { name: UserSettingsModel.name, schema: UserSettingsSchema },
     ]),
+    AuthModule,
   ],
   controllers: [UserManagementController, UserController, KafkaConsumerController],
   providers: [
@@ -30,6 +34,7 @@ import { UpdateUserUserSettingsUseCase } from './application/use-cases/update-se
     DeleteUserUseCase,
     GetUserUserSettingsUseCase,
     UpdateUserUserSettingsUseCase,
+    RequestFriendUseCase,
     RsqlParser,
     {
       provide: 'UserRepositoryPort',
@@ -38,6 +43,10 @@ import { UpdateUserUserSettingsUseCase } from './application/use-cases/update-se
     {
       provide: 'UserSettingsRepositoryPort',
       useClass: UserSettingsRepository,
+    },
+    {
+      provide: 'UserSearchPort',
+      useClass: KeycloakUserSearchClient,
     },
   ],
 })

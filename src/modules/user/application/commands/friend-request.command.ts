@@ -1,6 +1,7 @@
-export class User {
+export class RequestFriendCommand {
   constructor(
-    public sourceId: string,
-    public targetId: string,
+    public userId: string,
+    public friendEmail: string,
+    public message?: string,
   ) {}
 }
