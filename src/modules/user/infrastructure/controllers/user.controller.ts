@@ -9,8 +9,8 @@ import { JwtAuthGuard } from 'src/modules/auth/jwt.auth.guard';
 import { GetUserUserSettingsUseCase } from '../../application/use-cases/get-user-settings.usecase';
 import { UpdateUserUserSettingsUseCase } from '../../application/use-cases/update-settings.usecase';
 import { UpdateUserSettingsCommand } from '../../application/commands/update-settings.command';
-import { FriendshipRequestUseCase } from '../../application/use-cases/request-friend.usecase';
-import { RequestFriendCommand } from '../../application/commands/friend-request.command';
+import { FriendshipRequestUseCase } from '../../application/use-cases/friendship-request.usecase';
+import { FriendshipRequestCommand } from '../../application/commands/friendship-request.command';
 
 @UseGuards(JwtAuthGuard)
 @Controller('user')
@@ -52,7 +52,7 @@ export class UserController {
   @Post('friends')
   requestFriend(@Request() req) {
     const userId = req.user!.id as string;
-    const command = new RequestFriendCommand(userId, req.body.friendEmail, req.body.message);
+    const command = new FriendshipRequestCommand(userId, req.body.friendEmail, req.body.message);
     this.requestFriendUseCase.execute(command);
     return { message: 'Friend request sent successfully' };
   }

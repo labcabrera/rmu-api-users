@@ -11,6 +11,7 @@ export class KeycloakUserSearchClient implements UserSearchPort {
 
   async findByEmail(email: string): Promise<UserApiResponse | null> {
     const token = await this.tokenService.getToken();
+    console.log('Token:', token);
     //TODO READ FROM CONFIG
     const uri = `http://localhost:8090/admin/realms/rmu-local/users?email=${email}`;
     const response = await axios.get(uri, {

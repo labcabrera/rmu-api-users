@@ -6,7 +6,7 @@ import * as userSettingsRepositoryPort from '../ports/out/user-settings-reposito
 @Injectable()
 export class GetUserUserSettingsUseCase {
   constructor(
-    @Inject('UserSettingsRepositoryPort')
+    @Inject('UserSettingsRepository')
     private readonly userRepo: userSettingsRepositoryPort.UserSettingsRepository,
   ) {}
 
@@ -20,6 +20,7 @@ export class GetUserUserSettingsUseCase {
     const defaultSettings: UserSettings = {
       id: userId,
       measurementSystem: 'metric',
+      defaultRealm: null,
       language: 'en',
       theme: 'dark',
     };

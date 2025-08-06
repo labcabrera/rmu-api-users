@@ -7,7 +7,7 @@ import { UserSettings } from '../../domain/entities/user-settings.entity';
 import { UserSettingsRepository } from '../../application/ports/out/user-settings-repository';
 
 @Injectable()
-export class FriendshipRepository implements UserSettingsRepository {
+export class MongoUserSettingsRepository implements UserSettingsRepository {
   constructor(@InjectModel(UserSettingsModel.name) private userSettingsModel: Model<UserSettingsDocument>) {}
 
   async findById(id: string): Promise<UserSettings | null> {
@@ -35,6 +35,6 @@ export class FriendshipRepository implements UserSettingsRepository {
   }
 
   private mapToDomain(doc: UserSettingsDocument): UserSettings {
-    return new UserSettings(doc._id as string, doc.measurementSystem, doc.language, doc.theme);
+    return new UserSettings(doc._id as string, doc.measurementSystem, doc.defaultRealm, doc.language, doc.theme);
   }
 }

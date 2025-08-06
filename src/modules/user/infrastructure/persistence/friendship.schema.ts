@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { UserSettings } from '../../domain/entities/user-settings.entity';
+import { Friendship } from '../../domain/entities/friendship.entity';
 
-export type FriendshipDocument = UserSettings & Document;
+export type FriendshipDocument = Friendship & Document;
 
-@Schema({ collection: 'user-settings', versionKey: false })
+@Schema({ collection: 'friendship', versionKey: false })
 export class FriendshipModel {
   @Prop({ required: true })
   requesterId: string;

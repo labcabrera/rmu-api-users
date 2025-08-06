@@ -1,4 +1,4 @@
-export class RequestFriendCommand {
+export class FriendshipRequestCommand {
   constructor(
     public userId: string,
     public friendEmail: string,

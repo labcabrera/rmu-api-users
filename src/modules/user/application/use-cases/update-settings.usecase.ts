@@ -7,7 +7,7 @@ import { UpdateUserSettingsCommand } from '../commands/update-settings.command';
 @Injectable()
 export class UpdateUserUserSettingsUseCase {
   constructor(
-    @Inject('UserSettingsRepositoryPort')
+    @Inject('UserSettingsRepository')
     private readonly userRepo: userSettingsRepositoryPort.UserSettingsRepository,
   ) {}
 
@@ -18,12 +18,16 @@ export class UpdateUserUserSettingsUseCase {
     if (command.measurementSystem) {
       query['measurementSystem'] = command.measurementSystem;
     }
+    if (command.defaultRealm) {
+      query['defaultRealm'] = command.defaultRealm;
+    }
     if (command.language) {
       query['language'] = command.language;
     }
     if (command.theme) {
       query['theme'] = command.theme;
     }
+    console.info('Update query:', query);
     if (Object.keys(query).length === 0) {
       throw new Error('No settings to update');
     }

@@ -12,10 +12,13 @@ export class UserSettingsModel {
   @Prop()
   measurementSystem: 'metric' | 'imperial';
 
-  @Prop()
+  @Prop({ required: false })
+  defaultRealm: string;
+
+  @Prop({ required: true })
   language: string;
 
-  @Prop()
+  @Prop({ required: true })
   theme: 'light' | 'dark';
 }
 
