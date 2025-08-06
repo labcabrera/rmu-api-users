@@ -15,24 +15,22 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, openApiConfig);
   SwaggerModule.setup('api-docs', app, document);
 
-  const kafkaDisabled = app.get(ConfigService).get<boolean>('DEV_KAFKA_DISABLED');
-  if (!kafkaDisabled) {
-    const clientId = app.get(ConfigService).get<string>('KAFKA_CLIENT_ID') || 'rmu-api-users';
-    const brokers = app.get(ConfigService).get<string>('KAFKA_BROKERS')?.split(',') || ['localhost:9092'];
-    const consumerGroupId = app.get(ConfigService).get<string>('KAFKA_CONSUMER_GROUP_ID') || 'user-consumer';
-    app.connectMicroservice<MicroserviceOptions>({
-      transport: Transport.KAFKA,
-      options: {
-        client: {
-          clientId: clientId,
-          brokers: brokers,
-        },
-        consumer: {
-          groupId: consumerGroupId,
-        },
+  const clientId = app.get(ConfigService).get<string>('KAFKA_CLIENT_ID') || 'rmu-api-users';
+  const brokers = app.get(ConfigService).get<string>('KAFKA_BROKERS')?.split(',') || ['localhost:9092'];
+  const consumerGroupId = app.get(ConfigService).get<string>('KAFKA_CONSUMER_GROUP_ID') || 'user-consumer';
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        clientId: clientId,
+        brokers: brokers,
       },
-    });
-  }
+      consumer: {
+        groupId: consumerGroupId,
+      },
+    },
+  });
+
   app.useGlobalFilters(new DomainExceptionFilter());
   await app.listen(3010);
   await app.startAllMicroservices();

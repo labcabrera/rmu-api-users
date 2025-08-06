@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { UserSettingsDocument, UserSettingsModel } from './user-settings.schema';
-import { UserSettings } from '../../domain/entities/user-settings.entity';
 import { UserSettingsRepository } from '../../application/ports/out/user-settings-repository';
+import { UserSettings } from '../../domain/entities/user-settings.entity';
+import { UserSettingsDocument, UserSettingsModel } from './user-settings.schema';
 
 @Injectable()
 export class MongoUserSettingsRepository implements UserSettingsRepository {
@@ -32,6 +32,12 @@ export class MongoUserSettingsRepository implements UserSettingsRepository {
 
   async deleteById(id: string): Promise<void> {
     await this.userSettingsModel.deleteOne({ _id: id });
+  }
+
+  unsetRealm(realmId: string): Promise<number> {
+    return this.userSettingsModel
+      .updateMany({ defaultRealm: realmId }, { $unset: { defaultRealm: '' } })
+      .then((result) => result.modifiedCount);
   }
 
   private mapToDomain(doc: UserSettingsDocument): UserSettings {

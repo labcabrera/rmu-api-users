@@ -5,8 +5,8 @@ import { Model } from 'mongoose';
 import { FriendshipRepository } from '../../application/ports/out/friendship.repository';
 import { Friendship } from '../../domain/entities/friendship.entity';
 import { FriendshipDocument, FriendshipModel } from './friendship.schema';
-import { rsqlToMongo } from './rsql-adapter';
 import { Page } from '../../domain/entities/page';
+import { toMongoQuery } from './rsql-adapter';
 
 @Injectable()
 export class MongoFriendshipRepository implements FriendshipRepository {
@@ -17,8 +17,8 @@ export class MongoFriendshipRepository implements FriendshipRepository {
     return friendship ? this.mapToDomain(friendship) : null;
   }
 
-  async findByRsql(rsql: string, page: number, size: number): Promise<Page<Friendship> | null> {
-    const query = rsql ? rsqlToMongo(rsql) : {};
+  async findByRsql(rsql: string, page: number, size: number): Promise<Page<Friendship>> {
+    const query = rsql ? toMongoQuery(rsql) : {};
     const skip = page * size;
     const [results, totalElements] = await Promise.all([
       this.friendshipModel.find(query).skip(skip).limit(size).sort({ createdAt: 1 }),

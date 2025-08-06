@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { KafkaProducerService } from './infrastructure/messaging/kafka-producer.service';
 import { KafkaConsumerController } from './infrastructure/messaging/kafka-consumer.controller';
-import { RsqlParser } from './infrastructure/controllers/rsql-parser';
 import { MongoUserSettingsRepository } from './infrastructure/persistence/mongo-user-settings.repository';
 import { UserController } from './infrastructure/controllers/user.controller';
 import { GetUserUserSettingsUseCase } from './application/use-cases/get-user-settings.usecase';
@@ -13,6 +12,7 @@ import { AuthModule } from 'src/modules/auth/auth.module';
 import { FriendshipRequestUseCase } from './application/use-cases/friendship-request.usecase';
 import { MongoFriendshipRepository } from './infrastructure/persistence/mongo-friendship.repository';
 import { FriendshipModel, FriendshipSchema } from './infrastructure/persistence/friendship.schema';
+import { UnsetDeletedRealmUseCase } from './application/use-cases/unset-deleted-realm.usecase';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { FriendshipModel, FriendshipSchema } from './infrastructure/persistence/
     GetUserUserSettingsUseCase,
     UpdateUserUserSettingsUseCase,
     FriendshipRequestUseCase,
-    RsqlParser,
+    UnsetDeletedRealmUseCase,
     {
       provide: 'UserSettingsRepository',
       useClass: MongoUserSettingsRepository,

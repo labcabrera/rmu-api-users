@@ -1,11 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TokenService {
+  private readonly logger = new Logger(TokenService.name);
+
+  constructor(private readonly configService: ConfigService) {}
+
   private token: string | null = null;
   private expiresAt = 0;
 
@@ -13,9 +18,19 @@ export class TokenService {
     const now = Date.now();
     if (this.token && now < this.expiresAt) return this.token;
 
-    const uri = process.env.RMU_IAM_TOKEN_URL || '';
-    const clientId = process.env.RMU_IAM_CLIENT_ID || '';
-    const clientSecret = process.env.RMU_IAM_CLIENT_SECRET || '';
+    const uri = this.configService.get<string>('RMU_IAM_TOKEN_URI')!;
+    let clientId = this.configService.get<string>('RMU_IAM_CLIENT_ID')!;
+    let clientSecret = this.configService.get<string>('RMU_IAM_CLIENT_SECRET')!;
+
+    //Local hack
+    if (!this.configService.get<string>('NODE_ENV')) {
+      clientId = 'rmu-user-client';
+      clientSecret = 'jApYtJ4ZenWmytDHwlq1QKHC4EjUCvFJ';
+    }
+
+    this.logger.debug('Fetching new token env:', this.configService.get<string>('NODE_ENV'));
+    this.logger.debug('Fetching new token from:', uri);
+    this.logger.debug('Fetching new token clientId:', clientId);
 
     const params = new URLSearchParams();
     params.append('grant_type', 'client_credentials');

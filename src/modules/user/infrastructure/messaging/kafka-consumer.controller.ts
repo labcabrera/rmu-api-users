@@ -1,22 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { UnsetDeletedRealmUseCase } from '../../application/use-cases/unset-deleted-realm.usecase';
 
 @Controller()
 export class KafkaConsumerController {
-  @MessagePattern('internal.rmu-users.user.created.v1')
-  handleUserCreated(@Payload() message: any) {
-    console.log('Received user created event:', JSON.stringify(message, null, 2));
-  }
+  private readonly logger = new Logger(KafkaConsumerController.name);
 
-  @MessagePattern('internal.rmu-users.user.updated.v1')
-  handleUserUpdated(@Payload() message: any) {
-    console.log('Received user updated event:', JSON.stringify(message, null, 2));
-  }
+  constructor(private unsetDeletedRealmUseCase: UnsetDeletedRealmUseCase) {}
 
-  @MessagePattern('internal.rmu-users.user.deleted.v1')
-  handleUserDeleted(@Payload() message: any) {
-    console.log('Received user deleted event:', JSON.stringify(message, null, 2));
+  @MessagePattern('internal.rmu-core.realm.deleted.v1')
+  async handleRealmDeleted(@Payload() message: any) {
+    this.logger.debug('Received realm deleted event:', JSON.stringify(message, null, 2));
+    await this.unsetDeletedRealmUseCase.execute(message.data.id);
   }
 }

@@ -24,3 +24,9 @@ export class UserNotFoundError extends DomainError {
     super(message, 'USER_NOT_FOUND');
   }
 }
+
+export class InvalidSearchExpression extends DomainError {
+  constructor(message: string) {
+    super(message, 'INVALID_SEARCH_EXPRESSION');
+  }
+}

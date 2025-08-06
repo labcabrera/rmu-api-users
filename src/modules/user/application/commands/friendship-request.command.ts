@@ -1,7 +1,7 @@
 export class FriendshipRequestCommand {
   constructor(
     public userId: string,
-    public friendEmail: string,
+    public addresseeEmail: string,
     public message?: string,
   ) {}
 }

@@ -3,7 +3,7 @@ import { Page } from 'src/modules/user/domain/entities/page';
 
 export interface FriendshipRepository {
   findById(id: string): Promise<Friendship | null>;
-  findByRsql(rsql: string, page: number, size: number): Promise<Page<Friendship> | null>;
+  findByRsql(rsql: string, page: number, size: number): Promise<Page<Friendship>>;
   save(friendship: Partial<Friendship>): Promise<Friendship>;
   update(id: string, friendship: Partial<Friendship>): Promise<Friendship>;
   deleteById(id: string): Promise<void>;

@@ -5,4 +5,5 @@ export interface UserSettingsRepository {
   save(user: Partial<UserSettings>): Promise<UserSettings>;
   update(id: string, user: Partial<UserSettings>): Promise<UserSettings>;
   deleteById(id: string): Promise<void>;
+  unsetRealm(realmId: string): Promise<number>;
 }

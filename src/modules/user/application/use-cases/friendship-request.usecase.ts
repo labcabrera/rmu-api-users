@@ -1,33 +1,67 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { FriendshipRequestCommand } from '../commands/friendship-request.command';
 import { UserNotFoundError, ValidationError } from '../../domain/errors/errors';
 import * as userSearchPort from '../ports/out/user-search.port';
 import * as friendshipRepository from '../ports/out/friendship.repository';
+import { Friendship } from '../../domain/entities/friendship.entity';
 
 @Injectable()
 export class FriendshipRequestUseCase {
+  private readonly logger = new Logger(FriendshipRequestUseCase.name);
+
   constructor(
     @Inject('UserSearchPort') private readonly userSearchPort: userSearchPort.UserSearchPort,
     @Inject('FriendshipRepository') private readonly friendshipRepository: friendshipRepository.FriendshipRepository,
   ) {}
 
   async execute(command: FriendshipRequestCommand): Promise<void> {
-    const email = command.friendEmail;
-    const addresseeInfo = await this.userSearchPort.findByEmail(email);
+    this.logger.log(`Executing for user ${command.userId} and friend ${command.addresseeEmail}`);
+    const addresseeInfo = await this.userSearchPort.findByEmail(command.addresseeEmail);
     if (!addresseeInfo) {
-      throw new UserNotFoundError(`User with email ${email} not found`);
+      throw new UserNotFoundError(`User with email ${command.addresseeEmail} not found`);
     }
+    this.logger.debug(`Found addressee id ${addresseeInfo.id}`);
     if (addresseeInfo.id === command.userId) {
       throw new ValidationError(`Cannot send a friendship request to yourself`);
     }
-    const rsql = `requesterId=='${command.userId}';addresseeId=='${addresseeInfo.id}'`;
-    const current = await this.friendshipRepository.findByRsql(rsql, 0, 1);
-    if (current) {
-      console.log(`Friendship already exists between ${command.userId} and ${addresseeInfo.id}`);
+    const current = await this.getExisting(command.userId, addresseeInfo.id);
+    const inverse = await this.getExisting(addresseeInfo.id, command.userId);
+    if (inverse) {
+      switch (inverse?.status) {
+        case 'blocked':
+          // Silent ignore, as the user has already blocked the request
+          return;
+      }
     }
-    //TODO check user not already a friend
-    //TODO check blocked users
-    throw new Error('Method not implemented.');
+    if (current) {
+      return this.processExistingFriendship(current);
+    } else {
+      await this.createNewFriendship(command.userId, addresseeInfo.id);
+    }
+  }
+  private async getExisting(userId: string, addresseeId: string): Promise<Friendship | null> {
+    const rsql = `requesterId==${userId};addresseeId==${addresseeId}`;
+    const page = await this.friendshipRepository.findByRsql(rsql, 0, 1);
+    return page.content.length > 0 ? page.content[0] : null;
+  }
+
+  private async processExistingFriendship(friendship: Friendship): Promise<void> {
+    const update: Partial<Friendship> = {
+      status: 'pending',
+      updatedAt: new Date(),
+    };
+    await this.friendshipRepository.update(friendship.id, update);
+  }
+
+  private async createNewFriendship(userId: string, addresseeId: string): Promise<void> {
+    const friendship: Partial<Friendship> = {
+      requesterId: userId,
+      addresseeId: addresseeId,
+      status: 'pending',
+      createdAt: new Date(),
+    };
+    const created = await this.friendshipRepository.save(friendship);
+    this.logger.log(`Friendship request created with id ${created.id}`);
   }
 }
