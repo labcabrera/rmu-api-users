@@ -11,15 +11,20 @@ import { UpdateUserSettingsCommand } from '../../application/commands/update-set
 
 @UseGuards(JwtAuthGuard)
 @Controller('user')
-@ApiTags('User settings')
+@ApiTags('User')
 export class UserController {
   constructor(
     private readonly getUserSettingsUseCase: GetUserUserSettingsUseCase,
     private readonly updateUserSettingsUseCase: UpdateUserUserSettingsUseCase,
   ) {}
 
+  @Get('')
+  getUser(@Request() req) {
+    return req.user;
+  }
+
   @Get('settings')
-  getProfile(@Request() req) {
+  getSettings(@Request() req) {
     const userId = req.user!.id as string;
     if (!userId) {
       throw new Error('User not authenticated');
@@ -28,7 +33,7 @@ export class UserController {
   }
 
   @Patch('settings')
-  updateProfile(@Request() req) {
+  updateSettings(@Request() req) {
     const userId = req.user!.id as string;
     if (!userId) {
       throw new Error('User not authenticated');

@@ -10,7 +10,7 @@ import { DeleteUserUseCase } from './application/use-cases/delete-user.usecase';
 import { UpdateUserUseCase } from './application/use-cases/update-user.usecase';
 import { RsqlParser } from './infrastructure/controllers/rsql-parser';
 import { UserSettingsRepository } from './infrastructure/persistence/user-settings.repository';
-import { UserController } from './infrastructure/controllers/user-settings.controller';
+import { UserController } from './infrastructure/controllers/user.controller';
 import { GetUserUserSettingsUseCase } from './application/use-cases/get-user-settings.usecase';
 import { UserSettingsModel, UserSettingsSchema } from './infrastructure/persistence/user-settings.schema';
 import { UpdateUserUserSettingsUseCase } from './application/use-cases/update-settings.usecase';
