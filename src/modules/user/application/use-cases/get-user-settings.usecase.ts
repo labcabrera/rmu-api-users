@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { UserSettings } from '../../domain/entities/user-settings.entity';
-import * as userSettingsRepositoryPort from '../ports/out/user-settings-repository.port';
+import * as userSettingsRepositoryPort from '../ports/out/user-settings-repository';
 
 @Injectable()
 export class GetUserUserSettingsUseCase {
   constructor(
     @Inject('UserSettingsRepositoryPort')
-    private readonly userRepo: userSettingsRepositoryPort.UserSettingsRepositoryPort,
+    private readonly userRepo: userSettingsRepositoryPort.UserSettingsRepository,
   ) {}
 
   async execute(userId: string): Promise<UserSettings> {

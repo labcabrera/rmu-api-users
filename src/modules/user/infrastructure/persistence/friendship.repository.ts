@@ -4,9 +4,10 @@ import { Model } from 'mongoose';
 
 import { UserSettingsDocument, UserSettingsModel } from './user-settings.schema';
 import { UserSettings } from '../../domain/entities/user-settings.entity';
+import { UserSettingsRepository } from '../../application/ports/out/user-settings-repository';
 
 @Injectable()
-export class UserSettingsRepository implements UserSettingsRepository {
+export class FriendshipRepository implements UserSettingsRepository {
   constructor(@InjectModel(UserSettingsModel.name) private userSettingsModel: Model<UserSettingsDocument>) {}
 
   async findById(id: string): Promise<UserSettings | null> {

@@ -5,7 +5,7 @@ import * as userSearchPort from '../ports/out/user-search.port';
 import { RequestFriendCommand } from '../commands/friend-request.command';
 
 @Injectable()
-export class RequestFriendUseCase {
+export class FriendshipRequestUseCase {
   constructor(@Inject('UserSearchPort') private readonly userSearchPort: userSearchPort.UserSearchPort) {}
 
   async execute(command: RequestFriendCommand): Promise<UserSettings> {

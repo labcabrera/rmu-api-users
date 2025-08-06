@@ -9,7 +9,7 @@ import { JwtAuthGuard } from 'src/modules/auth/jwt.auth.guard';
 import { GetUserUserSettingsUseCase } from '../../application/use-cases/get-user-settings.usecase';
 import { UpdateUserUserSettingsUseCase } from '../../application/use-cases/update-settings.usecase';
 import { UpdateUserSettingsCommand } from '../../application/commands/update-settings.command';
-import { RequestFriendUseCase } from '../../application/use-cases/request-friend.usecase';
+import { FriendshipRequestUseCase } from '../../application/use-cases/request-friend.usecase';
 import { RequestFriendCommand } from '../../application/commands/friend-request.command';
 
 @UseGuards(JwtAuthGuard)
@@ -19,7 +19,7 @@ export class UserController {
   constructor(
     private readonly getUserSettingsUseCase: GetUserUserSettingsUseCase,
     private readonly updateUserSettingsUseCase: UpdateUserUserSettingsUseCase,
-    private readonly requestFriendUseCase: RequestFriendUseCase,
+    private readonly requestFriendUseCase: FriendshipRequestUseCase,
   ) {}
 
   @Get('')

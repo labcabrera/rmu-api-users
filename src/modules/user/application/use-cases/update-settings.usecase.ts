@@ -1,14 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { UserSettings } from '../../domain/entities/user-settings.entity';
-import * as userSettingsRepositoryPort from '../ports/out/user-settings-repository.port';
+import * as userSettingsRepositoryPort from '../ports/out/user-settings-repository';
 import { UpdateUserSettingsCommand } from '../commands/update-settings.command';
 
 @Injectable()
 export class UpdateUserUserSettingsUseCase {
   constructor(
     @Inject('UserSettingsRepositoryPort')
-    private readonly userRepo: userSettingsRepositoryPort.UserSettingsRepositoryPort,
+    private readonly userRepo: userSettingsRepositoryPort.UserSettingsRepository,
   ) {}
 
   async execute(command: UpdateUserSettingsCommand): Promise<UserSettings> {
