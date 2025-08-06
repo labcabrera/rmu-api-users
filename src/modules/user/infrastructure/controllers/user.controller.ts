@@ -5,7 +5,7 @@
 import { Controller, Get, Patch, Post, Request, UseGuards } from '@nestjs/common';
 
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
+import { JwtAuthGuard } from 'src/modules/auth/jwt.auth.guard';
 import { GetUserUserSettingsUseCase } from '../../application/use-cases/get-user-settings.usecase';
 import { UpdateUserUserSettingsUseCase } from '../../application/use-cases/update-settings.usecase';
 import { UpdateUserSettingsCommand } from '../../application/commands/update-settings.command';

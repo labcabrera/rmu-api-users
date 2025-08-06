@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import { TokenService } from 'src/auth/token.service';
+import { TokenService } from 'src/modules/auth/token.service';
 import { UserApiResponse, UserSearchPort } from '../../application/ports/out/user-search.port';
 
 @Injectable()

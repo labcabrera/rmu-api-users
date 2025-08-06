@@ -12,7 +12,7 @@ import { RsqlParser } from './rsql-parser';
 import { UpdateUserCommand } from '../../application/commands/update-user.command';
 import { UpdateUserUseCase } from '../../application/use-cases/update-user.usecase';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
+import { JwtAuthGuard } from 'src/modules/auth/jwt.auth.guard';
 
 @Controller('users-management')
 export class UserManagementController {

@@ -15,7 +15,7 @@ import { GetUserUserSettingsUseCase } from './application/use-cases/get-user-set
 import { UserSettingsModel, UserSettingsSchema } from './infrastructure/persistence/user-settings.schema';
 import { UpdateUserUserSettingsUseCase } from './application/use-cases/update-settings.usecase';
 import { KeycloakUserSearchClient } from './infrastructure/client/keycloak-user-client';
-import { AuthModule } from 'src/auth/auth.module';
+import { AuthModule } from 'src/modules/auth/auth.module';
 import { RequestFriendUseCase } from './application/use-cases/request-friend.usecase';
 
 @Module({
