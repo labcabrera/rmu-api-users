@@ -15,10 +15,7 @@ export class CreateUserUseCase implements CreateUserPort {
 
   async execute(command: CreateUserCommand): Promise<User> {
     const inserted = await this.userRepo.save(command);
-    await this.kafkaProducer.emit(
-      'internal.rmu-users.user.created.v1',
-      command,
-    );
+    await this.kafkaProducer.emit('internal.rmu-users.user.created.v1', command);
     return inserted;
   }
 }

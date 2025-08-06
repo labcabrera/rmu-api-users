@@ -7,9 +7,7 @@ import { UserDocument, UserModel } from './user.schema';
 
 @Injectable()
 export class UserRepository implements UserRepositoryPort {
-  constructor(
-    @InjectModel(UserModel.name) private userModel: Model<UserDocument>,
-  ) {}
+  constructor(@InjectModel(UserModel.name) private userModel: Model<UserDocument>) {}
 
   async findById(id: string): Promise<User | null> {
     const result = await this.userModel.findById(id).lean();

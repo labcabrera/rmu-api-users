@@ -1,17 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
-import {
-  Controller,
-  Post,
-  Body,
-  Get,
-  Inject,
-  Delete,
-  Param,
-  Patch,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Post, Body, Get, Inject, Delete, Param, Patch, UseGuards, Request } from '@nestjs/common';
 
 import { CreateUserUseCase } from '../../application/use-cases/create-user.usecase';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -25,8 +14,8 @@ import { UpdateUserUseCase } from '../../application/use-cases/update-user.useca
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt.auth.guard';
 
-@Controller('users')
-export class UserController {
+@Controller('users-management')
+export class UserManagementController {
   constructor(
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly updateUserUseCase: UpdateUserUseCase,
@@ -43,11 +32,7 @@ export class UserController {
   }
 
   @Get()
-  async findAll(
-    @Param('q') query: string = '',
-    @Param('page') page: number = 0,
-    @Param('size') size: number = 10,
-  ) {
+  async findAll(@Param('q') query: string = '', @Param('page') page: number = 0, @Param('size') size: number = 10) {
     const mongoQuery = this.rsqlParser.parseToMongoQuery(query);
     return this.userRepository.findAll(mongoQuery, page, size);
   }
