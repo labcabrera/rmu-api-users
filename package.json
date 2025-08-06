@@ -22,9 +22,19 @@
   "dependencies": {
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/mapped-types": "*",
+    "@nestjs/microservices": "^11.1.5",
+    "@nestjs/mongoose": "^11.0.3",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/swagger": "^11.2.0",
+    "kafkajs": "^2.2.4",
+    "module": "^1.2.5",
+    "mongoose": "^8.17.0",
+    "node-rsql-parser": "^1.0.3",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "swagger-ui-express": "^5.0.1",
+    "test": "^3.3.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
