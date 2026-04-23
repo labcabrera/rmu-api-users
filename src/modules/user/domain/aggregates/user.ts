@@ -7,6 +7,7 @@ export interface UserProps {
   email: string;
   emailVerified: boolean;
   enabled: boolean;
+  features: string[];
   settings: UserSettings;
   createdAt: Date;
   updatedAt: Date | null;
@@ -19,6 +20,7 @@ export class User extends BaseAggregateRoot<UserProps> {
     public email: string,
     public emailVerified: boolean,
     public enabled: boolean,
+    public features: string[],
     public settings: UserSettings,
     public createdAt: Date,
     public updatedAt: Date | null,
@@ -27,7 +29,17 @@ export class User extends BaseAggregateRoot<UserProps> {
   }
 
   static create(props: Omit<UserProps, 'createdAt' | 'updatedAt'>): User {
-    return new User(props.id, props.name, props.email, props.emailVerified, props.enabled, props.settings, new Date(), null);
+    return new User(
+      props.id,
+      props.name,
+      props.email,
+      props.emailVerified,
+      props.enabled,
+      props.features,
+      props.settings,
+      new Date(),
+      null,
+    );
   }
 
   static fromProps(props: UserProps): User {
@@ -37,6 +49,7 @@ export class User extends BaseAggregateRoot<UserProps> {
       props.email,
       props.emailVerified,
       props.enabled,
+      props.features,
       props.settings,
       props.createdAt,
       props.updatedAt,
@@ -59,6 +72,7 @@ export class User extends BaseAggregateRoot<UserProps> {
       email: this.email,
       emailVerified: this.emailVerified,
       enabled: this.enabled,
+      features: this.features,
       settings: this.settings,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

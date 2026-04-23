@@ -50,6 +50,7 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
       name: keycloakUser.username,
       email: keycloakUser.email,
       emailVerified: keycloakUser.emailVerified || false,
+      features: [],
       enabled: keycloakUser.enabled,
       settings: UserSettings.default(),
     };

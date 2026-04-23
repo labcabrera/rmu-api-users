@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { User } from '../../../domain/aggregates/user';
-import type { UserStatus } from '../../../domain/value-objects/user-status.vo';
 import { UserSettings } from './user-settings.model';
 
 export type UserDocument = User & Document;
@@ -22,6 +21,9 @@ export class UserModel {
 
   @Prop({ type: Boolean, required: true })
   public enabled: boolean;
+
+  @Prop({ type: [String], required: true })
+  public features: string[];
 
   @Prop({ type: UserSettings, required: true })
   settings: UserSettings;
