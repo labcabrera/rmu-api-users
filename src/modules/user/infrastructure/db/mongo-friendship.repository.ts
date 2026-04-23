@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { FriendshipRepository } from '../../application/ports/friendship.repository';
 import { Friendship } from '../../domain/aggregates/friendship';
-import { FriendshipDocument, FriendshipModel } from '../persistence/friendship.model';
+import { FriendshipDocument, FriendshipModel } from '../persistence/models/friendship.model';
 import { MongoBaseRepository } from 'src/modules/shared/infrastructure/db/mongo.base.repository';
 import { RsqlParser } from 'src/modules/shared/infrastructure/persistence/repositories/rsql-parser';
 
@@ -19,6 +19,7 @@ export class MongoFriendshipRepository extends MongoBaseRepository<Friendship, F
       requesterId: doc.requesterId,
       addresseeId: doc.addresseeId,
       status: doc.status,
+      message: doc.message,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });

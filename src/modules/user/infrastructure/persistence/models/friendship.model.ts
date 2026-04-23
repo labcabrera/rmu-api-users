@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Friendship } from '../../domain/aggregates/friendship';
+import { Friendship } from '../../../domain/aggregates/friendship';
+import type { FriendshipStatus } from '../../../domain/value-objects/friendship-status.vo';
 
 export type FriendshipDocument = Friendship & Document;
 
@@ -16,7 +17,10 @@ export class FriendshipModel {
   addresseeId: string;
 
   @Prop({ type: String, required: true })
-  status: 'pending' | 'accepted' | 'rejected' | 'blocked';
+  status: FriendshipStatus;
+
+  @Prop({ type: String, required: false })
+  message: string | null;
 
   @Prop({ type: Date, required: true })
   createdAt: Date;

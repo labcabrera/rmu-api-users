@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Request, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/modules/auth/jwt.auth.guard';
-import { FriendshipRequestUseCase } from '../../application/cqrs/handlers/friendship-request.usecase';
-import { FriendshipRequestCommand } from '../../application/cqrs/commands/friendship-request.command';
+// import { FriendshipRequestUseCase } from '../../application/cqrs/handlers/friendship-request.usecase';
+// import { FriendshipRequestCommand } from '../../application/cqrs/commands/create-friendship-request.command';
 
 @UseGuards(JwtAuthGuard)
 @Controller('user')
 @ApiTags('User')
 export class UserController {
-  constructor(private readonly requestFriendUseCase: FriendshipRequestUseCase) {}
+  // constructor(private readonly requestFriendUseCase: FriendshipRequestUseCase) {}
 
   @Get('')
   getUser(@Request() req) {
@@ -39,12 +39,12 @@ export class UserController {
   //   return this.updateUserSettingsUseCase.execute(command);
   // }
 
-  @Post('friends')
-  requestFriend(@Request() req) {
-    const userId = req.user!.id as string;
-    const roles = req.user!.roles as string[];
-    const command = new FriendshipRequestCommand(req.body.friendEmail, req.body.message, userId, roles);
-    this.requestFriendUseCase.execute(command);
-    return { message: 'Friend request sent successfully' };
-  }
+  // @Post('friends')
+  // requestFriend(@Request() req) {
+  //   const userId = req.user!.id as string;
+  //   const roles = req.user!.roles as string[];
+  //   const command = new FriendshipRequestCommand(req.body.friendEmail, req.body.message, userId, roles);
+  //   this.requestFriendUseCase.execute(command);
+  //   return { message: 'Friend request sent successfully' };
+  // }
 }

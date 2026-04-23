@@ -3,17 +3,17 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { KafkaProducerService } from './infrastructure/messaging/kafka-producer.service';
 import { KafkaConsumerController } from './infrastructure/messaging/kafka-consumer.controller';
 import { UserController } from './infrastructure/controllers/user.controller';
-import { UserSettingsModel, UserSettingsSchema } from './infrastructure/persistence/user-settings.schema';
+import { UserModel, UserSchema } from './infrastructure/persistence/models/user.model';
 import { KeycloakUserSearchClient } from './infrastructure/client/keycloak-user-client';
 import { AuthModule } from 'src/modules/auth/auth.module';
-import { FriendshipRequestUseCase } from './application/cqrs/handlers/friendship-request.usecase';
 import { MongoFriendshipRepository } from './infrastructure/db/mongo-friendship.repository';
-import { FriendshipModel, FriendshipSchema } from './infrastructure/persistence/friendship.model';
+import { FriendshipModel, FriendshipSchema } from './infrastructure/persistence/models/friendship.model';
+import { MongoUserRepository } from './infrastructure/db/mongo-user.repository';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: UserSettingsModel.name, schema: UserSettingsSchema },
+      { name: UserModel.name, schema: UserSchema },
       { name: FriendshipModel.name, schema: FriendshipSchema },
     ]),
     AuthModule,
@@ -21,11 +21,10 @@ import { FriendshipModel, FriendshipSchema } from './infrastructure/persistence/
   controllers: [UserController, KafkaConsumerController],
   providers: [
     KafkaProducerService,
-    FriendshipRequestUseCase,
-    // {
-    //   provide: 'UserSettingsRepository',
-    //   useClass: MongoUserSettingsRepository,
-    // },
+    {
+      provide: 'UserRepository',
+      useClass: MongoUserRepository,
+    },
     {
       provide: 'FriendshipRepository',
       useClass: MongoFriendshipRepository,

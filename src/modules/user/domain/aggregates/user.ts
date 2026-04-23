@@ -1,15 +1,16 @@
 import { BaseAggregateRoot } from 'src/modules/shared/domain/aggregates/base-aggregate';
 import { UserSettings as UserSettings } from '../value-objects/user-settings.vo';
+import { UserStatus } from '../value-objects/user-status.vo';
 
 export interface UserProps {
   id: string;
   name: string;
   email: string;
   emailVerified: boolean;
-  status: 'active' | 'inactive';
+  status: UserStatus;
   settings: UserSettings;
-  created: Date;
-  updated: Date | null;
+  createdAt: Date;
+  updatedAt: Date | null;
 }
 
 export class User extends BaseAggregateRoot<UserProps> {
@@ -18,10 +19,10 @@ export class User extends BaseAggregateRoot<UserProps> {
     public name: string,
     public email: string,
     public emailVerified: boolean,
-    public status: 'active' | 'inactive',
+    public status: UserStatus,
     public settings: UserSettings,
-    public created: Date,
-    public updated: Date | null,
+    public createdAt: Date,
+    public updatedAt: Date | null,
   ) {
     super(id);
   }
@@ -31,7 +32,7 @@ export class User extends BaseAggregateRoot<UserProps> {
   }
 
   static fromProps(props: UserProps): User {
-    return new User(props.id, props.name, props.email, props.emailVerified, props.status, props.settings, props.created, props.updated);
+    return new User(props.id, props.name, props.email, props.emailVerified, props.status, props.settings, props.createdAt, props.updatedAt);
   }
 
   public getProps(): UserProps {
@@ -42,8 +43,8 @@ export class User extends BaseAggregateRoot<UserProps> {
       emailVerified: this.emailVerified,
       status: this.status,
       settings: this.settings,
-      created: this.created,
-      updated: this.updated,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
     };
   }
 }

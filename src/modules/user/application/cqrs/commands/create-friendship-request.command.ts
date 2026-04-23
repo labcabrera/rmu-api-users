@@ -1,8 +1,8 @@
 import { AuthenticatedCommand } from 'src/modules/shared/application/cqrs/authenticated-command';
 
-export class FriendshipRequestCommand extends AuthenticatedCommand {
+export class CreateFriendshipRequestCommand extends AuthenticatedCommand {
   constructor(
-    public addresseeEmail: string,
+    public addresseeId: string,
     public message: string | null,
     userId: string,
     roles: string[],
