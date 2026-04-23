@@ -1,58 +1,49 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-
-import { Controller, Get, Patch, Post, Request, UseGuards } from '@nestjs/common';
-
+import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/modules/auth/jwt.auth.guard';
-import { GetUserUserSettingsUseCase } from '../../application/use-cases/get-user-settings.usecase';
-import { UpdateUserUserSettingsUseCase } from '../../application/use-cases/update-settings.usecase';
-import { UpdateUserSettingsCommand } from '../../application/commands/update-settings.command';
-import { FriendshipRequestUseCase } from '../../application/use-cases/friendship-request.usecase';
-import { FriendshipRequestCommand } from '../../application/commands/friendship-request.command';
+import { FriendshipRequestUseCase } from '../../application/cqrs/handlers/friendship-request.usecase';
+import { FriendshipRequestCommand } from '../../application/cqrs/commands/friendship-request.command';
 
 @UseGuards(JwtAuthGuard)
 @Controller('user')
 @ApiTags('User')
 export class UserController {
-  constructor(
-    private readonly getUserSettingsUseCase: GetUserUserSettingsUseCase,
-    private readonly updateUserSettingsUseCase: UpdateUserUserSettingsUseCase,
-    private readonly requestFriendUseCase: FriendshipRequestUseCase,
-  ) {}
+  constructor(private readonly requestFriendUseCase: FriendshipRequestUseCase) {}
 
   @Get('')
   getUser(@Request() req) {
     return req.user;
   }
 
-  @Get('settings')
-  getSettings(@Request() req) {
-    const userId = req.user!.id as string;
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
-    return this.getUserSettingsUseCase.execute(userId);
-  }
+  // @Get('settings')
+  // getSettings(@Request() req) {
+  //   const userId = req.user!.id as string;
+  //   if (!userId) {
+  //     throw new Error('User not authenticated');
+  //   }
+  //   return this.getUserSettingsUseCase.execute(userId);
+  // }
 
-  @Patch('settings')
-  updateSettings(@Request() req) {
-    const userId = req.user!.id as string;
-    if (!userId) {
-      throw new Error('User not authenticated');
-    }
-    const command: UpdateUserSettingsCommand = {
-      ...req.body,
-      id: userId,
-    };
-    return this.updateUserSettingsUseCase.execute(command);
-  }
+  // @Patch('settings')
+  // updateSettings(@Request() req) {
+  //   const userId = req.user!.id as string;
+  //   if (!userId) {
+  //     throw new Error('User not authenticated');
+  //   }
+  //   const command: UpdateUserSettingsCommand = {
+  //     ...req.body,
+  //     id: userId,
+  //   };
+  //   return this.updateUserSettingsUseCase.execute(command);
+  // }
 
   @Post('friends')
   requestFriend(@Request() req) {
     const userId = req.user!.id as string;
-    const command = new FriendshipRequestCommand(userId, req.body.friendEmail, req.body.message);
+    const roles = req.user!.roles as string[];
+    const command = new FriendshipRequestCommand(req.body.friendEmail, req.body.message, userId, roles);
     this.requestFriendUseCase.execute(command);
     return { message: 'Friend request sent successfully' };
   }

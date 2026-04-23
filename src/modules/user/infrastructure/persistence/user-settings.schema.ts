@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { UserSettings } from '../../domain/entities/user-settings.entity';
+import { UserSettings } from '../../domain/value-objects/user-settings.vo';
 
 export type UserSettingsDocument = UserSettings & Document;
 

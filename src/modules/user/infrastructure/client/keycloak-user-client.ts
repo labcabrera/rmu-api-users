@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { TokenService } from 'src/modules/auth/token.service';
-import { UserApiResponse, UserSearchPort } from '../../application/ports/out/user-search.port';
+import { UserApiResponse, UserSearchPort } from '../../application/ports/user-search.port';
 
 @Injectable()
 export class KeycloakUserSearchClient implements UserSearchPort {

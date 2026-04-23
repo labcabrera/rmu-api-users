@@ -1,3 +1,4 @@
 {
+    "editor.formatOnSave": true,
     "material-icon-theme.activeIconPack": "nest"
 }

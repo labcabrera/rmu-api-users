@@ -6,7 +6,7 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import { DomainExceptionFilter } from './modules/user/infrastructure/controllers/domain-exception-filter';
+import { DomainExceptionFilter } from './modules/shared/interfaces/http/domain-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
