@@ -19,7 +19,7 @@ export class MongoUserRepository extends MongoBaseRepository<User, UserDocument>
       name: doc.name,
       email: doc.email,
       emailVerified: doc.emailVerified,
-      status: doc.status,
+      enabled: doc.enabled,
       settings: doc.settings,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,

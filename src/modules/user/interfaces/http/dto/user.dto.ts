@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 import { User } from 'src/modules/user/domain/aggregates/user';
-import { UserStatus } from 'src/modules/user/domain/value-objects/user-status.vo';
 
 export class UserDto {
   @ApiProperty({ description: 'Unique identifier of the user', required: true })
@@ -14,7 +13,8 @@ export class UserDto {
 
   emailVerified: boolean;
 
-  status: UserStatus;
+  enabled: boolean;
+
   //   settings: UserSettingsDto;
 
   createdAt: Date;
@@ -27,7 +27,7 @@ export class UserDto {
     dto.name = user.name;
     dto.email = user.email;
     dto.emailVerified = user.emailVerified;
-    dto.status = user.status;
+    dto.enabled = user.enabled;
     return dto;
   }
 }

@@ -13,7 +13,7 @@ export class KeycloakUserSearchClient implements UserSearchPort {
     private readonly tokenService: TokenService,
     configService: ConfigService,
   ) {
-    this.keycloakBaseUrl = configService.get('RMU_IAM_BASE_URL') as string;
+    this.keycloakBaseUrl = configService.get('RMU_IAM_ADMIN_BASE_URL') as string;
   }
 
   async findById(id: string): Promise<UserApiResponse | null> {
@@ -32,6 +32,8 @@ export class KeycloakUserSearchClient implements UserSearchPort {
         id: response.data.id as string,
         username: response.data.username as string,
         email: response.data.email as string,
+        emailVerified: response.data.emailVerified as boolean,
+        enabled: response.data.enabled as boolean,
       };
     } catch (err) {
       // Return null when the user is not found (404), rethrow otherwise
@@ -57,6 +59,8 @@ export class KeycloakUserSearchClient implements UserSearchPort {
       id: response.data[0].id as string,
       username: response.data[0].username as string,
       email: response.data[0].email as string,
+      emailVerified: response.data[0].emailVerified as boolean,
+      enabled: response.data[0].enabled as boolean,
     };
   }
 }

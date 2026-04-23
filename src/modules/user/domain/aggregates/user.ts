@@ -1,13 +1,12 @@
 import { BaseAggregateRoot } from 'src/modules/shared/domain/aggregates/base-aggregate';
 import { UserSettings as UserSettings } from '../value-objects/user-settings.vo';
-import { UserStatus } from '../value-objects/user-status.vo';
 
 export interface UserProps {
   id: string;
   name: string;
   email: string;
   emailVerified: boolean;
-  status: UserStatus;
+  enabled: boolean;
   settings: UserSettings;
   createdAt: Date;
   updatedAt: Date | null;
@@ -19,7 +18,7 @@ export class User extends BaseAggregateRoot<UserProps> {
     public name: string,
     public email: string,
     public emailVerified: boolean,
-    public status: UserStatus,
+    public enabled: boolean,
     public settings: UserSettings,
     public createdAt: Date,
     public updatedAt: Date | null,
@@ -27,12 +26,30 @@ export class User extends BaseAggregateRoot<UserProps> {
     super(id);
   }
 
-  static create(props: Omit<UserProps, 'created' | 'updated'>): User {
-    return new User(props.id, props.name, props.email, props.emailVerified, props.status, props.settings, new Date(), null);
+  static create(props: Omit<UserProps, 'createdAt' | 'updatedAt'>): User {
+    return new User(props.id, props.name, props.email, props.emailVerified, props.enabled, props.settings, new Date(), null);
   }
 
   static fromProps(props: UserProps): User {
-    return new User(props.id, props.name, props.email, props.emailVerified, props.status, props.settings, props.createdAt, props.updatedAt);
+    return new User(
+      props.id,
+      props.name,
+      props.email,
+      props.emailVerified,
+      props.enabled,
+      props.settings,
+      props.createdAt,
+      props.updatedAt,
+    );
+  }
+
+  update(props: Partial<Omit<UserProps, 'id' | 'createdAt' | 'updatedAt'>>): void {
+    if (props.email) this.email = props.email;
+    if (props.name) this.name = props.name;
+    if (props.emailVerified !== undefined) this.emailVerified = props.emailVerified;
+    if (props.enabled) this.enabled = props.enabled;
+    if (props.settings) this.settings = props.settings;
+    this.updatedAt = new Date();
   }
 
   public getProps(): UserProps {
@@ -41,7 +58,7 @@ export class User extends BaseAggregateRoot<UserProps> {
       name: this.name,
       email: this.email,
       emailVerified: this.emailVerified,
-      status: this.status,
+      enabled: this.enabled,
       settings: this.settings,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

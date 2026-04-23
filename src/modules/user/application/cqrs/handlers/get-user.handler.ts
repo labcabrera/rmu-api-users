@@ -5,6 +5,7 @@ import { User } from 'src/modules/user/domain/aggregates/user';
 import type { UserRepository } from '../../ports/user-repository';
 import { NotFoundError } from 'src/modules/shared/domain/errors/errors';
 import type { UserApiResponse, UserSearchPort } from '../../ports/user-search.port';
+import { UserSettings } from 'src/modules/user/domain/value-objects/user-settings.vo';
 
 @QueryHandler(GetUserQuery)
 export class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
@@ -25,21 +26,33 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
     let user = await this.userRepository.findById(query.userId);
     if (user) {
       this.mergeUser(user, keycloakUser);
-      await this.userRepository.save(user);
+      await this.userRepository.update(user.id, user);
     } else {
       user = this.createUserFromKeycloak(keycloakUser);
-      await this.userRepository.update(user.id, user);
+      await this.userRepository.save(user);
     }
     return user;
   }
 
-  private mergeUser(user: User, keycloakUser: UserApiResponse): User {
+  private mergeUser(user: User, keycloakUser: UserApiResponse) {
+    user.update({
+      name: keycloakUser.username,
+      email: keycloakUser.email,
+      emailVerified: keycloakUser.emailVerified || false,
+      enabled: keycloakUser.enabled,
+    });
     // TODO
-    throw new Error('Not implemented');
   }
 
   private createUserFromKeycloak(keycloakUser: UserApiResponse): User {
-    // TODO
-    throw new Error('Not implemented');
+    const props = {
+      id: keycloakUser.id,
+      name: keycloakUser.username,
+      email: keycloakUser.email,
+      emailVerified: keycloakUser.emailVerified || false,
+      enabled: keycloakUser.enabled,
+      settings: UserSettings.default(),
+    };
+    return User.create(props);
   }
 }

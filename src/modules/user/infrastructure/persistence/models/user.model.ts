@@ -20,8 +20,8 @@ export class UserModel {
   @Prop({ type: Boolean, required: true })
   emailVerified: boolean;
 
-  @Prop({ type: String, required: true })
-  status: UserStatus;
+  @Prop({ type: Boolean, required: true })
+  public enabled: boolean;
 
   @Prop({ type: UserSettings, required: true })
   settings: UserSettings;
