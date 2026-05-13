@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
+import { ActivationFeature } from '../../../domain/aggregates/activation-code-props';
 
 export class ActivationCodeDto {
   @ApiProperty({ description: 'Unique identifier of the activation code', required: true })
@@ -11,7 +12,7 @@ export class ActivationCodeDto {
 
   owner: string;
 
-  features: string[];
+  features: ActivationFeature[];
 
   createdAt: Date;
 

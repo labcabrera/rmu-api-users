@@ -16,7 +16,7 @@ export class ActivationCodeModel {
   owner: string;
 
   @Prop({ type: [String], required: true })
-  features: string[];
+  features: import('../../../domain/aggregates/activation-code-props').ActivationFeature[];
 
   @Prop({ type: Date, required: true })
   createdAt: Date;

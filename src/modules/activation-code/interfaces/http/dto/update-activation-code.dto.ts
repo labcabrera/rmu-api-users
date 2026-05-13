@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsDateString, IsOptional, IsString, Matches } from 'class-validator';
+import { IsArray, IsDateString, IsOptional, IsIn, Matches, IsString } from 'class-validator';
+import { ACTIVATION_FEATURES, ActivationFeature } from '../../../domain/aggregates/activation-code-props';
 
 export class UpdateActivationCodeDto {
   @ApiPropertyOptional({ description: 'Alphanumeric activation code', example: 'ABCD1234' })
@@ -18,9 +19,9 @@ export class UpdateActivationCodeDto {
   @IsOptional()
   activatedAt?: string | null;
 
-  @ApiPropertyOptional({ description: 'Enabled features', example: ['reports', 'exports'], type: [String] })
+  @ApiPropertyOptional({ description: 'Enabled features', example: ['core-law'], enum: ACTIVATION_FEATURES, type: [String] })
   @IsArray()
-  @IsString({ each: true })
+  @IsIn(ACTIVATION_FEATURES as any, { each: true })
   @IsOptional()
-  features?: string[];
+  features?: ActivationFeature[];
 }

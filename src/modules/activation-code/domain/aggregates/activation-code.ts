@@ -1,13 +1,13 @@
 import { randomUUID } from 'crypto';
 import { BaseAggregateRoot } from 'src/modules/shared/domain/aggregates/base-aggregate';
-import { ActivationCodeProps } from './activation-code-props';
+import { ActivationCodeProps, ActivationFeature } from './activation-code-props';
 
 export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
   constructor(
     id: string,
     public code: string,
     public owner: string,
-    public features: string[],
+    public features: ActivationFeature[],
     public createdAt: Date,
     public expiresAt?: Date,
     public activatedAt?: Date | null,

@@ -37,7 +37,7 @@ export class ActivationCodeController {
   ) {}
 
   @Post('')
-  @ApiOperation({ operationId: 'createActivationCode', summary: 'Create activation code' })
+  @ApiOperation({ operationId: 'createActivationCodes', summary: 'Create activation codes' })
   @ApiCreatedResponse({ type: ActivationCodeDto, isArray: true, description: 'Created' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   async create(@Request() req, @Body() body: CreateActivationCodeDto): Promise<ActivationCodeDto[]> {
