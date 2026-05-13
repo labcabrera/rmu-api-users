@@ -24,6 +24,9 @@ export class ActivationCodeModel {
   @Prop({ type: Date, required: false })
   expiresAt?: Date;
 
+  @Prop({ type: String, required: false })
+  activatedBy?: string | null;
+
   @Prop({ type: Date, required: false })
   activatedAt: Date | null;
 

@@ -18,6 +18,7 @@ export class ActivationCodeDto {
   expiresAt?: Date;
 
   activatedAt?: Date | null;
+  activatedBy?: string | null;
 
   updatedAt?: Date | null;
 
@@ -30,6 +31,7 @@ export class ActivationCodeDto {
     dto.createdAt = activationCode.createdAt;
     dto.expiresAt = activationCode.expiresAt;
     dto.activatedAt = activationCode.activatedAt;
+    dto.activatedBy = (activationCode as any).activatedBy ?? null;
     dto.updatedAt = activationCode.updatedAt;
     return dto;
   }

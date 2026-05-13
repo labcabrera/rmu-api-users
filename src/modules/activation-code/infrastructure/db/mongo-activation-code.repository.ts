@@ -30,6 +30,7 @@ export class MongoActivationCodeRepository
       createdAt: doc.createdAt,
       expiresAt: doc.expiresAt,
       activatedAt: doc.activatedAt,
+      activatedBy: (doc as any).activatedBy ?? null,
       updatedAt: doc.updatedAt,
     });
   }

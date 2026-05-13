@@ -6,5 +6,6 @@ export interface ActivationCodeProps {
   createdAt: Date;
   expiresAt?: Date;
   activatedAt?: Date | null;
+  activatedBy?: string | null;
   updatedAt?: Date | null;
 }

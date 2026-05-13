@@ -11,13 +11,14 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
     public createdAt: Date,
     public expiresAt?: Date,
     public activatedAt?: Date | null,
+    public activatedBy?: string | null,
     public updatedAt?: Date | null,
   ) {
     super(id);
   }
 
-  static create(props: Omit<ActivationCodeProps, 'id' | 'createdAt' | 'activatedAt' | 'updatedAt'>): ActivationCode {
-    return new ActivationCode(randomUUID(), props.code, props.owner, props.features, new Date(), props.expiresAt, null, null);
+  static create(props: Omit<ActivationCodeProps, 'id' | 'createdAt' | 'activatedAt' | 'updatedAt' | 'activatedBy'>): ActivationCode {
+    return new ActivationCode(randomUUID(), props.code, props.owner, props.features, new Date(), props.expiresAt, null, null, null);
   }
 
   static fromProps(props: ActivationCodeProps): ActivationCode {
@@ -29,6 +30,7 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
       props.createdAt,
       props.expiresAt,
       props.activatedAt,
+      props.activatedBy ?? null,
       props.updatedAt,
     );
   }
@@ -38,11 +40,13 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
     if (props.features !== undefined) this.features = props.features;
     if (props.expiresAt !== undefined) this.expiresAt = props.expiresAt;
     if (props.activatedAt !== undefined) this.activatedAt = props.activatedAt;
+    if (props.activatedBy !== undefined) this.activatedBy = props.activatedBy ?? null;
     this.updatedAt = new Date();
   }
 
-  activate(activatedAt: Date = new Date()): void {
+  activate(activatedAt: Date = new Date(), activatedBy: string | null = null): void {
     this.activatedAt = activatedAt;
+    this.activatedBy = activatedBy;
     this.updatedAt = new Date();
   }
 
@@ -55,6 +59,7 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
       createdAt: this.createdAt,
       expiresAt: this.expiresAt,
       activatedAt: this.activatedAt,
+      activatedBy: this.activatedBy,
       updatedAt: this.updatedAt,
     };
   }
