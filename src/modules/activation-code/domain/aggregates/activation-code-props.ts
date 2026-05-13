@@ -4,7 +4,7 @@ export interface ActivationCodeProps {
   owner: string;
   features: string[];
   createdAt: Date;
-  expiresAt: Date;
-  activatedAt: Date | null;
-  updatedAt: Date | null;
+  expiresAt?: Date;
+  activatedAt?: Date | null;
+  updatedAt?: Date | null;
 }

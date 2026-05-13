@@ -9,7 +9,7 @@ import { GetUserQuery } from '../../application/cqrs/queries/GetUserQuery';
 import { User } from '../../domain/aggregates/user';
 
 @UseGuards(JwtAuthGuard)
-@Controller('users')
+@Controller('v1/users')
 @ApiTags('User')
 export class UserController {
   constructor(

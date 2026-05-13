@@ -14,7 +14,7 @@ export class ActivateActivationCodeHandler implements ICommandHandler<ActivateAc
     if (!activationCode) {
       throw new NotFoundError('ActivationCode', command.code);
     }
-    if (activationCode.expiresAt.getTime() < Date.now()) {
+    if (activationCode.expiresAt && activationCode.expiresAt.getTime() < Date.now()) {
       throw new ValidationError(`Activation code ${command.code} is expired`);
     }
     activationCode.activate();

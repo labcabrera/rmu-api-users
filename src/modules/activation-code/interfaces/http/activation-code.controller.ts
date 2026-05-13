@@ -28,7 +28,7 @@ import { CreateActivationCodeDto } from './dto/create-activation-code.dto';
 import { UpdateActivationCodeDto } from './dto/update-activation-code.dto';
 
 @UseGuards(JwtAuthGuard)
-@Controller('activation-codes')
+@Controller('v1/activation-codes')
 @ApiTags('ActivationCode')
 export class ActivationCodeController {
   constructor(
@@ -38,13 +38,15 @@ export class ActivationCodeController {
 
   @Post('')
   @ApiOperation({ operationId: 'createActivationCode', summary: 'Create activation code' })
-  @ApiCreatedResponse({ type: ActivationCodeDto, description: 'Created' })
+  @ApiCreatedResponse({ type: ActivationCodeDto, isArray: true, description: 'Created' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  async create(@Request() req, @Body() body: CreateActivationCodeDto): Promise<ActivationCodeDto> {
+  async create(@Request() req, @Body() body: CreateActivationCodeDto): Promise<ActivationCodeDto[]> {
     const owner = req.user!.id as string;
-    const command = new CreateActivationCodeCommand(owner, body.features, new Date(body.expiresAt));
-    const activationCode = await this.commandBus.execute<CreateActivationCodeCommand, ActivationCode>(command);
-    return ActivationCodeDto.fromEntity(activationCode);
+    const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined;
+    const count = body.count ?? 1;
+    const command = new CreateActivationCodeCommand(owner, body.features, expiresAt, count);
+    const activationCodes = await this.commandBus.execute<CreateActivationCodeCommand, ActivationCode[]>(command);
+    return activationCodes.map(ac => ActivationCodeDto.fromEntity(ac));
   }
 
   @Get('')

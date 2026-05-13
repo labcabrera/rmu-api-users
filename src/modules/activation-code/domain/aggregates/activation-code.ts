@@ -9,9 +9,9 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
     public owner: string,
     public features: string[],
     public createdAt: Date,
-    public expiresAt: Date,
-    public activatedAt: Date | null,
-    public updatedAt: Date | null,
+    public expiresAt?: Date,
+    public activatedAt?: Date | null,
+    public updatedAt?: Date | null,
   ) {
     super(id);
   }

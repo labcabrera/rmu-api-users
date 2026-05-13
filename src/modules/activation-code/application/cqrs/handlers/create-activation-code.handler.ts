@@ -7,13 +7,13 @@ import type { ActivationCodeRepository } from '../../ports/activation-code.repos
 import { CreateActivationCodeCommand } from '../commands/create-activation-code.command';
 
 @CommandHandler(CreateActivationCodeCommand)
-export class CreateActivationCodeHandler implements ICommandHandler<CreateActivationCodeCommand, ActivationCode> {
+export class CreateActivationCodeHandler implements ICommandHandler<CreateActivationCodeCommand, ActivationCode[]> {
   constructor(
     @Inject('ActivationCodeRepository') private readonly activationCodeRepository: ActivationCodeRepository,
     private readonly configService: ConfigService,
   ) {}
 
-  async execute(command: CreateActivationCodeCommand): Promise<ActivationCode> {
+  async execute(command: CreateActivationCodeCommand): Promise<ActivationCode[]> {
     const size = this.configService.get<number>('RMU_ACTIVATION_CODE_SIZE', 8);
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const generateCode = (len: number) => {
@@ -23,26 +23,34 @@ export class CreateActivationCodeHandler implements ICommandHandler<CreateActiva
       }
       return s;
     };
-
-    let code: string | undefined;
-    let existing;
+    const results: ActivationCode[] = [];
+    const used = new Set<string>();
     const maxAttempts = 10;
-    for (let attempt = 0; attempt < maxAttempts; attempt++) {
-      code = generateCode(size);
-      existing = await this.activationCodeRepository.findByCode(code, command.owner);
-      if (!existing) break;
+    const count = Math.max(1, Math.min(1000, command.count ?? 1));
+
+    for (let i = 0; i < count; i++) {
+      let code: string | undefined;
+      let existing;
+      for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        code = generateCode(size);
+        if (used.has(code)) continue;
+        existing = await this.activationCodeRepository.findByCode(code, command.owner);
+        if (!existing) break;
+      }
+      if (existing) {
+        throw new ConflictError(`Could not generate unique activation code after ${maxAttempts} attempts`);
+      }
+      used.add(code!);
+      const activationCode = ActivationCode.create({
+        code: code!,
+        owner: command.owner,
+        features: command.features,
+        expiresAt: command.expiresAt,
+      });
+      const saved = await this.activationCodeRepository.save(activationCode);
+      results.push(saved);
     }
 
-    if (existing) {
-      throw new ConflictError(`Could not generate unique activation code after ${maxAttempts} attempts`);
-    }
-
-    const activationCode = ActivationCode.create({
-      code: code!,
-      owner: command.owner,
-      features: command.features,
-      expiresAt: command.expiresAt,
-    });
-    return this.activationCodeRepository.save(activationCode);
+    return results;
   }
 }

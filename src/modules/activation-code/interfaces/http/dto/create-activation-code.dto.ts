@@ -1,13 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsDateString, IsString } from 'class-validator';
+import { IsArray, IsDateString, IsString, IsInt, Min, Max, IsOptional } from 'class-validator';
 
 export class CreateActivationCodeDto {
-  @ApiProperty({ description: 'Expiration date', example: '2026-12-31T23:59:59.000Z' })
+  @ApiProperty({ description: 'Expiration date (optional)', example: '2026-12-31T23:59:59.000Z', required: false })
+  @IsOptional()
   @IsDateString()
-  expiresAt: string;
+  expiresAt?: string;
 
   @ApiProperty({ description: 'Enabled features', example: ['reports', 'exports'], type: [String] })
   @IsArray()
   @IsString({ each: true })
   features: string[];
+
+  @ApiProperty({ description: 'Number of codes to generate', example: 1, required: false })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  count?: number;
 }

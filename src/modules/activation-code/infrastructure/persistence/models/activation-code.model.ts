@@ -21,8 +21,8 @@ export class ActivationCodeModel {
   @Prop({ type: Date, required: true })
   createdAt: Date;
 
-  @Prop({ type: Date, required: true })
-  expiresAt: Date;
+  @Prop({ type: Date, required: false })
+  expiresAt?: Date;
 
   @Prop({ type: Date, required: false })
   activatedAt: Date | null;

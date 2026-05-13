@@ -15,11 +15,11 @@ export class ActivationCodeDto {
 
   createdAt: Date;
 
-  expiresAt: Date;
+  expiresAt?: Date;
 
-  activatedAt: Date | null;
+  activatedAt?: Date | null;
 
-  updatedAt: Date | null;
+  updatedAt?: Date | null;
 
   static fromEntity(activationCode: ActivationCode): ActivationCodeDto {
     const dto = new ActivationCodeDto();
