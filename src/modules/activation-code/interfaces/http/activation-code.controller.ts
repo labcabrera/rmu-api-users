@@ -42,7 +42,7 @@ export class ActivationCodeController {
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   async create(@Request() req, @Body() body: CreateActivationCodeDto): Promise<ActivationCodeDto> {
     const owner = req.user!.id as string;
-    const command = new CreateActivationCodeCommand(body.code, owner, body.features, new Date(body.expiresAt));
+    const command = new CreateActivationCodeCommand(owner, body.features, new Date(body.expiresAt));
     const activationCode = await this.commandBus.execute<CreateActivationCodeCommand, ActivationCode>(command);
     return ActivationCodeDto.fromEntity(activationCode);
   }

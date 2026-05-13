@@ -1,12 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsDateString, IsString, Matches } from 'class-validator';
+import { IsArray, IsDateString, IsString } from 'class-validator';
 
 export class CreateActivationCodeDto {
-  @ApiProperty({ description: 'Alphanumeric activation code', example: 'ABCD1234' })
-  @IsString()
-  @Matches(/^[a-zA-Z0-9]+$/)
-  code: string;
-
   @ApiProperty({ description: 'Expiration date', example: '2026-12-31T23:59:59.000Z' })
   @IsDateString()
   expiresAt: string;

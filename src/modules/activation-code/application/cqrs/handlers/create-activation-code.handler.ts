@@ -1,4 +1,5 @@
 import { Inject } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ConflictError } from 'src/modules/shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
@@ -7,15 +8,37 @@ import { CreateActivationCodeCommand } from '../commands/create-activation-code.
 
 @CommandHandler(CreateActivationCodeCommand)
 export class CreateActivationCodeHandler implements ICommandHandler<CreateActivationCodeCommand, ActivationCode> {
-  constructor(@Inject('ActivationCodeRepository') private readonly activationCodeRepository: ActivationCodeRepository) {}
+  constructor(
+    @Inject('ActivationCodeRepository') private readonly activationCodeRepository: ActivationCodeRepository,
+    private readonly configService: ConfigService,
+  ) {}
 
   async execute(command: CreateActivationCodeCommand): Promise<ActivationCode> {
-    const existing = await this.activationCodeRepository.findByCode(command.code, command.owner);
-    if (existing) {
-      throw new ConflictError(`Activation code ${command.code} already exists`);
+    const size = this.configService.get<number>('RMU_ACTIVATION_CODE_SIZE', 8);
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const generateCode = (len: number) => {
+      let s = '';
+      for (let i = 0; i < len; i++) {
+        s += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return s;
+    };
+
+    let code: string | undefined;
+    let existing;
+    const maxAttempts = 10;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      code = generateCode(size);
+      existing = await this.activationCodeRepository.findByCode(code, command.owner);
+      if (!existing) break;
     }
+
+    if (existing) {
+      throw new ConflictError(`Could not generate unique activation code after ${maxAttempts} attempts`);
+    }
+
     const activationCode = ActivationCode.create({
-      code: command.code,
+      code: code!,
       owner: command.owner,
       features: command.features,
       expiresAt: command.expiresAt,
