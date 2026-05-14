@@ -7,19 +7,9 @@ export class UserSettingsDto {
   @IsString()
   measurementSystem: 'metric' | 'imperial';
 
-  @ApiProperty({ description: 'Language preference of the user', required: true })
-  @IsString()
-  language: string;
-
-  @ApiProperty({ description: 'Theme preference of the user', required: true, enum: ['light', 'dark'] })
-  @IsString()
-  theme: 'light' | 'dark';
-
   static fromEntity(user: UserSettings): UserSettingsDto {
     const dto = new UserSettingsDto();
     dto.measurementSystem = user.measurementSystem;
-    dto.language = user.language;
-    dto.theme = user.theme;
     return dto;
   }
 }
