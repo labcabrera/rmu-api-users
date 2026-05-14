@@ -1,6 +1,6 @@
 import { Inject, Logger } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { GetUserQuery } from '../queries/GetUserQuery';
+import { GetUserQuery } from '../queries/get-user-query';
 import { User } from 'src/modules/user/domain/aggregates/user';
 import type { UserRepository } from '../../ports/user-repository';
 import { NotFoundError } from 'src/modules/shared/domain/errors/errors';

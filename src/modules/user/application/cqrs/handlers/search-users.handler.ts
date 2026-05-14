@@ -1,17 +1,18 @@
 import { Inject, Logger } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Page } from 'src/modules/shared/domain/entities/page';
-import type { UserApiResponse, UserSearchPort } from '../../ports/user-search.port';
-import { SearchUsersQuery } from '../queries/search-users.query';
+import { GetUsersQuery } from '../queries/get-users-query';
+import type { UserRepository } from '../../ports/user-repository';
+import { User } from 'src/modules/user/domain/aggregates/user';
 
-@QueryHandler(SearchUsersQuery)
-export class SearchUsersHandler implements IQueryHandler<SearchUsersQuery, Page<UserApiResponse>> {
-  private readonly logger = new Logger(SearchUsersHandler.name);
+@QueryHandler(GetUsersQuery)
+export class GetUsersHandler implements IQueryHandler<GetUsersQuery, Page<User>> {
+  private readonly logger = new Logger(GetUsersHandler.name);
 
-  constructor(@Inject('UserSearchPort') private readonly userSearchPort: UserSearchPort) {}
+  constructor(@Inject('UserRepository') private readonly userRepository: UserRepository) {}
 
-  async execute(query: SearchUsersQuery): Promise<Page<UserApiResponse>> {
-    this.logger.verbose(`Searching users with term ${query.term ?? ''}`);
-    return this.userSearchPort.search(query.term, query.page, query.size);
+  async execute(query: GetUsersQuery): Promise<Page<User>> {
+    this.logger.verbose(`Searching users with term ${query.rsql ?? ''}`);
+    return await this.userRepository.findByRsql(query.rsql ?? '', query.page, query.size);
   }
 }
