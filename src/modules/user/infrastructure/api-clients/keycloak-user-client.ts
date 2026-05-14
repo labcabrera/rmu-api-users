@@ -6,6 +6,15 @@ import { UserApiResponse, IamUserPort } from '../../application/ports/iam-user.p
 import { ConfigService } from '@nestjs/config';
 import { Page } from 'src/modules/shared/domain/entities/page';
 
+interface KeycloakRoleResponse {
+  readonly id: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly composite?: boolean;
+  readonly clientRole?: boolean;
+  readonly containerId?: string;
+}
+
 @Injectable()
 export class KeycloakIamUserAdapter extends IamUserPort {
   private readonly keycloakBaseUrl: string;
@@ -95,5 +104,40 @@ export class KeycloakIamUserAdapter extends IamUserPort {
       enabled: user.enabled,
     }));
     return new Page(users, page, size, countResponse.data);
+  }
+
+  async addUserToGroup(userId: string, groupId: string): Promise<void> {
+    const token = await this.tokenService.getToken();
+    const uri = `${this.keycloakBaseUrl}/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupId)}`;
+    await axios.put(
+      uri,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+  }
+
+  async setUserRole(userId: string, roleName: string): Promise<void> {
+    const token = await this.tokenService.getToken();
+    const role = await this.findRealmRoleByName(token, roleName);
+    const uri = `${this.keycloakBaseUrl}/users/${encodeURIComponent(userId)}/role-mappings/realm`;
+    await axios.post(uri, [role], {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  private async findRealmRoleByName(token: string, roleName: string): Promise<KeycloakRoleResponse> {
+    const uri = `${this.keycloakBaseUrl}/roles/${encodeURIComponent(roleName)}`;
+    const response = await axios.get<KeycloakRoleResponse>(uri, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
   }
 }
