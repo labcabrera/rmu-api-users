@@ -2,7 +2,7 @@ import { Inject, Logger } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { GetUserQuery } from '../queries/get-user-query';
 import { User } from 'src/modules/user/domain/aggregates/user';
-import type { UserRepository } from '../../ports/user-repository';
+import { UserRepository } from '../../ports/user-repository';
 import { NotFoundError } from 'src/modules/shared/domain/errors/errors';
 import { UserApiResponse, IamUserPort } from '../../ports/iam-user.port';
 import { UserSettings } from 'src/modules/user/domain/value-objects/user-settings.vo';
@@ -12,7 +12,7 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
   private readonly logger = new Logger(GetUserHandler.name);
 
   constructor(
-    @Inject('UserRepository') private readonly userRepository: UserRepository,
+    @Inject(UserRepository) private readonly userRepository: UserRepository,
     @Inject(IamUserPort) private readonly userSearchPort: IamUserPort,
   ) {}
 

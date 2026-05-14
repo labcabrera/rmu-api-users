@@ -51,7 +51,7 @@ export class MessageController {
   async create(@Request() req, @Body() body: CreateUserMessageDto): Promise<UserMessageDto> {
     const userId = req.user!.id as string;
     const roles = req.user!.roles as string[];
-    const command = new CreateUserMessageCommand(body.message, body.type, userId, roles);
+    const command = new CreateUserMessageCommand(body.message, body.type, body.recipientId, userId, roles);
     const message = await this.commandBus.execute<CreateUserMessageCommand, UserMessage>(command);
     return UserMessageDto.fromEntity(message);
   }

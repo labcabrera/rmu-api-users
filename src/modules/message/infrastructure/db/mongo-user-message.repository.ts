@@ -25,6 +25,7 @@ export class MongoUserMessageRepository extends MongoBaseRepository<UserMessage,
     return UserMessage.fromProps({
       id: doc._id.toString(),
       userId: doc.userId,
+      from: doc.from,
       message: doc.message,
       type: doc.type,
       readed: doc.readed,

@@ -12,6 +12,7 @@ import { KafkaUserEventConsumer } from './infrastructure/messaging/kafka.user-ev
 import { GetUserHandler } from './application/cqrs/handlers/get-user.handler';
 import { GetUsersHandler } from './application/cqrs/handlers/search-users.handler';
 import { IamUserPort } from './application/ports/iam-user.port';
+import { UserRepository } from './application/ports/user-repository';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { IamUserPort } from './application/ports/iam-user.port';
     GetUserHandler,
     GetUsersHandler,
     {
-      provide: 'UserRepository',
+      provide: UserRepository,
       useClass: MongoUserRepository,
     },
     {
@@ -34,5 +35,6 @@ import { IamUserPort } from './application/ports/iam-user.port';
       useClass: KeycloakIamUserAdapter,
     },
   ],
+  exports: [UserRepository],
 })
 export class UserModule {}

@@ -9,6 +9,10 @@ export class CreateUserMessageDto {
   @MaxLength(1000)
   message: string;
 
+  @ApiProperty({ description: 'Recipient user id', example: 'b9d2b52d-5b4d-4ab7-a59d-93bb67e32ce1' })
+  @IsString()
+  recipientId: string;
+
   @ApiProperty({ description: 'Message type', enum: MESSAGE_TYPES, example: 'info' })
   @IsIn(MESSAGE_TYPES)
   type: MessageType;

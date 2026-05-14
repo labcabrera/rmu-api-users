@@ -12,6 +12,9 @@ export class UserMessageDto {
   @ApiProperty({ description: 'Identifier of the message owner', example: 'b9d2b52d-5b4d-4ab7-a59d-93bb67e32ce1' })
   userId: string;
 
+  @ApiProperty({ description: 'Identifier of the message sender', example: 'a1b2c3d4-1234-5678-9abc-def012345678' })
+  from: string;
+
   @ApiProperty({ description: 'Message text', example: 'Your activation code has been redeemed' })
   message: string;
 
@@ -48,6 +51,7 @@ export class UserMessageDto {
     const dto = new UserMessageDto();
     dto.id = message.id;
     dto.userId = message.userId;
+    dto.from = message.from;
     dto.message = message.message;
     dto.type = message.type;
     dto.readed = message.readed;

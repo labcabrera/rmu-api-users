@@ -10,18 +10,26 @@ import { MarkUserMessageReadHandler } from './application/cqrs/handlers/mark-use
 import { MongoUserMessageRepository } from './infrastructure/db/mongo-user-message.repository';
 import { UserMessageModel, UserMessageSchema } from './infrastructure/persistence/models/user-message.model';
 import { MessageController } from './interfaces/http/message.controller';
+import { UserMessageRepository } from './application/ports/user-message.repository';
+import { UserModule } from '../user/user.module';
 
 const CommandHandlers = [CreateUserMessageHandler, DeleteUserMessageHandler, MarkUserMessageReadHandler];
 const QueryHandlers = [ListUnreadUserMessagesHandler];
 
 @Module({
-  imports: [CqrsModule, MongooseModule.forFeature([{ name: UserMessageModel.name, schema: UserMessageSchema }]), AuthModule, SharedModule],
+  imports: [
+    CqrsModule,
+    MongooseModule.forFeature([{ name: UserMessageModel.name, schema: UserMessageSchema }]),
+    AuthModule,
+    SharedModule,
+    UserModule,
+  ],
   controllers: [MessageController],
   providers: [
     ...CommandHandlers,
     ...QueryHandlers,
     {
-      provide: 'UserMessageRepository',
+      provide: UserMessageRepository,
       useClass: MongoUserMessageRepository,
     },
   ],

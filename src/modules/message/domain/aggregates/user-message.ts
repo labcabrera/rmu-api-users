@@ -7,6 +7,7 @@ export class UserMessage extends BaseAggregateRoot<UserMessageProps> {
   constructor(
     public readonly id: string,
     public userId: string,
+    public from: string,
     public message: string,
     public type: MessageType,
     public readed: Date | null,
@@ -20,6 +21,7 @@ export class UserMessage extends BaseAggregateRoot<UserMessageProps> {
     return UserMessage.fromProps({
       id: randomUUID(),
       userId: props.userId,
+      from: props.from,
       message: props.message,
       type: props.type,
       readed: null,
@@ -29,7 +31,7 @@ export class UserMessage extends BaseAggregateRoot<UserMessageProps> {
   }
 
   static fromProps(props: UserMessageProps): UserMessage {
-    return new UserMessage(props.id, props.userId, props.message, props.type, props.readed, props.createdAt, props.updatedAt);
+    return new UserMessage(props.id, props.userId, props.from, props.message, props.type, props.readed, props.createdAt, props.updatedAt);
   }
 
   markAsRead(readed: Date = new Date()): void {
@@ -41,6 +43,7 @@ export class UserMessage extends BaseAggregateRoot<UserMessageProps> {
     return {
       id: this.id,
       userId: this.userId,
+      from: this.from,
       message: this.message,
       type: this.type,
       readed: this.readed,

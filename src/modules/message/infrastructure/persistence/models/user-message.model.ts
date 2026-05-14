@@ -14,6 +14,9 @@ export class UserMessageModel {
   userId: string;
 
   @Prop({ type: String, required: true })
+  from: string;
+
+  @Prop({ type: String, required: true })
   message: string;
 
   @Prop({ type: String, required: true })
