@@ -44,7 +44,7 @@ export class FriendshipController {
   async create(@Request() req, @Body() body: CreateFriendshipRequestDto): Promise<FriendshipDto> {
     const userId = req.user!.id as string;
     const roles = req.user!.roles as string[];
-    const command = new CreateFriendshipRequestCommand(body.addresseeId, body.message ?? null, userId, roles);
+    const command = new CreateFriendshipRequestCommand(body.addresseeName, body.message ?? null, userId, roles);
     const friendship = await this.commandBus.execute<CreateFriendshipRequestCommand, Friendship>(command);
     return FriendshipDto.fromEntity(friendship);
   }

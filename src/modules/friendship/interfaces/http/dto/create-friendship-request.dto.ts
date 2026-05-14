@@ -2,9 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateFriendshipRequestDto {
-  @ApiProperty({ description: 'User id receiving the friendship request', example: 'user-123' })
+  @ApiProperty({ description: 'Name of the user receiving the friendship request', example: 'alice' })
   @IsString()
-  addresseeId: string;
+  addresseeName: string;
 
   @ApiPropertyOptional({ description: 'Optional request message', example: 'Want to connect?' })
   @IsOptional()

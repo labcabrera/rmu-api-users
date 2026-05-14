@@ -14,7 +14,7 @@ export class UpdateFriendshipHandler implements ICommandHandler<UpdateFriendship
     if (!friendship || !friendship.hasParticipant(command.userId)) {
       throw new NotFoundError('Friendship', command.id);
     }
-    if ((command.status === 'accepted' || command.status === 'rejected') && friendship.addresseeId !== command.userId) {
+    if ((command.status === 'accepted' || command.status === 'rejected') && friendship.addresseeName !== command.userId) {
       throw new ForbiddenError('Only the addressee can accept or reject a friendship request');
     }
     friendship.update({ status: command.status, message: command.message });

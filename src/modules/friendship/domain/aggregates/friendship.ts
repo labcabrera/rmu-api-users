@@ -8,7 +8,7 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
   constructor(
     public readonly id: string,
     public requesterId: string,
-    public addresseeId: string,
+    public addresseeName: string,
     public status: FriendshipStatus,
     public message: string | null,
     public createdAt: Date,
@@ -18,13 +18,13 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
   }
 
   static create(props: Omit<FriendshipProps, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Friendship {
-    if (props.requesterId === props.addresseeId) {
+    if (props.requesterId === props.addresseeName) {
       throw new ValidationError('Requester and addressee must be different users');
     }
     return Friendship.fromProps({
       id: randomUUID(),
       requesterId: props.requesterId,
-      addresseeId: props.addresseeId,
+      addresseeName: props.addresseeName,
       status: 'pending',
       message: props.message,
       createdAt: new Date(),
@@ -33,11 +33,11 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
   }
 
   static fromProps(props: FriendshipProps): Friendship {
-    return new Friendship(props.id, props.requesterId, props.addresseeId, props.status, props.message, props.createdAt, props.updatedAt);
+    return new Friendship(props.id, props.requesterId, props.addresseeName, props.status, props.message, props.createdAt, props.updatedAt);
   }
 
   public hasParticipant(userId: string): boolean {
-    return this.requesterId === userId || this.addresseeId === userId;
+    return this.requesterId === userId || this.addresseeName === userId;
   }
 
   public update(props: { status?: FriendshipStatus; message?: string | null }): void {
@@ -54,7 +54,7 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
     return {
       id: this.id,
       requesterId: this.requesterId,
-      addresseeId: this.addresseeId,
+      addresseeName: this.addresseeName,
       status: this.status,
       message: this.message,
       createdAt: this.createdAt,

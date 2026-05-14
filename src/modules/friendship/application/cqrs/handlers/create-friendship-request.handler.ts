@@ -12,14 +12,14 @@ export class CreateFriendshipRequestHandler implements ICommandHandler<CreateFri
   constructor(@Inject('FriendshipRepository') private readonly friendshipRepository: FriendshipRepository) {}
 
   async execute(command: CreateFriendshipRequestCommand): Promise<Friendship> {
-    this.logger.log(`Creating friendship ${command.addresseeId} for user ${command.userId}`);
-    const existing = await this.friendshipRepository.findByParticipants(command.userId, command.addresseeId);
+    this.logger.log(`Creating friendship ${command.addresseeName} for user ${command.userId}`);
+    const existing = await this.friendshipRepository.findByParticipants(command.userId, command.addresseeName);
     if (existing && existing.status !== 'rejected') {
       throw new ConflictError('Friendship already exists between users');
     }
     const friendship = Friendship.create({
       requesterId: command.userId,
-      addresseeId: command.addresseeId,
+      addresseeName: command.addresseeName,
       message: command.message,
     });
     await this.friendshipRepository.save(friendship);

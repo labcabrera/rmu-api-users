@@ -18,7 +18,7 @@ export class UserController {
   ) {}
 
   @Get('')
-  @ApiOperation({ operationId: 'findRealmById', summary: 'Find realm by id' })
+  @ApiOperation({ operationId: 'getUser', summary: 'Get current user' })
   @ApiOkResponse({ type: UserDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   @ApiNotFoundResponse({ description: 'User not found', type: ErrorDto })
@@ -29,35 +29,4 @@ export class UserController {
     const user = await this.queryBus.execute<GetUserQuery, User>(query);
     return UserDto.fromEntity(user);
   }
-
-  // @Get('settings')
-  // getSettings(@Request() req) {
-  //   const userId = req.user!.id as string;
-  //   if (!userId) {
-  //     throw new Error('User not authenticated');
-  //   }
-  //   return this.getUserSettingsUseCase.execute(userId);
-  // }
-
-  // @Patch('settings')
-  // updateSettings(@Request() req) {
-  //   const userId = req.user!.id as string;
-  //   if (!userId) {
-  //     throw new Error('User not authenticated');
-  //   }
-  //   const command: UpdateUserSettingsCommand = {
-  //     ...req.body,
-  //     id: userId,
-  //   };
-  //   return this.updateUserSettingsUseCase.execute(command);
-  // }
-
-  // @Post('friends')
-  // requestFriend(@Request() req) {
-  //   const userId = req.user!.id as string;
-  //   const roles = req.user!.roles as string[];
-  //   const command = new FriendshipRequestCommand(req.body.friendEmail, req.body.message, userId, roles);
-  //   this.requestFriendUseCase.execute(command);
-  //   return { message: 'Friend request sent successfully' };
-  // }
 }
