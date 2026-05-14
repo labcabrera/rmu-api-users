@@ -35,6 +35,6 @@ import { UserRepository } from './application/ports/user-repository';
       useClass: KeycloakIamUserAdapter,
     },
   ],
-  exports: [UserRepository],
+  exports: [UserRepository, IamUserPort],
 })
 export class UserModule {}

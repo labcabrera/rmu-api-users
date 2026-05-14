@@ -3,13 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ConflictError } from 'src/modules/shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import type { ActivationCodeRepository } from '../../ports/activation-code.repository';
+import { ActivationCodeRepository } from '../../ports/activation-code.repository';
 import { CreateActivationCodeCommand } from '../commands/create-activation-code.command';
 
 @CommandHandler(CreateActivationCodeCommand)
 export class CreateActivationCodeHandler implements ICommandHandler<CreateActivationCodeCommand, ActivationCode[]> {
   constructor(
-    @Inject('ActivationCodeRepository') private readonly activationCodeRepository: ActivationCodeRepository,
+    @Inject(ActivationCodeRepository) private readonly activationCodeRepository: ActivationCodeRepository,
     private readonly configService: ConfigService,
   ) {}
 
@@ -34,7 +34,7 @@ export class CreateActivationCodeHandler implements ICommandHandler<CreateActiva
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
         code = generateCode(size);
         if (used.has(code)) continue;
-        existing = await this.activationCodeRepository.findByCode(code, command.owner);
+        existing = await this.activationCodeRepository.findByCode(code);
         if (!existing) break;
       }
       if (existing) {

@@ -16,8 +16,8 @@ export class MongoActivationCodeRepository
     super(activationCodeModel, rsqlParser);
   }
 
-  async findByCode(code: string, owner: string): Promise<ActivationCode | null> {
-    const doc = await this.model.findOne({ code, owner });
+  async findByCode(code: string): Promise<ActivationCode | null> {
+    const doc = await this.model.findOne({ code });
     return doc ? this.mapToEntity(doc) : null;
   }
 

@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { TokenService } from 'src/modules/auth/token.service';
-import { UserApiResponse, IamUserPort } from '../../application/ports/iam-user.port';
+import { UserApiResponse, IamUserPort, UserGroup } from '../../application/ports/iam-user.port';
 import { ConfigService } from '@nestjs/config';
 import { Page } from 'src/modules/shared/domain/entities/page';
 
@@ -139,5 +139,16 @@ export class KeycloakIamUserAdapter extends IamUserPort {
       },
     });
     return response.data;
+  }
+
+  async findGroups(): Promise<UserGroup[]> {
+    const token = await this.tokenService.getToken();
+    const uri = `${this.keycloakBaseUrl}/groups`;
+    const response = await axios.get<KeycloakRoleResponse>(uri, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response as unknown as UserGroup[];
   }
 }

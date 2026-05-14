@@ -12,6 +12,8 @@ import { UpdateActivationCodeHandler } from './application/cqrs/handlers/update-
 import { MongoActivationCodeRepository } from './infrastructure/db/mongo-activation-code.repository';
 import { ActivationCodeModel, ActivationCodeSchema } from './infrastructure/persistence/models/activation-code.model';
 import { ActivationCodeController } from './interfaces/http/activation-code.controller';
+import { UserModule } from '../user/user.module';
+import { ActivationCodeRepository } from './application/ports/activation-code.repository';
 
 const CommandHandlers = [
   ActivateActivationCodeHandler,
@@ -19,6 +21,7 @@ const CommandHandlers = [
   DeleteActivationCodeHandler,
   UpdateActivationCodeHandler,
 ];
+
 const QueryHandlers = [GetActivationCodeHandler, ListActivationCodesHandler];
 
 @Module({
@@ -27,13 +30,14 @@ const QueryHandlers = [GetActivationCodeHandler, ListActivationCodesHandler];
     MongooseModule.forFeature([{ name: ActivationCodeModel.name, schema: ActivationCodeSchema }]),
     AuthModule,
     SharedModule,
+    UserModule,
   ],
   controllers: [ActivationCodeController],
   providers: [
     ...CommandHandlers,
     ...QueryHandlers,
     {
-      provide: 'ActivationCodeRepository',
+      provide: ActivationCodeRepository,
       useClass: MongoActivationCodeRepository,
     },
   ],

@@ -1,8 +1,10 @@
 import { AuthenticatedCommand } from 'src/modules/shared/application/cqrs/authenticated-command';
 
-export class ActivateActivationCodeCommand extends AuthenticatedCommand {
+export class GetUserMessagesQuery extends AuthenticatedCommand {
   constructor(
-    public readonly code: string,
+    public readonly rsql: string | undefined,
+    public readonly page: number,
+    public readonly size: number,
     userId: string,
     roles: string[],
   ) {

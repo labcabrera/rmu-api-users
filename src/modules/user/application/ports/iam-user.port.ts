@@ -8,6 +8,11 @@ export interface UserApiResponse {
   readonly enabled: boolean;
 }
 
+export interface UserGroup {
+  readonly id: string;
+  readonly name: string;
+}
+
 /**
  * Interface to search for users from email in an external system (Keycloak).
  */
@@ -17,4 +22,5 @@ export abstract class IamUserPort {
   abstract search(term: string | undefined, page: number, size: number): Promise<Page<UserApiResponse>>;
   abstract addUserToGroup(userId: string, groupId: string): Promise<void>;
   abstract setUserRole(userId: string, roleName: string): Promise<void>;
+  abstract findGroups(): Promise<UserGroup[]>;
 }

@@ -3,12 +3,12 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundError } from 'src/modules/shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
 import { ActivationFeature } from '../../../domain/aggregates/activation-code-props';
-import type { ActivationCodeRepository } from '../../ports/activation-code.repository';
+import { ActivationCodeRepository } from '../../ports/activation-code.repository';
 import { UpdateActivationCodeCommand } from '../commands/update-activation-code.command';
 
 @CommandHandler(UpdateActivationCodeCommand)
 export class UpdateActivationCodeHandler implements ICommandHandler<UpdateActivationCodeCommand, ActivationCode> {
-  constructor(@Inject('ActivationCodeRepository') private readonly activationCodeRepository: ActivationCodeRepository) {}
+  constructor(@Inject(ActivationCodeRepository) private readonly activationCodeRepository: ActivationCodeRepository) {}
 
   async execute(command: UpdateActivationCodeCommand): Promise<ActivationCode> {
     const activationCode = await this.activationCodeRepository.findById(command.id);

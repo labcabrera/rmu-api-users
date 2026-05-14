@@ -17,7 +17,7 @@ import { PagedQueryDto } from 'src/modules/shared/interfaces/http/dto/paged-rsql
 import { CreateUserMessageCommand } from '../../application/cqrs/commands/create-user-message.command';
 import { DeleteUserMessageCommand } from '../../application/cqrs/commands/delete-user-message.command';
 import { MarkUserMessageReadCommand } from '../../application/cqrs/commands/mark-user-message-read.command';
-import { ListUnreadUserMessagesQuery } from '../../application/cqrs/queries/list-unread-user-messages.query';
+import { GetUserMessagesQuery } from '../../application/cqrs/queries/get-user-messages.query';
 import { UserMessage } from '../../domain/aggregates/user-message';
 import { CreateUserMessageDto } from './dto/create-user-message.dto';
 import { UserMessageDto } from './dto/user-message.dto';
@@ -32,16 +32,16 @@ export class MessageController {
     private readonly commandBus: CommandBus,
   ) {}
 
-  @Get('unread')
-  @ApiOperation({ operationId: 'listUnreadMessages', summary: 'List unread user messages' })
+  @Get('')
+  @ApiOperation({ operationId: 'listMessages', summary: 'List user messages' })
   @ApiOkResponse({ type: UserMessagePageDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  async findUnread(@Request() req, @Query() query: PagedQueryDto): Promise<UserMessagePageDto> {
+  async findUnread(@Request() req, @Query() dto: PagedQueryDto): Promise<UserMessagePageDto> {
     const userId = req.user!.id as string;
-    const messages = await this.queryBus.execute<ListUnreadUserMessagesQuery, Page<UserMessage>>(
-      new ListUnreadUserMessagesQuery(userId, query.page, query.size),
-    );
-    return UserMessagePageDto.fromPage(messages);
+    const roles = req.user!.roles as string[];
+    const query = new GetUserMessagesQuery(dto.q, dto.page, dto.size, userId, roles);
+    const page = await this.queryBus.execute<GetUserMessagesQuery, Page<UserMessage>>(query);
+    return UserMessagePageDto.fromPage(page);
   }
 
   @Post('')

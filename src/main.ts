@@ -30,6 +30,7 @@ async function bootstrap() {
       },
     },
   });
+  app.enableCors();
 
   app.useGlobalFilters(new DomainExceptionFilter());
   await app.listen(3010);
