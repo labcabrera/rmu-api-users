@@ -27,9 +27,6 @@ export class UserMessageModel {
 
   @Prop({ type: Date, required: true })
   createdAt: Date;
-
-  @Prop({ type: Date, required: false })
-  updatedAt: Date | null;
 }
 
 export const UserMessageSchema = SchemaFactory.createForClass(UserMessageModel);

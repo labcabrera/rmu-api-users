@@ -9,7 +9,7 @@ import { ListUnreadUserMessagesHandler } from './application/cqrs/handlers/list-
 import { MarkUserMessageReadHandler } from './application/cqrs/handlers/mark-user-message-read.handler';
 import { MongoUserMessageRepository } from './infrastructure/db/mongo-user-message.repository';
 import { UserMessageModel, UserMessageSchema } from './infrastructure/persistence/models/user-message.model';
-import { MessageController } from './interfaces/http/message.controller';
+import { MessageController } from './interfaces/http/user-message.controller';
 import { UserMessageRepository } from './application/ports/user-message.repository';
 import { UserModule } from '../user/user.module';
 

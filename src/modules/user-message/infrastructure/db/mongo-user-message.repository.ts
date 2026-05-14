@@ -30,7 +30,6 @@ export class MongoUserMessageRepository extends MongoBaseRepository<UserMessage,
       type: doc.type,
       readed: doc.readed,
       createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
     });
   }
 }

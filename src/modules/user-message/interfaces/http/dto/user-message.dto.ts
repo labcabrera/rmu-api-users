@@ -38,15 +38,6 @@ export class UserMessageDto {
   })
   createdAt: Date;
 
-  @ApiPropertyOptional({
-    description: 'Date when the message was last updated',
-    example: '2026-05-14T10:30:00.000Z',
-    nullable: true,
-    type: String,
-    format: 'date-time',
-  })
-  updatedAt: Date | null;
-
   static fromEntity(message: UserMessage): UserMessageDto {
     const dto = new UserMessageDto();
     dto.id = message.id;
@@ -56,7 +47,6 @@ export class UserMessageDto {
     dto.type = message.type;
     dto.readed = message.readed;
     dto.createdAt = message.createdAt;
-    dto.updatedAt = message.updatedAt;
     return dto;
   }
 }

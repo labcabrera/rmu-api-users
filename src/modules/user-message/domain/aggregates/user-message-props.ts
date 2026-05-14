@@ -8,5 +8,4 @@ export interface UserMessageProps {
   type: MessageType;
   readed: Date | null;
   createdAt: Date;
-  updatedAt: Date | null;
 }

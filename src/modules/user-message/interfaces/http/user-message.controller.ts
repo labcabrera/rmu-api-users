@@ -24,7 +24,7 @@ import { UserMessageDto } from './dto/user-message.dto';
 import { UserMessagePageDto } from './dto/user-message-page.dto';
 
 @UseGuards(JwtAuthGuard)
-@Controller('v1/messages')
+@Controller('v1/user-messages')
 @ApiTags('Message')
 export class MessageController {
   constructor(
