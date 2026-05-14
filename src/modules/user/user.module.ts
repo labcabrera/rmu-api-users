@@ -10,6 +10,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { SharedModule } from '../shared/shared.module';
 import { KafkaUserEventConsumer } from './infrastructure/messaging/kafka.user-event-consumer';
 import { GetUserHandler } from './application/cqrs/handlers/get-user.handler';
+import { SearchUsersHandler } from './application/cqrs/handlers/search-users.handler';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { GetUserHandler } from './application/cqrs/handlers/get-user.handler';
   controllers: [UserController, KafkaUserEventConsumer],
   providers: [
     GetUserHandler,
+    SearchUsersHandler,
     {
       provide: 'UserRepository',
       useClass: MongoUserRepository,
