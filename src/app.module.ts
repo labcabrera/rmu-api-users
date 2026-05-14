@@ -5,6 +5,7 @@ import { UserModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { SharedModule } from './modules/shared/shared.module';
 import { ActivationCodeModule } from './modules/activation-code/activation-code.module';
+import { FriendshipModule } from './modules/friendship/friendship.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ActivationCodeModule } from './modules/activation-code/activation-code.
     SharedModule,
     UserModule,
     ActivationCodeModule,
+    FriendshipModule,
     AuthModule,
   ],
 })

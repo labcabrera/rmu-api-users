@@ -4,8 +4,6 @@ import { UserController } from './interfaces/http/user.controller';
 import { UserModel, UserSchema } from './infrastructure/persistence/models/user.model';
 import { KeycloakUserSearchClient } from './infrastructure/api-clients/keycloak-user-client';
 import { AuthModule } from 'src/modules/auth/auth.module';
-import { MongoFriendshipRepository } from './infrastructure/db/mongo-friendship.repository';
-import { FriendshipModel, FriendshipSchema } from './infrastructure/persistence/models/friendship.model';
 import { MongoUserRepository } from './infrastructure/db/mongo-user.repository';
 import { TerminusModule } from '@nestjs/terminus';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -17,10 +15,7 @@ import { GetUserHandler } from './application/cqrs/handlers/get-user.handler';
   imports: [
     TerminusModule,
     CqrsModule,
-    MongooseModule.forFeature([
-      { name: UserModel.name, schema: UserSchema },
-      { name: FriendshipModel.name, schema: FriendshipSchema },
-    ]),
+    MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]),
     AuthModule,
     SharedModule,
   ],
@@ -30,10 +25,6 @@ import { GetUserHandler } from './application/cqrs/handlers/get-user.handler';
     {
       provide: 'UserRepository',
       useClass: MongoUserRepository,
-    },
-    {
-      provide: 'FriendshipRepository',
-      useClass: MongoFriendshipRepository,
     },
     {
       provide: 'UserSearchPort',

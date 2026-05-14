@@ -1,9 +1,8 @@
 import { AuthenticatedCommand } from 'src/modules/shared/application/cqrs/authenticated-command';
 
-export class UpdateFriendshipCommand extends AuthenticatedCommand {
+export class DeleteFriendshipCommand extends AuthenticatedCommand {
   constructor(
-    public addresseeId: string,
-    public status: 'accepted' | 'rejected' | 'blocked',
+    public readonly id: string,
     userId: string,
     roles: string[],
   ) {
