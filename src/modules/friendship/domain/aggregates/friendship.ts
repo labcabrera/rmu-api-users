@@ -2,16 +2,7 @@ import { BaseAggregateRoot } from 'src/modules/shared/domain/aggregates/base-agg
 import { FriendshipStatus } from '../value-objects/friendship-status.vo';
 import { randomUUID } from 'crypto';
 import { ValidationError } from 'src/modules/shared/domain/errors/errors';
-
-export interface FriendshipProps {
-  id: string;
-  requesterId: string;
-  addresseeId: string;
-  status: FriendshipStatus;
-  message: string | null;
-  createdAt: Date;
-  updatedAt: Date | null;
-}
+import { FriendshipProps } from './friendship-props';
 
 export class Friendship extends BaseAggregateRoot<FriendshipProps> {
   constructor(

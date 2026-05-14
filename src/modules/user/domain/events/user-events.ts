@@ -1,5 +1,5 @@
 import { DomainEvent } from 'src/modules/shared/domain/events/domain-event';
-import { UserProps } from '../aggregates/user';
+import { UserProps } from '../aggregates/user-props';
 
 export class UserCreatedEvent extends DomainEvent<UserProps> {
   constructor(data: UserProps) {

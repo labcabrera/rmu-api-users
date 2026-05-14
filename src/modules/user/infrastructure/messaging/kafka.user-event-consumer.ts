@@ -1,7 +1,7 @@
 import { Controller, Logger } from '@nestjs/common';
 import { Ctx, EventPattern, KafkaContext, Payload } from '@nestjs/microservices';
 import { DomainEvent } from 'src/modules/shared/domain/events/domain-event';
-import { UserProps } from '../../domain/aggregates/user';
+import { UserProps } from '../../domain/aggregates/user-props';
 
 @Controller()
 export class KafkaUserEventConsumer {
