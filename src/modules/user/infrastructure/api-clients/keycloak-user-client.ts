@@ -2,18 +2,19 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { TokenService } from 'src/modules/auth/token.service';
-import { UserApiResponse, UserSearchPort } from '../../application/ports/user-search.port';
+import { UserApiResponse, IamUserPort } from '../../application/ports/iam-user.port';
 import { ConfigService } from '@nestjs/config';
 import { Page } from 'src/modules/shared/domain/entities/page';
 
 @Injectable()
-export class KeycloakUserSearchClient implements UserSearchPort {
+export class KeycloakIamUserAdapter extends IamUserPort {
   private readonly keycloakBaseUrl: string;
 
   constructor(
     private readonly tokenService: TokenService,
     configService: ConfigService,
   ) {
+    super();
     this.keycloakBaseUrl = configService.get('RMU_IAM_ADMIN_BASE_URL') as string;
   }
 

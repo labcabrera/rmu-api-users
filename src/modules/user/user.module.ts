@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserController } from './interfaces/http/user.controller';
 import { UserModel, UserSchema } from './infrastructure/persistence/models/user.model';
-import { KeycloakUserSearchClient } from './infrastructure/api-clients/keycloak-user-client';
+import { KeycloakIamUserAdapter } from './infrastructure/api-clients/keycloak-user-client';
 import { AuthModule } from 'src/modules/auth/auth.module';
 import { MongoUserRepository } from './infrastructure/db/mongo-user.repository';
 import { TerminusModule } from '@nestjs/terminus';
@@ -11,6 +11,7 @@ import { SharedModule } from '../shared/shared.module';
 import { KafkaUserEventConsumer } from './infrastructure/messaging/kafka.user-event-consumer';
 import { GetUserHandler } from './application/cqrs/handlers/get-user.handler';
 import { GetUsersHandler } from './application/cqrs/handlers/search-users.handler';
+import { IamUserPort } from './application/ports/iam-user.port';
 
 @Module({
   imports: [
@@ -29,8 +30,8 @@ import { GetUsersHandler } from './application/cqrs/handlers/search-users.handle
       useClass: MongoUserRepository,
     },
     {
-      provide: 'UserSearchPort',
-      useClass: KeycloakUserSearchClient,
+      provide: IamUserPort,
+      useClass: KeycloakIamUserAdapter,
     },
   ],
 })
