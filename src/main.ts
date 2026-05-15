@@ -15,9 +15,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, openApiConfig);
   SwaggerModule.setup('api-docs', app, document);
 
-  const clientId = app.get(ConfigService).get<string>('KAFKA_CLIENT_ID') || 'rmu-api-users';
-  const brokers = app.get(ConfigService).get<string>('KAFKA_BROKERS')?.split(',') || ['localhost:9092'];
-  const consumerGroupId = app.get(ConfigService).get<string>('KAFKA_CONSUMER_GROUP_ID') || 'user-consumer';
+  const clientId = app.get(ConfigService).get<string>('RMU_KAFKA_CLIENT_ID')!;
+  const brokers = app.get(ConfigService).get<string>('RMU_KAFKA_BROKERS')!.split(',');
+  const consumerGroupId = app.get(ConfigService).get<string>('RMU_KAFKA_CONSUMER_GROUP_ID')!;
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.KAFKA,
     options: {
