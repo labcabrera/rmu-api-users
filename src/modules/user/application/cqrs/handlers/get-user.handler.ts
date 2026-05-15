@@ -25,32 +25,32 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
     }
     let user = await this.userRepository.findById(query.userId);
     if (user) {
-      this.mergeUser(user, keycloakUser);
+      this.mergeUser(user, keycloakUser, query.roles);
       await this.userRepository.update(user.id, user);
     } else {
-      user = this.createUserFromKeycloak(keycloakUser);
+      user = this.createUserFromKeycloak(keycloakUser, query.roles);
       await this.userRepository.save(user);
     }
     return user;
   }
 
-  private mergeUser(user: User, keycloakUser: UserApiResponse) {
+  private mergeUser(user: User, keycloakUser: UserApiResponse, groups: string[]): void {
     user.update({
       name: keycloakUser.username,
       email: keycloakUser.email,
       emailVerified: keycloakUser.emailVerified || false,
       enabled: keycloakUser.enabled,
+      features: groups,
     });
-    // TODO
   }
 
-  private createUserFromKeycloak(keycloakUser: UserApiResponse): User {
+  private createUserFromKeycloak(keycloakUser: UserApiResponse, groups: string[]): User {
     const props = {
       id: keycloakUser.id,
       name: keycloakUser.username,
       email: keycloakUser.email,
       emailVerified: keycloakUser.emailVerified || false,
-      features: [],
+      features: groups,
       enabled: keycloakUser.enabled,
       settings: UserSettings.default(),
     };

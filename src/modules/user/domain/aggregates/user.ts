@@ -51,6 +51,7 @@ export class User extends BaseAggregateRoot<UserProps> {
     if (props.emailVerified !== undefined) this.emailVerified = props.emailVerified;
     if (props.enabled) this.enabled = props.enabled;
     if (props.settings) this.settings = props.settings;
+    if (props.features) this.features = props.features;
     this.updatedAt = new Date();
   }
 
