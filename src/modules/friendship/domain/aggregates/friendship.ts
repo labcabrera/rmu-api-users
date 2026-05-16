@@ -8,6 +8,8 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
   constructor(
     public readonly id: string,
     public requesterId: string,
+    public requesterName: string,
+    public addresseeId: string,
     public addresseeName: string,
     public status: FriendshipStatus,
     public message: string | null,
@@ -18,12 +20,14 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
   }
 
   static create(props: Omit<FriendshipProps, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Friendship {
-    if (props.requesterId === props.addresseeName) {
+    if (props.requesterId === props.addresseeName || (props.addresseeId && props.requesterId === props.addresseeId)) {
       throw new ValidationError('Requester and addressee must be different users');
     }
     return Friendship.fromProps({
       id: randomUUID(),
       requesterId: props.requesterId,
+      requesterName: props.requesterName,
+      addresseeId: props.addresseeId,
       addresseeName: props.addresseeName,
       status: 'pending',
       message: props.message,
@@ -33,11 +37,21 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
   }
 
   static fromProps(props: FriendshipProps): Friendship {
-    return new Friendship(props.id, props.requesterId, props.addresseeName, props.status, props.message, props.createdAt, props.updatedAt);
+    return new Friendship(
+      props.id,
+      props.requesterId,
+      props.requesterName,
+      props.addresseeId,
+      props.addresseeName,
+      props.status,
+      props.message,
+      props.createdAt,
+      props.updatedAt,
+    );
   }
 
   public hasParticipant(userId: string): boolean {
-    return this.requesterId === userId || this.addresseeName === userId;
+    return this.requesterId === userId || this.addresseeId === userId || this.addresseeName === userId;
   }
 
   public update(props: { status?: FriendshipStatus; message?: string | null }): void {
@@ -54,6 +68,8 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
     return {
       id: this.id,
       requesterId: this.requesterId,
+      requesterName: this.requesterName,
+      addresseeId: this.addresseeId,
       addresseeName: this.addresseeName,
       status: this.status,
       message: this.message,

@@ -5,6 +5,7 @@ import { Page } from 'src/modules/shared/domain/entities/page';
 
 export abstract class UserRepository implements BaseRepository<User> {
   abstract findById(id: string): Promise<User | null>;
+  abstract findByName(string: string): Promise<User | null>;
   abstract findByRsql(
     rsql: string | undefined,
     page: number,

@@ -3,6 +3,8 @@ import { FriendshipStatus } from '../value-objects/friendship-status.vo';
 export interface FriendshipProps {
   id: string;
   requesterId: string;
+  requesterName: string;
+  addresseeId: string;
   addresseeName: string;
   status: FriendshipStatus;
   message: string | null;

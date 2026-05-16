@@ -11,7 +11,8 @@ export class ListFriendshipsHandler implements IQueryHandler<ListFriendshipsQuer
   constructor(@Inject('FriendshipRepository') private readonly friendshipRepository: FriendshipRepository) {}
 
   async execute(query: ListFriendshipsQuery): Promise<Page<Friendship>> {
-    const filter = QueryCriteria.anyOf([QueryCriteria.eq('requesterId', query.userId), QueryCriteria.eq('addresseeName', query.userId)]);
+    //TODO check security filter
+    const filter = QueryCriteria.anyOf([QueryCriteria.eq('requesterId', query.userId), QueryCriteria.eq('addresseeId', query.userId)]);
     return this.friendshipRepository.findByRsql(query.q ?? '', query.page, query.size, filter);
   }
 }

@@ -13,6 +13,10 @@ export class MongoUserRepository extends MongoBaseRepository<User, UserDocument>
     super(friendshipModel, rsqlParser);
   }
 
+  findByName(string: string): Promise<User | null> {
+    return this.model.findOne({ name: string }).then(doc => (doc ? this.mapToEntity(doc) : null));
+  }
+
   protected mapToEntity(doc: UserDocument): User {
     return User.fromProps({
       id: doc._id.toString(),

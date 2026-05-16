@@ -11,12 +11,19 @@ import { UpdateFriendshipHandler } from './application/cqrs/handlers/update-frie
 import { MongoFriendshipRepository } from './infrastructure/db/mongo-friendship.repository';
 import { FriendshipModel, FriendshipSchema } from './infrastructure/persistence/models/friendship.model';
 import { FriendshipController } from './interfaces/http/friendship.controller';
+import { UserModule } from '../user/user.module';
 
 const CommandHandlers = [CreateFriendshipRequestHandler, DeleteFriendshipHandler, UpdateFriendshipHandler];
 const QueryHandlers = [GetFriendshipHandler, ListFriendshipsHandler];
 
 @Module({
-  imports: [CqrsModule, MongooseModule.forFeature([{ name: FriendshipModel.name, schema: FriendshipSchema }]), AuthModule, SharedModule],
+  imports: [
+    CqrsModule,
+    MongooseModule.forFeature([{ name: FriendshipModel.name, schema: FriendshipSchema }]),
+    AuthModule,
+    SharedModule,
+    UserModule,
+  ],
   controllers: [FriendshipController],
   providers: [
     ...CommandHandlers,

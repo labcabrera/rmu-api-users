@@ -5,7 +5,7 @@ import type { MessageType } from '../../../domain/value-objects/message-type.vo'
 
 export type UserMessageDocument = UserMessage & Document;
 
-@Schema({ collection: 'user_messages', _id: false, versionKey: false })
+@Schema({ collection: 'user-messages', _id: false, versionKey: false })
 export class UserMessageModel {
   @Prop({ type: String, required: true })
   _id: string;

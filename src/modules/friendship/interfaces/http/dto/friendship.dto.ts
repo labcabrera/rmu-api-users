@@ -9,6 +9,8 @@ export class FriendshipDto {
   id: string;
 
   requesterId: string;
+  requesterName?: string;
+  addresseeId?: string;
 
   addresseeName: string;
 
@@ -24,6 +26,8 @@ export class FriendshipDto {
     const dto = new FriendshipDto();
     dto.id = friendship.id;
     dto.requesterId = friendship.requesterId;
+    dto.requesterName = friendship.requesterName;
+    dto.addresseeId = friendship.addresseeId;
     dto.addresseeName = friendship.addresseeName;
     dto.status = friendship.status;
     dto.message = friendship.message;

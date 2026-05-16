@@ -11,13 +11,12 @@ export class UpdateFriendshipHandler implements ICommandHandler<UpdateFriendship
 
   async execute(command: UpdateFriendshipCommand): Promise<Friendship> {
     const friendship = await this.friendshipRepository.findById(command.id);
-    if (!friendship || !friendship.hasParticipant(command.userId)) {
+    if (!friendship) {
       throw new NotFoundError('Friendship', command.id);
-    }
-    if ((command.status === 'accepted' || command.status === 'rejected') && friendship.addresseeName !== command.userId) {
+    } else if (friendship.addresseeId !== command.userId) {
       throw new ForbiddenError('Only the addressee can accept or reject a friendship request');
     }
-    friendship.update({ status: command.status, message: command.message });
+    friendship.update({ status: command.status });
     return this.friendshipRepository.update(friendship.id, friendship);
   }
 }

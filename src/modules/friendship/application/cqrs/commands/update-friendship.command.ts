@@ -5,7 +5,6 @@ export class UpdateFriendshipCommand extends AuthenticatedCommand {
   constructor(
     public id: string,
     public status: FriendshipStatus | undefined,
-    public message: string | null | undefined,
     userId: string,
     roles: string[],
   ) {

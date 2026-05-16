@@ -81,7 +81,7 @@ export class FriendshipController {
   async update(@Request() req, @Param('id') id: string, @Body() body: UpdateFriendshipDto): Promise<FriendshipDto> {
     const userId = req.user!.id as string;
     const roles = req.user!.roles as string[];
-    const command = new UpdateFriendshipCommand(id, body.status, body.message, userId, roles);
+    const command = new UpdateFriendshipCommand(id, body.status, userId, roles);
     const friendship = await this.commandBus.execute<UpdateFriendshipCommand, Friendship>(command);
     return FriendshipDto.fromEntity(friendship);
   }

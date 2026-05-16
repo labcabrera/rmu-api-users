@@ -14,6 +14,12 @@ export class FriendshipModel {
   requesterId: string;
 
   @Prop({ type: String, required: true })
+  requesterName: string;
+
+  @Prop({ type: String, required: true })
+  addresseeId: string;
+
+  @Prop({ type: String, required: true })
   addresseeName: string;
 
   @Prop({ type: String, required: true })
@@ -32,4 +38,6 @@ export class FriendshipModel {
 export const FriendshipSchema = SchemaFactory.createForClass(FriendshipModel);
 FriendshipSchema.index({ requesterId: 1, addresseeName: 1 });
 FriendshipSchema.index({ addresseeName: 1, requesterId: 1 });
+FriendshipSchema.index({ requesterId: 1, addresseeId: 1 });
+FriendshipSchema.index({ addresseeId: 1, requesterId: 1 });
 FriendshipSchema.index({ status: 1 });

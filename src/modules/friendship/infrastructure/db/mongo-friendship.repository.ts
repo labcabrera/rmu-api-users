@@ -23,7 +23,9 @@ export class MongoFriendshipRepository extends MongoBaseRepository<Friendship, F
     const doc = await this.model.findOne({
       $or: [
         { requesterId: userId, addresseeName: friendId },
+        { requesterId: userId, addresseeId: friendId },
         { requesterId: friendId, addresseeName: userId },
+        { requesterId: friendId, addresseeId: userId },
       ],
     });
     return doc ? this.mapToEntity(doc) : null;
@@ -33,6 +35,8 @@ export class MongoFriendshipRepository extends MongoBaseRepository<Friendship, F
     return Friendship.fromProps({
       id: doc._id.toString(),
       requesterId: doc.requesterId,
+      requesterName: doc.requesterName,
+      addresseeId: doc.addresseeId,
       addresseeName: doc.addresseeName,
       status: doc.status,
       message: doc.message,
