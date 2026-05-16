@@ -8,6 +8,7 @@ export interface UserProps {
   enabled: boolean;
   features: string[];
   settings: UserSettings;
+  imageUrl: string | null;
   createdAt: Date;
   updatedAt: Date | null;
 }

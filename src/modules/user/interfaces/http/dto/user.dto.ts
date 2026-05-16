@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsString, IsBoolean, IsArray, IsOptional, ValidateNested } from 'class-validator';
 import { User } from 'src/modules/user/domain/aggregates/user';
@@ -30,6 +30,11 @@ export class UserDto {
   @IsString({ each: true })
   features: string[];
 
+  @ApiPropertyOptional({ description: 'URL to the user profile image', required: false })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string | null;
+
   @ApiProperty({ description: 'User settings', type: UserSettingsDto })
   @ValidateNested()
   @Type(() => UserSettingsDto)
@@ -52,6 +57,7 @@ export class UserDto {
     dto.enabled = user.enabled;
     dto.features = user.features;
     dto.settings = UserSettingsDto.fromEntity(user.settings);
+    dto.imageUrl = user.imageUrl;
     dto.createdAt = user.createdAt;
     dto.updatedAt = user.updatedAt;
     return dto;

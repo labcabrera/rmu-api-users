@@ -10,6 +10,7 @@ export class User extends BaseAggregateRoot<UserProps> {
     public emailVerified: boolean,
     public enabled: boolean,
     public features: string[],
+    public imageUrl: string | null,
     public settings: UserSettings,
     public createdAt: Date,
     public updatedAt: Date | null,
@@ -25,6 +26,7 @@ export class User extends BaseAggregateRoot<UserProps> {
       props.emailVerified,
       props.enabled,
       props.features,
+      props.imageUrl,
       props.settings,
       new Date(),
       null,
@@ -39,6 +41,7 @@ export class User extends BaseAggregateRoot<UserProps> {
       props.emailVerified,
       props.enabled,
       props.features,
+      props.imageUrl ?? null,
       props.settings,
       props.createdAt,
       props.updatedAt,
@@ -48,6 +51,7 @@ export class User extends BaseAggregateRoot<UserProps> {
   update(props: Partial<Omit<UserProps, 'id' | 'createdAt' | 'updatedAt'>>): void {
     if (props.email) this.email = props.email;
     if (props.name) this.name = props.name;
+    if (props.imageUrl !== undefined) this.imageUrl = props.imageUrl;
     if (props.emailVerified !== undefined) this.emailVerified = props.emailVerified;
     if (props.enabled) this.enabled = props.enabled;
     if (props.settings) this.settings = props.settings;
@@ -63,6 +67,7 @@ export class User extends BaseAggregateRoot<UserProps> {
       emailVerified: this.emailVerified,
       enabled: this.enabled,
       features: this.features,
+      imageUrl: this.imageUrl,
       settings: this.settings,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

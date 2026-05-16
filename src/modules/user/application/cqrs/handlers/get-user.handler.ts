@@ -53,6 +53,7 @@ export class GetUserHandler implements IQueryHandler<GetUserQuery, User> {
       features: groups,
       enabled: keycloakUser.enabled,
       settings: UserSettings.default(),
+      imageUrl: null,
     };
     return User.create(props);
   }

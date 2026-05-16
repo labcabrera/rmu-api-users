@@ -25,6 +25,9 @@ export class UserModel {
   @Prop({ type: [String], required: true })
   public features: string[];
 
+  @Prop({ type: String, required: false })
+  public imageUrl: string | null;
+
   @Prop({ type: UserSettings, required: true })
   settings: UserSettings;
 
