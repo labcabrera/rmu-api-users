@@ -149,6 +149,6 @@ export class KeycloakIamUserAdapter extends IamUserPort {
         Authorization: `Bearer ${token}`,
       },
     });
-    return response as unknown as UserGroup[];
+    return response.data as unknown as UserGroup[];
   }
 }
