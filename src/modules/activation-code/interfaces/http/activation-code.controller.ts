@@ -26,6 +26,7 @@ import { ActivationCodeDto } from './dto/activation-code.dto';
 import { ActivationCodePageDto } from './dto/activation-code-page.dto';
 import { CreateActivationCodeDto } from './dto/create-activation-code.dto';
 import { UpdateActivationCodeDto } from './dto/update-activation-code.dto';
+import { NotFoundError } from 'src/modules/shared/domain/errors/errors';
 
 @UseGuards(JwtAuthGuard)
 @Controller('v1/activation-codes')
@@ -53,12 +54,12 @@ export class ActivationCodeController {
   @ApiOperation({ operationId: 'listActivationCodes', summary: 'List activation codes' })
   @ApiOkResponse({ type: ActivationCodePageDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  async find(@Request() req, @Query() query: PagedQueryDto): Promise<ActivationCodePageDto> {
-    const owner = req.user!.id as string;
-    const activationCodes = await this.queryBus.execute<ListActivationCodesQuery, Page<ActivationCode>>(
-      new ListActivationCodesQuery(owner, query.q, query.page, query.size),
-    );
-    return ActivationCodePageDto.fromPage(activationCodes);
+  async find(@Request() req, @Query() dto: PagedQueryDto): Promise<ActivationCodePageDto> {
+    const userId = req.user!.id as string;
+    const roles = req.user!.roles as string[];
+    const query = new ListActivationCodesQuery(dto.q, dto.page, dto.size, userId, roles);
+    const page = await this.queryBus.execute<ListActivationCodesQuery, Page<ActivationCode>>(query);
+    return ActivationCodePageDto.fromPage(page);
   }
 
   @Get(':id')
@@ -68,8 +69,24 @@ export class ActivationCodeController {
   @ApiNotFoundResponse({ description: 'Activation code not found', type: ErrorDto })
   async findById(@Request() req, @Param('id') id: string): Promise<ActivationCodeDto> {
     const owner = req.user!.id as string;
-    const activationCode = await this.queryBus.execute<GetActivationCodeQuery, ActivationCode>(new GetActivationCodeQuery(id, owner));
+    const query = new GetActivationCodeQuery(id, owner);
+    const activationCode = await this.queryBus.execute<GetActivationCodeQuery, ActivationCode>(query);
     return ActivationCodeDto.fromEntity(activationCode);
+  }
+
+  @Get('code/:code')
+  @ApiOperation({ operationId: 'getActivationCode', summary: 'Get activation code by id' })
+  @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
+  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
+  @ApiNotFoundResponse({ description: 'Activation code not found', type: ErrorDto })
+  async findByCode(@Request() req, @Param('code') code: string): Promise<ActivationCodeDto> {
+    const userId = req.user!.id as string;
+    const query = new ListActivationCodesQuery(`code==${code}`, 0, 1, userId, ['rmu-admin']);
+    const page = await this.queryBus.execute<ListActivationCodesQuery, Page<ActivationCode>>(query);
+    if (page.content.length === 0) {
+      throw new NotFoundError('ActivationCode', 'Code not found');
+    }
+    return ActivationCodeDto.fromEntity(page.content[0]);
   }
 
   @Patch(':id')
