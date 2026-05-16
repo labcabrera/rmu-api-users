@@ -30,15 +30,15 @@ export class UserDto {
   @IsString({ each: true })
   features: string[];
 
-  @ApiPropertyOptional({ description: 'URL to the user profile image', required: false })
-  @IsOptional()
-  @IsString()
-  imageUrl?: string | null;
-
   @ApiProperty({ description: 'User settings', type: UserSettingsDto })
   @ValidateNested()
   @Type(() => UserSettingsDto)
   settings: UserSettingsDto;
+
+  @ApiPropertyOptional({ description: 'URL to the user profile image', required: false })
+  @IsOptional()
+  @IsString()
+  imageUrl?: string | null;
 
   @ApiProperty({ description: 'Creation timestamp', type: String, format: 'date-time' })
   @IsOptional()
