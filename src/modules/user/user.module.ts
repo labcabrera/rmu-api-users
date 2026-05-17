@@ -13,6 +13,7 @@ import { GetUserHandler } from './application/cqrs/handlers/get-user.handler';
 import { GetUsersHandler } from './application/cqrs/handlers/search-users.handler';
 import { IamUserPort } from './application/ports/iam-user.port';
 import { UserRepository } from './application/ports/user-repository';
+import { UpdateCurrentUserHandler } from './application/cqrs/handlers/update-current-user.handler';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { UserRepository } from './application/ports/user-repository';
   providers: [
     GetUserHandler,
     GetUsersHandler,
+    UpdateCurrentUserHandler,
     {
       provide: UserRepository,
       useClass: MongoUserRepository,

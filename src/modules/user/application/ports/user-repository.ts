@@ -14,6 +14,6 @@ export abstract class UserRepository implements BaseRepository<User> {
     sort?: SortCriteria,
   ): Promise<Page<User>>;
   abstract save(entity: Partial<User>): Promise<User>;
-  abstract update(id: string, entity: Partial<User>);
+  abstract update(id: string, entity: Partial<User>): Promise<User>;
   abstract deleteById(id: string): Promise<User | null>;
 }

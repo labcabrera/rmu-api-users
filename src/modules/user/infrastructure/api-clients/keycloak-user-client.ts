@@ -106,6 +106,20 @@ export class KeycloakIamUserAdapter extends IamUserPort {
     return new Page(users, page, size, countResponse.data);
   }
 
+  async updateName(userId: string, name: string): Promise<void> {
+    const token = await this.tokenService.getToken();
+    const uri = `${this.keycloakBaseUrl}/users/${encodeURIComponent(userId)}`;
+    await axios.put(
+      uri,
+      { username: name },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+  }
+
   async addUserToGroup(userId: string, groupId: string): Promise<void> {
     const token = await this.tokenService.getToken();
     const uri = `${this.keycloakBaseUrl}/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupId)}`;

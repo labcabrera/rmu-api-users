@@ -20,6 +20,7 @@ export abstract class IamUserPort {
   abstract findById(email: string): Promise<UserApiResponse | null>;
   abstract findByEmail(email: string): Promise<UserApiResponse | null>;
   abstract search(term: string | undefined, page: number, size: number): Promise<Page<UserApiResponse>>;
+  abstract updateName(userId: string, name: string): Promise<void>;
   abstract addUserToGroup(userId: string, groupId: string): Promise<void>;
   abstract setUserRole(userId: string, roleName: string): Promise<void>;
   abstract findGroups(): Promise<UserGroup[]>;
