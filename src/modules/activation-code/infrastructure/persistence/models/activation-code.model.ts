@@ -4,7 +4,7 @@ import { ActivationCode } from '../../../domain/aggregates/activation-code';
 
 export type ActivationCodeDocument = ActivationCode & Document;
 
-@Schema({ collection: 'activation_codes', _id: false, versionKey: false })
+@Schema({ collection: 'activation-codes', _id: false, versionKey: false })
 export class ActivationCodeModel {
   @Prop({ type: String, required: true })
   _id: string;
