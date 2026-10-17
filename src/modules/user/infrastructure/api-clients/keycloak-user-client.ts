@@ -24,7 +24,7 @@ export class KeycloakIamUserAdapter extends IamUserPort {
     configService: ConfigService,
   ) {
     super();
-    this.keycloakBaseUrl = configService.get('RMU_IAM_ADMIN_BASE_URL') as string;
+    this.keycloakBaseUrl = configService.get('RMU_IAM_ADMIN_URI') as string;
   }
 
   async findById(id: string): Promise<UserApiResponse | null> {

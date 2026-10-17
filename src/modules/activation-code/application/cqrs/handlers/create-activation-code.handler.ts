@@ -14,7 +14,7 @@ export class CreateActivationCodeHandler implements ICommandHandler<CreateActiva
   ) {}
 
   async execute(command: CreateActivationCodeCommand): Promise<ActivationCode[]> {
-    const size = this.configService.get<number>('RMU_ACTIVATION_CODE_SIZE', 8);
+    const size = this.configService.get<number>('RMU_USERS_ACTIVATION_CODE_SIZE', 8);
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const generateCode = (len: number) => {
       let s = '';
