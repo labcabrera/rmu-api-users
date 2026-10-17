@@ -15,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 5,
-        jwksUri: configService.get<string>('RMU_IAM_JWKS_URI')!,
+        jwksUri: configService.get<string>('RMU_IAM_JWK_URI')!,
       }),
       algorithms: ['RS256'],
     });
