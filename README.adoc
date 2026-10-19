@@ -11,3 +11,91 @@ WARNING: *This application is an independent project developed by fans of Rolema
 == Description
 
 image::diagrams/c4-context.png[API Core Context System]
+
+== Running locally
+
+Start the infrastructure from `rmu-platform` (`make up-infra`), copy `.env.example` to `.env` and run `npm run start:dev`.
+The service listens on `PORT` (default 3010) and serves Swagger UI at `/api-docs`.
+Every variable is validated at startup by the Joi schema in `src/app.module.ts`; a missing one stops the service.
+
+[cols="1,3"]
+|===
+|Variable |Purpose
+
+|`PORT` |HTTP port (default 3010).
+|`RMU_MONGO_USERS_URI` |MongoDB connection string.
+|`RMU_IAM_JWK_URI` |Keycloak JWKS used to verify the RS256 signature of access tokens.
+|`RMU_IAM_ISSUER_URI` |Expected `iss` claim (public issuer, `http://localhost/sso/realms/rmu` locally).
+|`RMU_IAM_AUDIENCE` |Audience that `aud` must contain (`rmu-api`).
+|`RMU_IAM_TOKEN_URI`, `RMU_IAM_CLIENT_ID`, `RMU_IAM_CLIENT_SECRET` |Client credentials of the service account used for the admin API.
+|`RMU_IAM_ADMIN_URI` |Keycloak admin API of the realm (users and groups only).
+|`RMU_KAFKA_BROKERS`, `RMU_KAFKA_CLIENT_ID`, `RMU_KAFKA_DEFAULT_PARTITIONS` |Kafka producer for the user events.
+|`RMU_USERS_ACTIVATION_CODE_SIZE` |Length of generated activation codes (default 8).
+|===
+
+`npm run lint`, `npm run build`, `npm test` (unit tests under `test/unit`) and `npm run test:e2e` (`test/*.e2e-spec.ts`; no Mongo,
+Kafka or Keycloak needed: the e2e signs its own tokens against a local JWKS and uses in-memory adapters).
+
+== Authentication
+
+Every endpoint except `/v1/health` requires a Keycloak access token (`Authorization: Bearer ...`).
+The token must be signed with RS256 by a key of `RMU_IAM_JWK_URI`, have `iss = RMU_IAM_ISSUER_URI` and an `aud` that contains
+`RMU_IAM_AUDIENCE`; anything else gets `401`. The request user is mapped from the claims: `id = sub`, `email`,
+`emailVerified = email_verified`, `username = preferred_username`, `given_name`, `family_name`, `name`, `roles = groups`
+and `identityProvider = identity_provider` (`local` when the claim is absent).
+
+== Profiles
+
+Keycloak owns the identity; this API owns the RMU profile (display name, image, settings).
+
+* `GET /v1/users/me` reads the profile by `_id = sub`. On first access it creates it from the token claims, with no call to the
+  Keycloak admin API. Afterwards it only writes when a fingerprint of the claims (`email`, `email_verified`,
+  `preferred_username`, `given_name`, `family_name`, `groups`, identity provider) changes, or to refresh `lastLoginAt`, which is
+  written at most once per hour.
+* The display name `name` is unique (case-insensitive). A new profile takes it from `preferred_username`, or from the email local
+  part for brokered logins (Google) and usernames that look like an email, sanitized and with `-2`, `-3`... on collision.
+* `PATCH /v1/users/me` changes `name` (3 to 32 letters, digits, spaces, `.`, `_`, `-`), `settings` and `imageUrl` in the profile only;
+  Keycloak is never modified. A taken name answers `409`. The profile must exist (`404` otherwise; call `GET /me` first).
+* `features` mirrors the `groups` claim.
+
+Response of `GET` and `PATCH /v1/users/me`:
+
+[source,json]
+----
+{
+  "id": "b9d2b52d-...", "name": "alice", "email": "alice@example.com", "emailVerified": true, "enabled": true,
+  "features": ["rmu-user"], "settings": { "measurementSystem": "imperial" }, "imageUrl": null,
+  "identityProvider": "local", "firstName": "Alice", "lastName": "Liddell", "lastLoginAt": "2026-10-19T10:00:00.000Z",
+  "createdAt": "2026-10-19T10:00:00.000Z", "updatedAt": null
+}
+----
+
+* `GET /v1/users/search?name=<prefix>&page=0&size=10` (any authenticated user) returns a page of the public projection
+  `{ "content": [{ "id", "name", "imageUrl" }], "pagination": { "page", "size", "totalElements", "totalPages" } }`.
+  The match is a case-insensitive prefix on the display name; `size` is at most 20.
+* `GET /v1/users?q=<rsql>` returns full profiles and is reserved to the `rmu-admin` group (`403` otherwise).
+
+The Keycloak admin API is only used in two places: to resolve a friendship addressee that has no RMU profile yet (exact username,
+or exact email when the input looks like one; the profile is then created from the admin representation), and to add the user to
+the groups of a redeemed activation code.
+
+== Events
+
+Profile creation and changes publish `UserCreated` and `UserUpdated` on `internal.rmu-users.user.created.v1` and
+`internal.rmu-users.user.updated.v1`. `lastLoginAt`-only writes publish nothing. Publishing is fire and forget: a Kafka error is
+logged and never fails the request.
+
+== Activation codes
+
+* `POST /v1/activation-codes` is reserved to `rmu-admin` (`403` otherwise).
+* `POST /v1/activation-codes/check` with `{ "code" }` looks the code up by exact value: `400` when unknown or expired, `409` when
+  already used.
+* `POST /v1/activation-codes/activate` with `{ "code" }` redeems a code once: it records `activatedBy` and `activatedAt` atomically,
+  then adds the user to the Keycloak groups of the code's features. A used code answers `409`, an unknown one `404`, an expired
+  one `400`. If the group assignment fails the code is released.
+
+== Errors
+
+Domain errors are returned as `{ "error": "<ErrorName>", "message": "...", "timestamp": "..." }` with the status of the error
+(`400` validation, `403` forbidden, `404` not found, `409` conflict). Invalid request bodies or query parameters are rejected
+by the global `ValidationPipe` (`whitelist`, `transform`) with `400`; unknown properties are stripped.
