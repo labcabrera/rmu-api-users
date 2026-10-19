@@ -1,57 +1,49 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NotFoundError, ValidationError } from 'src/modules/shared/domain/errors/errors';
+import { ConflictError, NotFoundError, ValidationError } from 'src/modules/shared/domain/errors/errors';
 import { User } from 'src/modules/user/domain/aggregates/user';
-import { UserSettings } from 'src/modules/user/domain/value-objects/user-settings.vo';
-import { IamUserPort, UserApiResponse } from '../../ports/iam-user.port';
+import { UserUpdatedEvent } from 'src/modules/user/domain/events/user-events';
+import { DISPLAY_NAME_MAX_LENGTH, DISPLAY_NAME_MIN_LENGTH, DISPLAY_NAME_PATTERN } from 'src/modules/user/domain/services/display-name';
+import { UserEventBusPort } from '../../ports/user-event-bus.port';
 import { UserRepository } from '../../ports/user-repository';
 import { UpdateCurrentUserCommand } from '../commands/update-current-user.command';
 
+/** Updates the RMU profile only. The Keycloak account (username included) is never touched. */
 @CommandHandler(UpdateCurrentUserCommand)
 export class UpdateCurrentUserHandler implements ICommandHandler<UpdateCurrentUserCommand, User> {
   private readonly logger = new Logger(UpdateCurrentUserHandler.name);
 
   constructor(
     @Inject(UserRepository) private readonly userRepository: UserRepository,
-    @Inject(IamUserPort) private readonly iamUserPort: IamUserPort,
+    @Inject(UserEventBusPort) private readonly userEventBus: UserEventBusPort,
   ) {}
 
   async execute(command: UpdateCurrentUserCommand): Promise<User> {
-    this.ensureChanges(command);
+    const name = this.validate(command);
 
-    const iamUser = await this.iamUserPort.findById(command.userId);
-    if (!iamUser) {
-      this.logger.warn(`User ${command.userId} not found in Keycloak`);
+    const user = await this.userRepository.findById(command.userId);
+    if (!user) {
       throw new NotFoundError('User', command.userId);
     }
 
-    if (command.name !== undefined && command.name !== iamUser.username) {
-      await this.iamUserPort.updateName(command.userId, command.name);
+    if (name !== undefined && name !== user.name && (await this.userRepository.existsByName(name, user.id))) {
+      throw new ConflictError(`User name ${name} is already in use`);
     }
 
-    const user = await this.findOrCreateUser(command, iamUser);
     user.update({
-      name: command.name ?? iamUser.username,
-      email: iamUser.email,
-      emailVerified: iamUser.emailVerified || false,
-      enabled: iamUser.enabled,
-      features: command.roles,
+      name,
       settings: command.settings,
       imageUrl: command.imageUrl,
     });
-
-    return this.userRepository.update(user.id, user);
+    const updated = await this.userRepository.update(user.id, user);
+    this.logger.verbose(`Profile ${user.id} updated`);
+    this.userEventBus.publish(new UserUpdatedEvent(updated.getProps()));
+    return updated;
   }
 
-  private ensureChanges(command: UpdateCurrentUserCommand): void {
+  private validate(command: UpdateCurrentUserCommand): string | undefined {
     if (command.name === undefined && command.settings === undefined && command.imageUrl === undefined) {
       throw new ValidationError('At least one of name, settings or imageUrl must be provided');
-    }
-    if (command.name !== undefined && typeof command.name !== 'string') {
-      throw new ValidationError('User name must be a string');
-    }
-    if (command.name !== undefined && command.name.trim().length === 0) {
-      throw new ValidationError('User name must not be empty');
     }
     if (command.imageUrl !== undefined && command.imageUrl !== null && typeof command.imageUrl !== 'string') {
       throw new ValidationError('Image URL must be a string or null');
@@ -59,25 +51,17 @@ export class UpdateCurrentUserHandler implements ICommandHandler<UpdateCurrentUs
     if (command.settings && !['metric', 'imperial'].includes(command.settings.measurementSystem)) {
       throw new ValidationError('Measurement system must be metric or imperial');
     }
-  }
-
-  private async findOrCreateUser(command: UpdateCurrentUserCommand, iamUser: UserApiResponse): Promise<User> {
-    const user = await this.userRepository.findById(command.userId);
-    if (user) {
-      return user;
+    if (command.name === undefined) return undefined;
+    if (typeof command.name !== 'string') {
+      throw new ValidationError('User name must be a string');
     }
-
-    return this.userRepository.save(
-      User.create({
-        id: iamUser.id,
-        name: iamUser.username,
-        email: iamUser.email,
-        emailVerified: iamUser.emailVerified || false,
-        enabled: iamUser.enabled,
-        features: command.roles,
-        settings: UserSettings.default(),
-        imageUrl: null,
-      }),
-    );
+    const name = command.name.trim();
+    if (name.length < DISPLAY_NAME_MIN_LENGTH || name.length > DISPLAY_NAME_MAX_LENGTH) {
+      throw new ValidationError(`User name must have between ${DISPLAY_NAME_MIN_LENGTH} and ${DISPLAY_NAME_MAX_LENGTH} characters`);
+    }
+    if (!DISPLAY_NAME_PATTERN.test(name)) {
+      throw new ValidationError('User name may only contain letters, digits, spaces, dots, dashes and underscores');
+    }
+    return name;
   }
 }

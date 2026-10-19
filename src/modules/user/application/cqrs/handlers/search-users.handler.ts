@@ -1,18 +1,19 @@
-import { Inject, Logger } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { Page } from 'src/modules/shared/domain/entities/page';
-import { GetUsersQuery } from '../queries/get-users-query';
+import { UserSummary } from '../../models/user-summary';
 import { UserRepository } from '../../ports/user-repository';
-import { User } from 'src/modules/user/domain/aggregates/user';
+import { SearchUsersQuery } from '../queries/search-users-query';
 
-@QueryHandler(GetUsersQuery)
-export class GetUsersHandler implements IQueryHandler<GetUsersQuery, Page<User>> {
-  private readonly logger = new Logger(GetUsersHandler.name);
+export const SEARCH_USERS_MAX_SIZE = 20;
 
+@QueryHandler(SearchUsersQuery)
+export class SearchUsersHandler implements IQueryHandler<SearchUsersQuery, Page<UserSummary>> {
   constructor(@Inject(UserRepository) private readonly userRepository: UserRepository) {}
 
-  async execute(query: GetUsersQuery): Promise<Page<User>> {
-    this.logger.verbose(`Searching users with term ${query.rsql ?? ''}`);
-    return await this.userRepository.findByRsql(query.rsql ?? '', query.page, query.size);
+  execute(query: SearchUsersQuery): Promise<Page<UserSummary>> {
+    const size = Math.min(Math.max(1, query.size), SEARCH_USERS_MAX_SIZE);
+    const page = Math.max(0, query.page);
+    return this.userRepository.searchByNamePrefix(query.name.trim(), page, size);
   }
 }

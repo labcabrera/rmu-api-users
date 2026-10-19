@@ -40,6 +40,18 @@ export class UserDto {
   @IsString()
   imageUrl?: string | null;
 
+  @ApiProperty({ description: 'How the user signs in: local (username/password) or the identity provider alias', example: 'local' })
+  identityProvider: string;
+
+  @ApiPropertyOptional({ description: 'Given name from the identity provider', nullable: true })
+  firstName: string | null;
+
+  @ApiPropertyOptional({ description: 'Family name from the identity provider', nullable: true })
+  lastName: string | null;
+
+  @ApiPropertyOptional({ description: 'Last login (refreshed at most once per hour)', type: String, format: 'date-time', nullable: true })
+  lastLoginAt: Date | null;
+
   @ApiProperty({ description: 'Creation timestamp', type: String, format: 'date-time' })
   @IsOptional()
   createdAt: Date;
@@ -58,6 +70,10 @@ export class UserDto {
     dto.features = user.features;
     dto.settings = UserSettingsDto.fromEntity(user.settings);
     dto.imageUrl = user.imageUrl;
+    dto.identityProvider = user.identityProvider;
+    dto.firstName = user.firstName;
+    dto.lastName = user.lastName;
+    dto.lastLoginAt = user.lastLoginAt;
     dto.createdAt = user.createdAt;
     dto.updatedAt = user.updatedAt;
     return dto;

@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsIn, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsIn, IsObject, IsOptional, IsString, Matches, MaxLength, MinLength, ValidateNested } from 'class-validator';
+import { DISPLAY_NAME_MAX_LENGTH, DISPLAY_NAME_MIN_LENGTH, DISPLAY_NAME_PATTERN } from 'src/modules/user/domain/services/display-name';
 
 export class UpdateCurrentUserSettingsDto {
   @ApiPropertyOptional({ description: 'Measurement system used by the user', enum: ['metric', 'imperial'] })
@@ -10,9 +11,12 @@ export class UpdateCurrentUserSettingsDto {
 }
 
 export class UpdateCurrentUserDto {
-  @ApiPropertyOptional({ description: 'Display name of the user', example: 'alice' })
+  @ApiPropertyOptional({ description: 'RMU display name (unique, case-insensitive). Keycloak is not changed.', example: 'alice' })
   @IsOptional()
   @IsString()
+  @MinLength(DISPLAY_NAME_MIN_LENGTH)
+  @MaxLength(DISPLAY_NAME_MAX_LENGTH)
+  @Matches(DISPLAY_NAME_PATTERN)
   name?: string;
 
   @ApiPropertyOptional({ description: 'User settings', type: UpdateCurrentUserSettingsDto })

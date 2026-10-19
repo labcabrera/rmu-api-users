@@ -5,6 +5,7 @@ import { ConflictError, ValidationError } from 'src/modules/shared/domain/errors
 import { Friendship } from '../../../domain/aggregates/friendship';
 import type { FriendshipRepository } from '../../ports/friendship.repository';
 import { UserRepository } from 'src/modules/user/application/ports/user-repository';
+import { UserProvisioningService } from 'src/modules/user/application/services/user-provisioning.service';
 
 @CommandHandler(CreateFriendshipRequestCommand)
 export class CreateFriendshipRequestHandler implements ICommandHandler<CreateFriendshipRequestCommand, Friendship> {
@@ -13,6 +14,7 @@ export class CreateFriendshipRequestHandler implements ICommandHandler<CreateFri
   constructor(
     @Inject('FriendshipRepository') private readonly friendshipRepository: FriendshipRepository,
     @Inject(UserRepository) private readonly userRepository: UserRepository,
+    @Inject(UserProvisioningService) private readonly userProvisioning: UserProvisioningService,
   ) {}
 
   async execute(command: CreateFriendshipRequestCommand): Promise<Friendship> {
@@ -20,7 +22,8 @@ export class CreateFriendshipRequestHandler implements ICommandHandler<CreateFri
     if (!requester) {
       throw new ValidationError('Requester user not found');
     }
-    const addressee = await this.userRepository.findByName(command.addresseeName);
+    // Falls back to the Keycloak admin API when the addressee never logged into RMU.
+    const addressee = await this.userProvisioning.findOrProvisionByName(command.addresseeName.trim());
     if (!addressee) {
       throw new ValidationError('Addressee user not found');
     } else if (requester.id === addressee.id) {
@@ -43,7 +46,7 @@ export class CreateFriendshipRequestHandler implements ICommandHandler<CreateFri
       requesterId: command.userId,
       requesterName: requester.name,
       addresseeId: addressee.id,
-      addresseeName: command.addresseeName,
+      addresseeName: addressee.name,
       message: command.message,
     });
     await this.friendshipRepository.save(friendship);

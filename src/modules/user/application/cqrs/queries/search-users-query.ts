@@ -1,9 +1,10 @@
 import { AuthenticatedCommand } from 'src/modules/shared/application/cqrs/authenticated-command';
 
-export class UpdateUserSettingsCommand extends AuthenticatedCommand {
+export class SearchUsersQuery extends AuthenticatedCommand {
   constructor(
-    public measurementSystem: 'metric' | 'imperial',
-    public defaultRealm: string,
+    public readonly name: string,
+    public readonly page: number,
+    public readonly size: number,
     userId: string,
     roles: string[],
   ) {

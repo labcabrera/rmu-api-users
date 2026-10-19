@@ -1,87 +1,84 @@
-import { describe, expect, it, jest } from '@jest/globals';
-import { IamUserPort } from 'src/modules/user/application/ports/iam-user.port';
+import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { ConflictError, NotFoundError, ValidationError } from 'src/modules/shared/domain/errors/errors';
 import { UpdateCurrentUserCommand } from 'src/modules/user/application/cqrs/commands/update-current-user.command';
 import { UpdateCurrentUserHandler } from 'src/modules/user/application/cqrs/handlers/update-current-user.handler';
-import { UserRepository } from 'src/modules/user/application/ports/user-repository';
+import { UserEventBusPort } from 'src/modules/user/application/ports/user-event-bus.port';
 import { User } from 'src/modules/user/domain/aggregates/user';
 import { UserSettings } from 'src/modules/user/domain/value-objects/user-settings.vo';
+import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository';
 
-describe('UpdateCurrentUserHandler', () => {
-  const iamUser = {
-    id: 'user-1',
-    username: 'alice',
-    email: 'alice@example.com',
+const user = (id: string, name: string) =>
+  User.create({
+    id,
+    name,
+    email: `${name}@example.com`,
     emailVerified: true,
     enabled: true,
-  };
-
-  const createUser = () =>
-    User.create({
-      id: 'user-1',
-      name: 'alice',
-      email: 'alice@example.com',
-      emailVerified: true,
-      enabled: true,
-      features: ['basic'],
-      imageUrl: null,
-      settings: UserSettings.default(),
-    });
-
-  it('updates Keycloak name and MongoDB user profile', async () => {
-    const user = createUser();
-    const findById = jest.fn<() => Promise<User | null>>().mockResolvedValue(user);
-    const update = jest
-      .fn<(id: string, user: User) => Promise<User>>()
-      .mockImplementation((_id, updatedUser) => Promise.resolve(updatedUser));
-    const findIamUserById = jest.fn<() => Promise<typeof iamUser | null>>().mockResolvedValue(iamUser);
-    const updateName = jest.fn<() => Promise<void>>().mockResolvedValue(undefined);
-    const userRepository = {
-      findById,
-      update,
-    } as unknown as UserRepository;
-    const iamUserPort = {
-      findById: findIamUserById,
-      updateName,
-    } as unknown as IamUserPort;
-    const handler = new UpdateCurrentUserHandler(userRepository, iamUserPort);
-
-    const result = await handler.execute(
-      new UpdateCurrentUserCommand('alice-updated', new UserSettings('metric'), 'https://example.com/alice.png', 'user-1', [
-        'basic',
-        'advanced',
-      ]),
-    );
-
-    expect(updateName).toHaveBeenCalledWith('user-1', 'alice-updated');
-    expect(update).toHaveBeenCalledWith('user-1', expect.any(User));
-    expect(result.name).toBe('alice-updated');
-    expect(result.settings.measurementSystem).toBe('metric');
-    expect(result.imageUrl).toBe('https://example.com/alice.png');
-    expect(result.features).toEqual(['basic', 'advanced']);
+    features: ['rmu-user'],
+    imageUrl: null,
+    settings: UserSettings.default(),
   });
 
-  it('does not update Keycloak when name is not changed', async () => {
-    const user = createUser();
-    const findById = jest.fn<() => Promise<User | null>>().mockResolvedValue(user);
-    const update = jest
-      .fn<(id: string, user: User) => Promise<User>>()
-      .mockImplementation((_id, updatedUser) => Promise.resolve(updatedUser));
-    const findIamUserById = jest.fn<() => Promise<typeof iamUser | null>>().mockResolvedValue(iamUser);
-    const updateName = jest.fn<() => Promise<void>>().mockResolvedValue(undefined);
-    const userRepository = {
-      findById,
-      update,
-    } as unknown as UserRepository;
-    const iamUserPort = {
-      findById: findIamUserById,
-      updateName,
-    } as unknown as IamUserPort;
-    const handler = new UpdateCurrentUserHandler(userRepository, iamUserPort);
+describe('UpdateCurrentUserHandler', () => {
+  let repository: InMemoryUserRepository;
+  let publish: jest.Mock<UserEventBusPort['publish']>;
+  let handler: UpdateCurrentUserHandler;
 
-    const result = await handler.execute(new UpdateCurrentUserCommand(undefined, new UserSettings('metric'), null, 'user-1', ['basic']));
+  beforeEach(() => {
+    repository = new InMemoryUserRepository();
+    repository.seed(user('user-1', 'alice'));
+    repository.seed(user('user-2', 'bob'));
+    publish = jest.fn<UserEventBusPort['publish']>();
+    handler = new UpdateCurrentUserHandler(repository, { publish });
+  });
 
-    expect(updateName).not.toHaveBeenCalled();
+  it('updates the display name, settings and image in the profile only', async () => {
+    const result = await handler.execute(
+      new UpdateCurrentUserCommand(' Alice W ', new UserSettings('metric'), 'images/alice.png', 'user-1', ['rmu-user']),
+    );
+
+    expect(result.name).toBe('Alice W');
     expect(result.settings.measurementSystem).toBe('metric');
+    expect(result.imageUrl).toBe('images/alice.png');
+    expect(result.features).toEqual(['rmu-user']);
+    expect(repository.store.get('user-1')!.name).toBe('Alice W');
+    expect(publish).toHaveBeenCalledTimes(1);
+  });
+
+  it('allows changing only the case of the own name', async () => {
+    const result = await handler.execute(new UpdateCurrentUserCommand('ALICE', undefined, undefined, 'user-1', []));
+    expect(result.name).toBe('ALICE');
+  });
+
+  it('rejects a name used by another profile (case-insensitive) with a ConflictError', async () => {
+    await expect(handler.execute(new UpdateCurrentUserCommand('Bob', undefined, undefined, 'user-1', []))).rejects.toBeInstanceOf(
+      ConflictError,
+    );
+    expect(repository.store.get('user-1')!.name).toBe('alice');
+    expect(publish).not.toHaveBeenCalled();
+  });
+
+  it('keeps the name when only the settings change', async () => {
+    const result = await handler.execute(new UpdateCurrentUserCommand(undefined, new UserSettings('metric'), null, 'user-1', []));
+    expect(result.name).toBe('alice');
     expect(result.imageUrl).toBeNull();
+  });
+
+  it('rejects empty requests and invalid names', async () => {
+    await expect(handler.execute(new UpdateCurrentUserCommand(undefined, undefined, undefined, 'user-1', []))).rejects.toBeInstanceOf(
+      ValidationError,
+    );
+    await expect(handler.execute(new UpdateCurrentUserCommand('  a ', undefined, undefined, 'user-1', []))).rejects.toBeInstanceOf(
+      ValidationError,
+    );
+    await expect(handler.execute(new UpdateCurrentUserCommand('<script>', undefined, undefined, 'user-1', []))).rejects.toBeInstanceOf(
+      ValidationError,
+    );
+  });
+
+  it('fails with NotFoundError when the profile does not exist yet', async () => {
+    await expect(handler.execute(new UpdateCurrentUserCommand('carol', undefined, undefined, 'user-9', []))).rejects.toBeInstanceOf(
+      NotFoundError,
+    );
   });
 });

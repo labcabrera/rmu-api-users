@@ -1,20 +1,28 @@
 import { DomainEvent } from 'src/modules/shared/domain/events/domain-event';
 import { UserProps } from '../aggregates/user-props';
 
-export class UserCreatedEvent extends DomainEvent<UserProps> {
+export type UserEventData = Omit<UserProps, 'claimsFingerprint'>;
+
+function toEventData(props: UserProps): UserEventData {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { claimsFingerprint, ...data } = props;
+  return data;
+}
+
+export class UserCreatedEvent extends DomainEvent<UserEventData> {
   constructor(data: UserProps) {
-    super('created', data);
+    super('created', toEventData(data));
   }
 }
 
-export class UserUpdatedEvent extends DomainEvent<UserProps> {
+export class UserUpdatedEvent extends DomainEvent<UserEventData> {
   constructor(data: UserProps) {
-    super('updated', data);
+    super('updated', toEventData(data));
   }
 }
 
-export class UserDeletedEvent extends DomainEvent<UserProps> {
+export class UserDeletedEvent extends DomainEvent<UserEventData> {
   constructor(data: UserProps) {
-    super('deleted', data);
+    super('deleted', toEventData(data));
   }
 }
