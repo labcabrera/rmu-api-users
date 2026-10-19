@@ -44,7 +44,15 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
     this.updatedAt = new Date();
   }
 
-  activate(activatedAt: Date = new Date(), activatedBy: string | null = null): void {
+  isUsed(): boolean {
+    return !!this.activatedAt || !!this.activatedBy;
+  }
+
+  isExpired(now: Date = new Date()): boolean {
+    return !!this.expiresAt && this.expiresAt.getTime() < now.getTime();
+  }
+
+  activate(activatedBy: string, activatedAt: Date = new Date()): void {
     this.activatedAt = activatedAt;
     this.activatedBy = activatedBy;
     this.updatedAt = new Date();

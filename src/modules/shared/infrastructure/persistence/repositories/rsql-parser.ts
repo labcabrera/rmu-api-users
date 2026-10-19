@@ -9,6 +9,9 @@ import { InvalidSearchExpression } from 'src/modules/shared/domain/errors/errors
 
 type MongoQuery = Record<string, any>;
 
+/** Plain (optionally dotted) field names only: no `$` operators such as `$where`, no empty segments. */
+const SELECTOR_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$/;
+
 @Injectable()
 export class RsqlParser {
   private readonly logger = new Logger(RsqlParser.name);
@@ -60,6 +63,9 @@ export class RsqlParser {
         const op = node.operator || node.comparison;
         const value = node.right?.value || (node.arguments ? node.arguments[0] : undefined);
         if (!field) throw new InvalidSearchExpression(`Missing field selector in comparison`);
+        if (typeof field !== 'string' || (field !== '_id' && !SELECTOR_PATTERN.test(field))) {
+          throw new InvalidSearchExpression(`Invalid field selector ${field}`);
+        }
         if (!op) throw new InvalidSearchExpression(`Missing operator in comparison for field ${field}`);
         if (value === undefined) throw new InvalidSearchExpression(`Missing value for comparison operator ${op} on field ${field}`);
 

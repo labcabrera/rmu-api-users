@@ -21,11 +21,6 @@ export class TokenService {
     const clientId = this.configService.get<string>('RMU_IAM_CLIENT_ID')!;
     const clientSecret = this.configService.get<string>('RMU_IAM_CLIENT_SECRET')!;
 
-    // //Local hack
-    // if (!this.configService.get<string>('NODE_ENV')) {
-    //   clientId = 'rmu-user-client';
-    //   clientSecret = 'jApYtJ4ZenWmytDHwlq1QKHC4EjUCvFJ';
-    // }
     this.logger.debug(`Fetching new token from ${uri} with clientId ${clientId}`);
     const params = new URLSearchParams();
     params.append('grant_type', 'client_credentials');

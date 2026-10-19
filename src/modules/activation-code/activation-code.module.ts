@@ -14,6 +14,8 @@ import { ActivationCodeModel, ActivationCodeSchema } from './infrastructure/pers
 import { ActivationCodeController } from './interfaces/http/activation-code.controller';
 import { UserModule } from '../user/user.module';
 import { ActivationCodeRepository } from './application/ports/activation-code.repository';
+import { CheckActivationCodeHandler } from './application/cqrs/handlers/check-activation-code.handler';
+import { ActivationCodeGuardAdapter } from './infrastructure/security/realm-guard.adapter';
 
 const CommandHandlers = [
   ActivateActivationCodeHandler,
@@ -22,7 +24,7 @@ const CommandHandlers = [
   UpdateActivationCodeHandler,
 ];
 
-const QueryHandlers = [GetActivationCodeHandler, ListActivationCodesHandler];
+const QueryHandlers = [GetActivationCodeHandler, ListActivationCodesHandler, CheckActivationCodeHandler];
 
 @Module({
   imports: [
@@ -36,6 +38,7 @@ const QueryHandlers = [GetActivationCodeHandler, ListActivationCodesHandler];
   providers: [
     ...CommandHandlers,
     ...QueryHandlers,
+    ActivationCodeGuardAdapter,
     {
       provide: ActivationCodeRepository,
       useClass: MongoActivationCodeRepository,

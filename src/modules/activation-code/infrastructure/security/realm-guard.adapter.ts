@@ -9,7 +9,7 @@ import { ForbiddenError } from 'src/modules/shared/domain/errors/errors';
 export class ActivationCodeGuardAdapter implements ActivationCodeGuardPort {
   checkCreate(roles: string[]): void {
     if (roles.includes(RMU_ADMIN)) return;
-    throw new ForbiddenError('You do not have permission to read this entity');
+    throw new ForbiddenError('You do not have permission to create activation codes');
   }
   checkRead(entity: ActivationCode, userId: string, roles: string[]): void {
     if (roles.includes(RMU_ADMIN)) return;
@@ -23,7 +23,7 @@ export class ActivationCodeGuardAdapter implements ActivationCodeGuardPort {
     if (roles.includes(RMU_ADMIN)) return;
     throw new ForbiddenError('You do not have permission to read this entity');
   }
-  buildQueryPredicate(userId: string, roles: string[]): QueryCriteria {
+  buildQueryPredicate(): QueryCriteria {
     return QueryCriteria.empty();
   }
 }
