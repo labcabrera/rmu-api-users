@@ -5,15 +5,18 @@ import { ConflictError } from 'src/modules/shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
 import { ActivationCodeRepository } from '../../ports/activation-code.repository';
 import { CreateActivationCodeCommand } from '../commands/create-activation-code.command';
+import { ActivationCodeGuardAdapter } from '../../../infrastructure/security/realm-guard.adapter';
 
 @CommandHandler(CreateActivationCodeCommand)
 export class CreateActivationCodeHandler implements ICommandHandler<CreateActivationCodeCommand, ActivationCode[]> {
   constructor(
     @Inject(ActivationCodeRepository) private readonly activationCodeRepository: ActivationCodeRepository,
     private readonly configService: ConfigService,
+    @Inject(ActivationCodeGuardAdapter) private readonly guard: ActivationCodeGuardAdapter,
   ) {}
 
   async execute(command: CreateActivationCodeCommand): Promise<ActivationCode[]> {
+    this.guard.checkCreate(command.roles);
     const size = this.configService.get<number>('RMU_USERS_ACTIVATION_CODE_SIZE', 8);
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const generateCode = (len: number) => {

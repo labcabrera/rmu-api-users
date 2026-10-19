@@ -1,12 +1,13 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NotFoundError, ValidationError } from 'src/modules/shared/domain/errors/errors';
+import { ConflictError, NotFoundError, ValidationError } from 'src/modules/shared/domain/errors/errors';
+import { IamUserPort, UserGroup } from 'src/modules/user/application/ports/iam-user.port';
+import { UserRepository } from 'src/modules/user/application/ports/user-repository';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
 import { ActivationCodeRepository } from '../../ports/activation-code.repository';
 import { ActivateActivationCodeCommand } from '../commands/activate-activation-code.command';
-import { UserRepository } from 'src/modules/user/application/ports/user-repository';
-import { IamUserPort } from 'src/modules/user/application/ports/iam-user.port';
 
+/** Redeems a single-use code: it is claimed atomically first, then the user is added to the Keycloak groups. */
 @CommandHandler(ActivateActivationCodeCommand)
 export class ActivateActivationCodeHandler implements ICommandHandler<ActivateActivationCodeCommand, ActivationCode> {
   private readonly logger = new Logger(ActivateActivationCodeHandler.name);
@@ -27,24 +28,34 @@ export class ActivateActivationCodeHandler implements ICommandHandler<ActivateAc
     if (!activationCode) {
       throw new NotFoundError('ActivationCode', command.code);
     }
-
-    if (activationCode.expiresAt && activationCode.expiresAt.getTime() < Date.now()) {
+    if (activationCode.isUsed()) {
+      throw new ConflictError(`Activation code ${command.code} has already been used`);
+    }
+    if (activationCode.isExpired()) {
       throw new ValidationError(`Activation code ${command.code} is expired`);
     }
 
-    const iamGroups = await this.iamUserPort.findGroups();
-    this.logger.verbose(`Found ${iamGroups.length} groups in Keycloak`);
-
-    const groupsToAdd = activationCode.features
-      .map(feature => iamGroups.find(g => g.name === feature))
-      .filter((g): g is { id: string; name: string } => !!g);
-
-    for (const group of groupsToAdd) {
-      this.logger.verbose(`Adding user ${user.id} to group ${group.name} (${group.id})`);
-      await this.iamUserPort.addUserToGroup(user.id, group.id);
+    const claimed = await this.activationCodeRepository.markActivated(activationCode.id, user.id, new Date());
+    if (!claimed) {
+      throw new ConflictError(`Activation code ${command.code} has already been used`);
     }
 
-    activationCode.activate();
-    return this.activationCodeRepository.update(activationCode.id, activationCode);
+    try {
+      await this.assignGroups(claimed, user.id);
+    } catch (err) {
+      this.logger.error(`Group assignment failed for code ${claimed.id}; releasing it`, err);
+      await this.activationCodeRepository.clearActivation(claimed.id, user.id);
+      throw err;
+    }
+    return claimed;
+  }
+
+  private async assignGroups(activationCode: ActivationCode, userId: string): Promise<void> {
+    const iamGroups = await this.iamUserPort.findGroups();
+    const groupsToAdd = activationCode.features.map(feature => iamGroups.find(g => g.name === feature)).filter((g): g is UserGroup => !!g);
+    for (const group of groupsToAdd) {
+      this.logger.verbose(`Adding user ${userId} to group ${group.name} (${group.id})`);
+      await this.iamUserPort.addUserToGroup(userId, group.id);
+    }
   }
 }

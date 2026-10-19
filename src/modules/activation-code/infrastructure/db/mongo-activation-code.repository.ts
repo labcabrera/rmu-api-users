@@ -17,8 +17,22 @@ export class MongoActivationCodeRepository
   }
 
   async findByCode(code: string): Promise<ActivationCode | null> {
-    const doc = await this.model.findOne({ code });
+    if (typeof code !== 'string') return null;
+    const doc = await this.model.findOne({ code: { $eq: code } });
     return doc ? this.mapToEntity(doc) : null;
+  }
+
+  async markActivated(id: string, userId: string, at: Date): Promise<ActivationCode | null> {
+    const doc = await this.model.findOneAndUpdate(
+      { _id: id, activatedAt: null, activatedBy: null },
+      { $set: { activatedAt: at, activatedBy: userId, updatedAt: at } },
+      { new: true },
+    );
+    return doc ? this.mapToEntity(doc) : null;
+  }
+
+  async clearActivation(id: string, userId: string): Promise<void> {
+    await this.model.updateOne({ _id: id, activatedBy: userId }, { $set: { activatedAt: null, activatedBy: null, updatedAt: new Date() } });
   }
 
   protected mapToEntity(doc: ActivationCodeDocument): ActivationCode {
@@ -30,7 +44,7 @@ export class MongoActivationCodeRepository
       createdAt: doc.createdAt,
       expiresAt: doc.expiresAt,
       activatedAt: doc.activatedAt,
-      activatedBy: (doc as any).activatedBy ?? null,
+      activatedBy: doc.activatedBy ?? null,
       updatedAt: doc.updatedAt,
     });
   }

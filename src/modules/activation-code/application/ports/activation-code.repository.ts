@@ -15,5 +15,13 @@ export abstract class ActivationCodeRepository implements BaseRepository<Activat
   abstract save(entity: Partial<ActivationCode>): Promise<ActivationCode>;
   abstract update(id: string, entity: Partial<ActivationCode>): Promise<ActivationCode>;
   abstract deleteById(id: string): Promise<ActivationCode | null>;
+  /** Exact match on the code value (parameterized query, never RSQL). */
   abstract findByCode(code: string): Promise<ActivationCode | null>;
+  /**
+   * Atomically marks an unused code as activated by `userId`. Returns null when the code was already used, so two
+   * concurrent activations cannot both succeed.
+   */
+  abstract markActivated(id: string, userId: string, at: Date): Promise<ActivationCode | null>;
+  /** Reverts markActivated when the group assignment failed. */
+  abstract clearActivation(id: string, userId: string): Promise<void>;
 }

@@ -2,7 +2,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -26,7 +29,7 @@ import { ActivationCodeDto } from './dto/activation-code.dto';
 import { ActivationCodePageDto } from './dto/activation-code-page.dto';
 import { CreateActivationCodeDto } from './dto/create-activation-code.dto';
 import { UpdateActivationCodeDto } from './dto/update-activation-code.dto';
-import { ValidationError } from 'src/modules/shared/domain/errors/errors';
+import { CheckActivationCodeQuery } from '../../application/cqrs/queries/check-activation-code.query';
 
 @UseGuards(JwtAuthGuard)
 @Controller('v1/activation-codes')
@@ -41,11 +44,13 @@ export class ActivationCodeController {
   @ApiOperation({ operationId: 'createActivationCodes', summary: 'Create activation codes' })
   @ApiCreatedResponse({ type: ActivationCodeDto, isArray: true, description: 'Created' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
+  @ApiForbiddenResponse({ description: 'Caller is not in the rmu-admin group', type: ErrorDto })
   async create(@Request() req, @Body() body: CreateActivationCodeDto): Promise<ActivationCodeDto[]> {
     const owner = req.user!.id as string;
+    const roles = req.user!.roles as string[];
     const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined;
     const count = body.count ?? 1;
-    const command = new CreateActivationCodeCommand(owner, body.features, expiresAt, count);
+    const command = new CreateActivationCodeCommand(owner, roles, body.features, expiresAt, count);
     const activationCodes = await this.commandBus.execute<CreateActivationCodeCommand, ActivationCode[]>(command);
     return activationCodes.map(ac => ActivationCodeDto.fromEntity(ac));
   }
@@ -75,22 +80,13 @@ export class ActivationCodeController {
   }
 
   @Post('check')
-  @ApiOperation({ operationId: 'getActivationCode', summary: 'Get activation code by id' })
+  @ApiOperation({ operationId: 'checkActivationCode', summary: 'Check that an activation code can be redeemed' })
   @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  @ApiNotFoundResponse({ description: 'Activation code not found', type: ErrorDto })
-  async findByCode(@Request() req, @Body() body: ActivateActivationCodeDto): Promise<ActivationCodeDto> {
-    const userId = req.user!.id as string;
-    const code = body.code;
-    const query = new ListActivationCodesQuery(`code==${code}`, 0, 1, userId, ['rmu-admin']);
-    const page = await this.queryBus.execute<ListActivationCodesQuery, Page<ActivationCode>>(query);
-    if (page.content.length === 0) {
-      throw new ValidationError('Invalid activation code');
-    }
-    const activationCode = page.content[0];
-    if (activationCode.activatedAt || activationCode.activatedBy) {
-      throw new ValidationError('Activation code has already been used');
-    }
+  @ApiBadRequestResponse({ description: 'Unknown or expired activation code', type: ErrorDto })
+  @ApiConflictResponse({ description: 'Activation code already used', type: ErrorDto })
+  async check(@Body() body: ActivateActivationCodeDto): Promise<ActivationCodeDto> {
+    const activationCode = await this.queryBus.execute<CheckActivationCodeQuery, ActivationCode>(new CheckActivationCodeQuery(body.code));
     return ActivationCodeDto.fromEntity(activationCode);
   }
 
@@ -114,7 +110,8 @@ export class ActivationCodeController {
   }
 
   @Post('activate')
-  @ApiOperation({ operationId: 'activateActivationCode', summary: 'Activate activation code' })
+  @ApiOperation({ operationId: 'activateActivationCode', summary: 'Redeem a single-use activation code' })
+  @ApiConflictResponse({ description: 'Activation code already used', type: ErrorDto })
   @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   @ApiNotFoundResponse({ description: 'Activation code not found', type: ErrorDto })
