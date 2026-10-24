@@ -5,7 +5,7 @@ import { QueryCriteria } from '../../../shared/application/criteria/query-criter
 import { Page } from '../../../shared/application/pagination/page.js';
 import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository.js';
 import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser.js';
-import { UserMessageRepository } from '../../application/ports/user-message-repository.port.js';
+import { type UserMessageRepository } from '../../application/ports/user-message-repository.port.js';
 import { UserMessage } from '../../domain/aggregates/user-message.js';
 import { type UserMessageDocument, UserMessageModel } from '../persistence/models/user-message.model.js';
 

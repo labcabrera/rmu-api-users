@@ -7,8 +7,8 @@ import { GetUserHandler } from './application/cqrs/handlers/get-user.handler.js'
 import { GetUsersHandler } from './application/cqrs/handlers/get-users.handler.js';
 import { SearchUsersHandler } from './application/cqrs/handlers/search-users.handler.js';
 import { UpdateCurrentUserHandler } from './application/cqrs/handlers/update-current-user.handler.js';
-import { IamUserPort } from './application/ports/iam-user.port.js';
-import { UserRepository } from './application/ports/user-repository.port.js';
+import { IAM_USER_PORT } from './application/ports/iam-user.port.js';
+import { USER_REPOSITORY } from './application/ports/user-repository.port.js';
 import { UserProvisioningService } from './application/services/user-provisioning.service.js';
 import { KeycloakIamUserAdapter } from './infrastructure/api-clients/keycloak.iam-user.adapter.js';
 import { MongoUserRepository } from './infrastructure/db/mongo.user.repository.js';
@@ -23,9 +23,9 @@ export const USER_HANDLERS = [GetUserHandler, GetUsersHandler, SearchUsersHandle
   providers: [
     ...USER_HANDLERS,
     UserProvisioningService,
-    { provide: UserRepository, useClass: MongoUserRepository },
-    { provide: IamUserPort, useClass: KeycloakIamUserAdapter },
+    { provide: USER_REPOSITORY, useClass: MongoUserRepository },
+    { provide: IAM_USER_PORT, useClass: KeycloakIamUserAdapter },
   ],
-  exports: [UserRepository, IamUserPort, UserProvisioningService],
+  exports: [USER_REPOSITORY, IAM_USER_PORT, UserProvisioningService],
 })
 export class UserModule {}

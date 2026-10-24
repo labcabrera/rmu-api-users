@@ -10,7 +10,7 @@ import { MarkUserMessageReadHandler } from './application/cqrs/handlers/mark-use
 import { MongoUserMessageRepository } from './infrastructure/db/mongo.user-message.repository.js';
 import { UserMessageModel, UserMessageSchema } from './infrastructure/persistence/models/user-message.model.js';
 import { MessageController } from './interfaces/http/user-message.controller.js';
-import { UserMessageRepository } from './application/ports/user-message-repository.port.js';
+import { USER_MESSAGE_REPOSITORY } from './application/ports/user-message-repository.port.js';
 import { UserModule } from '../user/user.module.js';
 
 const CommandHandlers = [CreateUserMessageHandler, DeleteUserMessageHandler, MarkUserMessageReadHandler];
@@ -29,7 +29,7 @@ const QueryHandlers = [GetUserMessagesHandler];
     ...CommandHandlers,
     ...QueryHandlers,
     {
-      provide: UserMessageRepository,
+      provide: USER_MESSAGE_REPOSITORY,
       useClass: MongoUserMessageRepository,
     },
   ],

@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { MongoUserRepository } from '../../src/modules/user/infrastructure/db/mongo.user.repository.js';
-import { UserRepository } from '../../src/modules/user/application/ports/user-repository.port.js';
+import { USER_REPOSITORY } from '../../src/modules/user/application/ports/user-repository.port.js';
 import { ISSUER } from './support/jwks.js';
 import { ids, provision, startApp, USERS, type E2eApp } from './support/app.js';
 
@@ -67,7 +67,7 @@ describe('authentication', () => {
 
 describe('GET /v1/users/me', () => {
   it('provisions the profile on first access and then serves it without writes, events or admin calls', async () => {
-    const repository = e2e.app.get<MongoUserRepository>(UserRepository);
+    const repository = e2e.app.get<MongoUserRepository>(USER_REPOSITORY);
     const save = vi.spyOn(repository, 'save');
     const update = vi.spyOn(repository, 'update');
     const lastLogin = vi.spyOn(repository, 'updateLastLoginAt');
@@ -265,11 +265,11 @@ describe('GET /v1/users', () => {
     expect((await request(e2e.server).get('/v1/users').query({ q: '$where==1' }).set('Authorization', e2e.auth('admin'))).status).toBe(400);
   });
 
-  // F-users-21, corrected in phase 5: pages of at most 100 elements.
+  // F-users-21, corrected in phase 5: pages of at most 100 elements. The error path has no query string (F-receta-22).
   it('caps the page size at 100', async () => {
     expect((await request(e2e.server).get('/v1/users').query({ size: 100 }).set('Authorization', e2e.auth('admin'))).status).toBe(200);
     const tooBig = await request(e2e.server).get('/v1/users').query({ size: 101 }).set('Authorization', e2e.auth('admin'));
     expect(tooBig.status).toBe(400);
-    expect(tooBig.body).toMatchObject({ statusCode: 400, code: 'bad-request', path: '/v1/users?size=101' });
+    expect(tooBig.body).toMatchObject({ statusCode: 400, code: 'bad-request', path: '/v1/users' });
   });
 });

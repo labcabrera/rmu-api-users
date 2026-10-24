@@ -4,7 +4,7 @@ import type { HydratedDocument, Model } from 'mongoose';
 import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository.js';
 import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser.js';
 import { ActivationCode } from '../../domain/aggregates/activation-code.js';
-import { ActivationCodeRepository } from '../../application/ports/activation-code-repository.port.js';
+import { type ActivationCodeRepository } from '../../application/ports/activation-code-repository.port.js';
 import { type ActivationCodeDocument, ActivationCodeModel } from '../persistence/models/activation-code.model.js';
 
 @Injectable()

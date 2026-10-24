@@ -3,9 +3,9 @@ import { ActivationCode } from '../../domain/aggregates/activation-code.js';
 import { QueryCriteria, type SortCriteria } from '../../../shared/application/criteria/query-criteria.js';
 import { Page } from '../../../shared/application/pagination/page.js';
 
-export abstract class ActivationCodeRepository implements BaseRepository<ActivationCode> {
-  abstract findById(id: string): Promise<ActivationCode | null>;
-  abstract findByRsql(
+export interface ActivationCodeRepository extends BaseRepository<ActivationCode> {
+  findById(id: string): Promise<ActivationCode | null>;
+  findByRsql(
     rsql: string | undefined,
     page: number,
     size: number,
@@ -13,17 +13,19 @@ export abstract class ActivationCodeRepository implements BaseRepository<Activat
     sort?: SortCriteria,
   ): Promise<Page<ActivationCode>>;
   /** Throws ConflictError (`duplicate-key`) when the id or the owner's code already exists. */
-  abstract save(entity: ActivationCode): Promise<ActivationCode>;
+  save(entity: ActivationCode): Promise<ActivationCode>;
   /** Throws ConflictError (`version-conflict`) when the code changed since it was loaded. */
-  abstract update(entity: ActivationCode): Promise<ActivationCode>;
-  abstract deleteById(id: string): Promise<ActivationCode | null>;
+  update(entity: ActivationCode): Promise<ActivationCode>;
+  deleteById(id: string): Promise<ActivationCode | null>;
   /** Exact match on the code value (parameterized query, never RSQL). */
-  abstract findByCode(code: string): Promise<ActivationCode | null>;
+  findByCode(code: string): Promise<ActivationCode | null>;
   /**
    * Atomically marks an unused code as activated by `userId`. Returns null when the code was already used, so two
    * concurrent activations cannot both succeed.
    */
-  abstract markActivated(id: string, userId: string, at: Date): Promise<ActivationCode | null>;
+  markActivated(id: string, userId: string, at: Date): Promise<ActivationCode | null>;
   /** Reverts markActivated when the group assignment failed. */
-  abstract clearActivation(id: string, userId: string): Promise<void>;
+  clearActivation(id: string, userId: string): Promise<void>;
 }
+
+export const ACTIVATION_CODE_REPOSITORY = Symbol('ActivationCodeRepository');

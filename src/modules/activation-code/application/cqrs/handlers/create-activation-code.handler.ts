@@ -3,14 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { ConflictError } from '../../../../shared/domain/errors/errors.js';
 import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
-import { ActivationCodeRepository } from '../../ports/activation-code-repository.port.js';
+import { type ActivationCodeRepository, ACTIVATION_CODE_REPOSITORY } from '../../ports/activation-code-repository.port.js';
 import { CreateActivationCodeCommand } from '../commands/create-activation-code.command.js';
 import { ActivationCodeGuardAdapter } from '../../../infrastructure/security/activation-code-guard.adapter.js';
 
 @CommandHandler(CreateActivationCodeCommand)
 export class CreateActivationCodeHandler implements ICommandHandler<CreateActivationCodeCommand, ActivationCode[]> {
   constructor(
-    @Inject(ActivationCodeRepository) private readonly activationCodeRepository: ActivationCodeRepository,
+    @Inject(ACTIVATION_CODE_REPOSITORY) private readonly activationCodeRepository: ActivationCodeRepository,
     private readonly configService: ConfigService,
     @Inject(ActivationCodeGuardAdapter) private readonly guard: ActivationCodeGuardAdapter,
   ) {}

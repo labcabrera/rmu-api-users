@@ -1,10 +1,10 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { ConflictError, NotFoundError, ValidationError } from '../../../../shared/domain/errors/errors.js';
-import { IamUserPort, type UserGroup } from '../../../../user/application/ports/iam-user.port.js';
-import { UserRepository } from '../../../../user/application/ports/user-repository.port.js';
+import { type IamUserPort, IAM_USER_PORT, type UserGroup } from '../../../../user/application/ports/iam-user.port.js';
+import { type UserRepository, USER_REPOSITORY } from '../../../../user/application/ports/user-repository.port.js';
 import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
-import { ActivationCodeRepository } from '../../ports/activation-code-repository.port.js';
+import { type ActivationCodeRepository, ACTIVATION_CODE_REPOSITORY } from '../../ports/activation-code-repository.port.js';
 import { ActivateActivationCodeCommand } from '../commands/activate-activation-code.command.js';
 
 /** Redeems a single-use code: it is claimed atomically first, then the user is added to the Keycloak groups. */
@@ -13,9 +13,9 @@ export class ActivateActivationCodeHandler implements ICommandHandler<ActivateAc
   private readonly logger = new Logger(ActivateActivationCodeHandler.name);
 
   constructor(
-    @Inject(ActivationCodeRepository) private readonly activationCodeRepository: ActivationCodeRepository,
-    @Inject(UserRepository) private readonly userRepository: UserRepository,
-    @Inject(IamUserPort) private readonly iamUserPort: IamUserPort,
+    @Inject(ACTIVATION_CODE_REPOSITORY) private readonly activationCodeRepository: ActivationCodeRepository,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(IAM_USER_PORT) private readonly iamUserPort: IamUserPort,
   ) {}
 
   async execute(command: ActivateActivationCodeCommand): Promise<ActivationCode> {

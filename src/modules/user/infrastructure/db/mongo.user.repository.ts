@@ -7,7 +7,7 @@ import { ConflictError } from '../../../shared/domain/errors/errors.js';
 import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository.js';
 import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser.js';
 import type { UserSummary } from '../../application/models/user-summary.js';
-import { UserRepository } from '../../application/ports/user-repository.port.js';
+import { type UserRepository } from '../../application/ports/user-repository.port.js';
 import { User } from '../../domain/aggregates/user.js';
 import { USER_NAME_COLLATION, type UserDocument, UserModel } from '../persistence/models/user.model.js';
 

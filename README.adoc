@@ -31,6 +31,7 @@ Every variable is validated at startup by the Joi schema in `src/config/env.sche
 |`RMU_IAM_ADMIN_URI` |Keycloak admin API of the realm (users and groups only).
 |`RMU_KAFKA_BROKERS`, `RMU_KAFKA_CLIENT_ID`, `RMU_KAFKA_DEFAULT_PARTITIONS` |Kafka producer for the user events.
 |`RMU_USERS_ACTIVATION_CODE_SIZE` |Length of generated activation codes (default 8).
+|`RMU_HTTP_TIMEOUT_MS` |Timeout of the Keycloak token and admin API calls (default 10000); after it the request answers `504 upstream-timeout`.
 |===
 
 The HTTP variables (`RMU_CORS_ORIGINS`, `RMU_THROTTLE_*`, `RMU_TRUST_PROXY`) are described in <<Development>>.
@@ -73,6 +74,11 @@ Response of `GET` and `PATCH /v1/users/me`:
   `{ "content": [{ "id", "name", "imageUrl" }], "pagination": { "page", "size", "totalElements", "totalPages" } }`.
   The match is a case-insensitive prefix on the display name; `size` is at most 20.
 * `GET /v1/users?q=<rsql>` returns full profiles and is reserved to the `rmu-admin` group (`403` otherwise).
+
+The Keycloak calls (service account token and admin API) go through the shared `HttpClient`
+(`src/modules/shared/infrastructure/http/http-client.ts`, the same in every API that calls another one): a Keycloak that does
+not answer in `RMU_HTTP_TIMEOUT_MS` is a `504` (`upstream-timeout`), one that cannot be reached or answers an error a `502`
+(`bad-gateway`), and a `400`/`422` a `400`.
 
 The Keycloak admin API is only used in two places: to resolve a friendship addressee that has no RMU profile yet (exact username,
 or exact email when the input looks like one; the profile is then created from the admin representation), and to add the user to
@@ -130,6 +136,10 @@ The Joi schema in `src/config/env.schema.ts` fails startup on a missing required
 gateway), `RMU_THROTTLE_LIMIT` / `RMU_THROTTLE_TTL_MS` (`300` per `60000` ms and client IP, `0` turns it off) and
 `RMU_TRUST_PROXY` (`loopback, linklocal, uniquelocal`).
 
-Errors answer `{ statusCode, error, code, message, timestamp, path }`. Responses carry the `version` of the entity and a
+Errors answer `{ statusCode, error, code, message, timestamp, path }`, with `path` without the query string. Responses carry the `version` of the entity and a
 `PATCH` may send it back: a stale one is a 409 `version-conflict`. `size` goes up to 100.
+Ports are interfaces with a `Symbol` DI token next to them (`USER_REPOSITORY`, `IAM_USER_PORT`, `ACTIVATION_CODE_REPOSITORY`,
+`USER_MESSAGE_REPOSITORY`, `FRIENDSHIP_REPOSITORY`), as in core: no abstract classes as tokens. A `PATCH` that changes nothing
+neither writes nor publishes: the handlers ask the aggregate (`hasChanges()` of `BaseAggregateRoot`, which compares the state
+with the one loaded, without `updatedAt`). Events carry `producer` = `RMU_KAFKA_CLIENT_ID`.
 Open problems found during the migration are listed in `docs/reports/api-template-rollout-findings.md` of the workspace.
