@@ -122,8 +122,8 @@ describe('read, update and delete', () => {
     expect((same.body as CodeBody).version).toBe(1);
 
     const deleted = await request(e2e.server).delete(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth('admin'));
-    // F-users-13: the OpenAPI document says 204, the endpoint answers 200 with an empty body.
-    expect(deleted.status).toBe(200);
+    expect(deleted.status).toBe(204); // F-users-13
+    expect(deleted.text).toBe('');
     expect((await request(e2e.server).get(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth('admin'))).status).toBe(404);
   });
 
@@ -153,7 +153,7 @@ describe('read, update and delete', () => {
       .send({ features: ['spell-law'] });
     expect(patch.status).toBe(200);
     expect((await request(e2e.server).delete(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth(otherAdmin))).status).toBe(
-      200,
+      204,
     );
   });
 
@@ -179,8 +179,7 @@ describe('check', () => {
   it('accepts a code that can be redeemed', async () => {
     const code = await createOne();
     const response = await post('check', 'noRole', { code: code.code });
-    // F-users-14: POST /check and /activate answer 201 (the Nest default for POST), the OpenAPI document says 200.
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(200); // F-users-14
     expect((response.body as CodeBody).id).toBe(code.id);
   });
 
@@ -197,7 +196,7 @@ describe('activate', () => {
   it('redeems a code once, adds the user to the groups of its features and marks it used', async () => {
     const code = await createOne({ features: ['core-law', 'spell-law', 'treasure-law'] });
     const response = await post('activate', 'owner', { code: code.code });
-    expect(response.status).toBe(201);
+    expect(response.status).toBe(200); // F-users-14
     expect(response.body).toMatchObject({ id: code.id, activatedBy: USERS.owner.sub });
     expect((response.body as CodeBody).activatedAt).toEqual(expect.any(String));
     // treasure-law has no Keycloak group in the realm: it is skipped.
@@ -232,13 +231,13 @@ describe('activate', () => {
     } finally {
       e2e.keycloak.failGroupAssignment = false;
     }
-    expect((await post('check', 'other', { code: code.code })).status).toBe(201);
-    expect((await post('activate', 'other', { code: code.code })).status).toBe(201);
+    expect((await post('check', 'other', { code: code.code })).status).toBe(200);
+    expect((await post('activate', 'other', { code: code.code })).status).toBe(200);
   });
 
   it('lets a user without roles redeem a code', async () => {
     const code = await createOne();
-    expect((await post('activate', 'noRole', { code: code.code })).status).toBe(201);
+    expect((await post('activate', 'noRole', { code: code.code })).status).toBe(200);
   });
 
   it('releases a code when its activation date is cleared [F-users-12]', async () => {
@@ -250,7 +249,7 @@ describe('activate', () => {
       .send({ activatedAt: null });
     expect(cleared.status).toBe(200);
     expect(cleared.body).toMatchObject({ activatedAt: null, activatedBy: null });
-    expect((await post('check', 'other', { code: code.code })).status).toBe(201);
+    expect((await post('check', 'other', { code: code.code })).status).toBe(200);
     const again = await post('activate', 'other', { code: code.code });
     expect(again.body).toMatchObject({ activatedBy: USERS.other.sub });
   });

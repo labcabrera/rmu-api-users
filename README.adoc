@@ -94,9 +94,9 @@ logged and never fails the request.
 
 * Creating, listing, reading, changing and deleting codes (`/v1/activation-codes`, `/{id}`) is reserved to `rmu-admin`
   (`403` otherwise). Any admin manages every code, whoever created it.
-* `POST /v1/activation-codes/check` with `{ "code" }` looks the code up by exact value: `400` when unknown or expired, `409` when
+* `POST /v1/activation-codes/check` with `{ "code" }` looks the code up by exact value (`200` with the code): `400` when unknown or expired, `409` when
   already used.
-* `POST /v1/activation-codes/activate` with `{ "code" }` redeems a code once: it records `activatedBy` and `activatedAt` atomically,
+* `POST /v1/activation-codes/activate` with `{ "code" }` redeems a code once (`200` with the code): it records `activatedBy` and `activatedAt` atomically,
   then adds the user to the Keycloak groups of the code's features. A used code answers `409`, an unknown one `404`, an expired
   one `400`. If the group assignment fails the code is released.
 
@@ -135,8 +135,9 @@ Creating (a friendship request, a message) needs the `rmu-user` or `rmu-admin` g
 
 == Errors
 
-Domain errors are returned as `{ "error": "<ErrorName>", "message": "...", "timestamp": "..." }` with the status of the error
-(`400` validation, `403` forbidden, `404` not found, `409` conflict). Invalid request bodies or query parameters are rejected
+Errors are returned as `{ "statusCode", "error": "<ErrorName>", "code", "message", "timestamp", "path" }` with the status of
+the error (`400` validation, `403` forbidden, `404` not found, `409` conflict, `502` / `504` when Keycloak fails or does not
+answer). A `POST` that creates answers `201`, the actions `check` and `activate` `200`, and every `DELETE` `204` without a body. Invalid request bodies or query parameters are rejected
 by the global `ValidationPipe` (`whitelist`, `transform`) with `400`; unknown properties are stripped.
 
 == Development

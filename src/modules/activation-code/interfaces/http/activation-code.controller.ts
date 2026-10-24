@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiErrors } from '../../../shared/interfaces/http/api-errors.decorator.js';
@@ -67,6 +67,7 @@ export class ActivationCodeController {
   }
 
   @Post('check')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: 'checkActivationCode', summary: 'Check that an activation code can be redeemed' })
   @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
   @ApiErrors({ 400: 'Unknown or expired activation code', 409: 'Activation code already used' })
@@ -103,6 +104,7 @@ export class ActivationCodeController {
   }
 
   @Post('activate')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ operationId: 'activateActivationCode', summary: 'Redeem a single-use activation code' })
   @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
   @ApiErrors({ 404: 'Activation code not found', 409: 'Activation code already used' })
@@ -115,6 +117,7 @@ export class ActivationCodeController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ operationId: 'deleteActivationCode', summary: 'Delete activation code' })
   @ApiNoContentResponse({ description: 'Deleted' })
   @ApiErrors({ 403: 'Caller is not in the rmu-admin group', 404: 'Activation code not found' })
