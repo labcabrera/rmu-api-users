@@ -15,6 +15,7 @@ export class MarkUserMessageReadHandler implements ICommandHandler<MarkUserMessa
   async execute(command: MarkUserMessageReadCommand): Promise<UserMessage> {
     const message = this.guard.checkRecipient(await this.userMessageRepository.findById(command.id), command.id, command.userId);
     message.markAsRead();
+    if (!message.hasChanges()) return message;
     return this.userMessageRepository.update(message);
   }
 }
