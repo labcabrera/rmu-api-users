@@ -7,8 +7,8 @@ import { deriveBaseDisplayName, displayNameCandidate, looksLikeEmail } from '../
 import { UserSettings } from '../../domain/value-objects/user-settings.vo';
 import { UserClaims } from '../models/user-claims';
 import { IamUserPort, UserApiResponse } from '../ports/iam-user.port';
-import { UserEventBusPort } from '../ports/user-event-bus.port';
-import { UserRepository } from '../ports/user-repository';
+import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../../shared/application/ports/domain-event-publisher.port';
+import { UserRepository } from '../ports/user-repository.port';
 
 /** `lastLoginAt` is written at most once per this interval when the claims did not change. */
 export const LAST_LOGIN_REFRESH_MS = 60 * 60 * 1000;
@@ -26,7 +26,7 @@ export class UserProvisioningService {
   constructor(
     @Inject(UserRepository) private readonly userRepository: UserRepository,
     @Inject(IamUserPort) private readonly iamUserPort: IamUserPort,
-    @Inject(UserEventBusPort) private readonly userEventBus: UserEventBusPort,
+    @Inject(DOMAIN_EVENT_PUBLISHER) private readonly events: DomainEventPublisher,
   ) {}
 
   static fingerprint(claims: UserClaims): string {
@@ -62,7 +62,7 @@ export class UserProvisioningService {
       });
       const updated = await this.userRepository.update(existing.id, existing);
       this.logger.log(`Profile ${existing.id} updated from token claims`);
-      this.userEventBus.publish(new UserUpdatedEvent(updated.getProps()));
+      void this.events.publish('user', new UserUpdatedEvent(updated.getProps()));
       return updated;
     }
     if (!existing.lastLoginAt || now.getTime() - existing.lastLoginAt.getTime() >= LAST_LOGIN_REFRESH_MS) {
@@ -155,7 +155,7 @@ export class UserProvisioningService {
       try {
         const saved = await this.userRepository.save(build(name));
         this.logger.log(`Profile ${saved.id} created with name ${saved.name}`);
-        this.userEventBus.publish(new UserCreatedEvent(saved.getProps()));
+        void this.events.publish('user', new UserCreatedEvent(saved.getProps()));
         return saved;
       } catch (err) {
         if (!(err instanceof ConflictError) || attempt >= MAX_SAVE_ATTEMPTS) throw err;

@@ -2,7 +2,7 @@ import type { Mock } from 'vitest';
 import { ConflictError, NotFoundError, ValidationError } from '../../../../../../src/modules/shared/domain/errors/errors';
 import { UpdateCurrentUserCommand } from '../../../../../../src/modules/user/application/cqrs/commands/update-current-user.command';
 import { UpdateCurrentUserHandler } from '../../../../../../src/modules/user/application/cqrs/handlers/update-current-user.handler';
-import { UserEventBusPort } from '../../../../../../src/modules/user/application/ports/user-event-bus.port';
+import type { DomainEventPublisher } from '../../../../../../src/modules/shared/application/ports/domain-event-publisher.port';
 import { User } from '../../../../../../src/modules/user/domain/aggregates/user';
 import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo';
 import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository';
@@ -21,15 +21,15 @@ const user = (id: string, name: string) =>
 
 describe('UpdateCurrentUserHandler', () => {
   let repository: InMemoryUserRepository;
-  let publish: Mock<UserEventBusPort['publish']>;
+  let publish: Mock<DomainEventPublisher['publish']>;
   let handler: UpdateCurrentUserHandler;
 
   beforeEach(() => {
     repository = new InMemoryUserRepository();
     repository.seed(user('user-1', 'alice'));
     repository.seed(user('user-2', 'bob'));
-    publish = vi.fn<UserEventBusPort['publish']>();
-    handler = new UpdateCurrentUserHandler(repository, { publish });
+    publish = vi.fn<DomainEventPublisher['publish']>().mockResolvedValue(undefined);
+    handler = new UpdateCurrentUserHandler(repository, { publish, publishChanges: vi.fn() });
   });
 
   it('updates the display name, settings and image in the profile only', async () => {

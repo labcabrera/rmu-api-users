@@ -2,7 +2,7 @@ import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { NotFoundError } from '../../../../shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeRepository } from '../../ports/activation-code.repository';
+import { ActivationCodeRepository } from '../../ports/activation-code-repository.port';
 import { GetActivationCodeQuery } from '../queries/get-activation-code.query';
 
 @QueryHandler(GetActivationCodeQuery)

@@ -2,7 +2,7 @@ import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundError } from '../../../../shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeRepository } from '../../ports/activation-code.repository';
+import { ActivationCodeRepository } from '../../ports/activation-code-repository.port';
 import { DeleteActivationCodeCommand } from '../commands/delete-activation-code.command';
 
 @CommandHandler(DeleteActivationCodeCommand)

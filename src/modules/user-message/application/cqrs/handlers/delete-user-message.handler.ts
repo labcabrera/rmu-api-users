@@ -2,7 +2,7 @@ import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundError } from '../../../../shared/domain/errors/errors';
 import { UserMessage } from '../../../domain/aggregates/user-message';
-import { UserMessageRepository } from '../../ports/user-message.repository';
+import { UserMessageRepository } from '../../ports/user-message-repository.port';
 import { DeleteUserMessageCommand } from '../commands/delete-user-message.command';
 
 @CommandHandler(DeleteUserMessageCommand)

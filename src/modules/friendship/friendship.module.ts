@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../shared/infrastructure/security/auth.module';
 import { SharedModule } from '../shared/shared.module';
 import { CreateFriendshipRequestHandler } from './application/cqrs/handlers/create-friendship-request.handler';
 import { DeleteFriendshipHandler } from './application/cqrs/handlers/delete-friendship.handler';
 import { GetFriendshipHandler } from './application/cqrs/handlers/get-friendship.handler';
 import { ListFriendshipsHandler } from './application/cqrs/handlers/list-friendships.handler';
 import { UpdateFriendshipHandler } from './application/cqrs/handlers/update-friendship.handler';
-import { MongoFriendshipRepository } from './infrastructure/db/mongo-friendship.repository';
+import { MongoFriendshipRepository } from './infrastructure/db/mongo.friendship.repository';
 import { FriendshipModel, FriendshipSchema } from './infrastructure/persistence/models/friendship.model';
 import { FriendshipController } from './interfaces/http/friendship.controller';
 import { UserModule } from '../user/user.module';
 
+import { FRIENDSHIP_REPOSITORY } from './application/ports/friendship-repository.port';
 const CommandHandlers = [CreateFriendshipRequestHandler, DeleteFriendshipHandler, UpdateFriendshipHandler];
 const QueryHandlers = [GetFriendshipHandler, ListFriendshipsHandler];
 
@@ -29,7 +30,7 @@ const QueryHandlers = [GetFriendshipHandler, ListFriendshipsHandler];
     ...CommandHandlers,
     ...QueryHandlers,
     {
-      provide: 'FriendshipRepository',
+      provide: FRIENDSHIP_REPOSITORY,
       useClass: MongoFriendshipRepository,
     },
   ],

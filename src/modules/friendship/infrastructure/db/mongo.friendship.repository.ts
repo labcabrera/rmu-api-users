@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { FriendshipRepository } from '../../application/ports/friendship.repository';
+import { FriendshipRepository } from '../../application/ports/friendship-repository.port';
 import { Friendship } from '../../domain/aggregates/friendship';
 import { FriendshipDocument, FriendshipModel } from '../persistence/models/friendship.model';
 import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository';
-import { RsqlParser } from '../../../shared/infrastructure/persistence/repositories/rsql-parser';
-import { Page } from '../../../shared/domain/entities/page';
+import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser';
+import { Page } from '../../../shared/application/pagination/page';
 import { QueryCriteria } from '../../../shared/application/criteria/query-criteria';
 
 @Injectable()

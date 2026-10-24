@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Page } from '../../../../shared/domain/entities/page';
+import { Page } from '../../../../shared/application/pagination/page';
 import { UserSummary } from '../../models/user-summary';
-import { UserRepository } from '../../ports/user-repository';
-import { SearchUsersQuery } from '../queries/search-users-query';
+import { UserRepository } from '../../ports/user-repository.port';
+import { SearchUsersQuery } from '../queries/search-users.query';
 
 export const SEARCH_USERS_MAX_SIZE = 20;
 

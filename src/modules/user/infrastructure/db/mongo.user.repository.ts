@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { QueryFilter, Model } from 'mongoose';
 import { QueryCriteria, SortCriteria } from '../../../shared/application/criteria/query-criteria';
-import { Page } from '../../../shared/domain/entities/page';
+import { Page } from '../../../shared/application/pagination/page';
 import { ConflictError } from '../../../shared/domain/errors/errors';
 import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository';
-import { RsqlParser } from '../../../shared/infrastructure/persistence/repositories/rsql-parser';
+import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser';
 import { UserSummary } from '../../application/models/user-summary';
-import { UserRepository } from '../../application/ports/user-repository';
+import { UserRepository } from '../../application/ports/user-repository.port';
 import { User } from '../../domain/aggregates/user';
 import { USER_NAME_COLLATION, UserDocument, UserModel } from '../persistence/models/user.model';
 

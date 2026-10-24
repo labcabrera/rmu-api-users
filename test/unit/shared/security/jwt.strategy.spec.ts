@@ -1,6 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import { mapJwtPayload } from '../../../src/modules/auth/authenticated-user';
-import { buildJwtStrategyOptions } from '../../../src/modules/auth/jwt.strategy';
+import { buildJwtStrategyOptions, mapJwtPayload } from '../../../../src/modules/shared/infrastructure/security/jwt.strategy';
 
 describe('JwtStrategy', () => {
   const config = new ConfigService({

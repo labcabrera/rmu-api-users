@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Page } from '../../../../shared/domain/entities/page';
+import { Page } from '../../../../shared/application/pagination/page';
 import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto';
 import { UserSummary } from '../../../application/models/user-summary';
 

@@ -1,17 +1,17 @@
-import { INestApplication } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import { createServer, Server } from 'http';
 import { AddressInfo } from 'net';
 import { createSign, generateKeyPairSync, KeyObject } from 'crypto';
 import request from 'supertest';
-import { App } from 'supertest/types';
-import { configureApp } from '../../src/app.setup';
-import { JwtStrategy } from '../../src/modules/auth/jwt.strategy';
+import type { App } from 'supertest/types';
+import { configureHttp } from '../../src/bootstrap/http';
+import { JwtStrategy } from '../../src/modules/shared/infrastructure/security/jwt.strategy';
 import { IamUserPort } from '../../src/modules/user/application/ports/iam-user.port';
-import { UserEventBusPort } from '../../src/modules/user/application/ports/user-event-bus.port';
-import { UserRepository } from '../../src/modules/user/application/ports/user-repository';
+import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../src/modules/shared/application/ports/domain-event-publisher.port';
+import { UserRepository } from '../../src/modules/user/application/ports/user-repository.port';
 import { UserProvisioningService } from '../../src/modules/user/application/services/user-provisioning.service';
 import { UserController } from '../../src/modules/user/interfaces/http/user.controller';
 import { USER_HANDLERS } from '../../src/modules/user/user.module';
@@ -38,10 +38,10 @@ function signToken(privateKey: KeyObject, claims: Record<string, unknown>): stri
 describe('/v1/users (e2e)', () => {
   const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
   let jwks: Server;
-  let app: INestApplication<App>;
-  const http = () => app.getHttpServer();
+  let app: NestExpressApplication;
+  const http = () => app.getHttpServer() as App;
   let repository: InMemoryUserRepository;
-  const publish = vi.fn<UserEventBusPort['publish']>();
+  const publish = vi.fn<DomainEventPublisher['publish']>().mockResolvedValue(undefined);
   const iamCalls = vi.fn<(...args: unknown[]) => unknown>();
   const iam = new Proxy({} as IamUserPort, {
     get: (_target, prop) => (prop === 'then' ? undefined : (...args: unknown[]) => iamCalls(prop, ...args)),
@@ -89,12 +89,12 @@ describe('/v1/users (e2e)', () => {
         JwtStrategy,
         { provide: UserRepository, useValue: repository },
         { provide: IamUserPort, useValue: iam },
-        { provide: UserEventBusPort, useValue: { publish } },
+        { provide: DOMAIN_EVENT_PUBLISHER, useValue: { publish, publishChanges: vi.fn() } },
       ],
     }).compile();
 
-    app = moduleRef.createNestApplication();
-    configureApp(app);
+    app = moduleRef.createNestApplication<NestExpressApplication>();
+    configureHttp(app);
     await app.init();
   });
 

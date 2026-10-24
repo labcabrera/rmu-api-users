@@ -3,8 +3,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateFriendshipRequestCommand } from '../commands/create-friendship-request.command';
 import { ConflictError, ValidationError } from '../../../../shared/domain/errors/errors';
 import { Friendship } from '../../../domain/aggregates/friendship';
-import type { FriendshipRepository } from '../../ports/friendship.repository';
-import { UserRepository } from '../../../../user/application/ports/user-repository';
+import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port';
+import { UserRepository } from '../../../../user/application/ports/user-repository.port';
 import { UserProvisioningService } from '../../../../user/application/services/user-provisioning.service';
 
 @CommandHandler(CreateFriendshipRequestCommand)
@@ -12,7 +12,7 @@ export class CreateFriendshipRequestHandler implements ICommandHandler<CreateFri
   private readonly logger = new Logger(CreateFriendshipRequestHandler.name);
 
   constructor(
-    @Inject('FriendshipRepository') private readonly friendshipRepository: FriendshipRepository,
+    @Inject(FRIENDSHIP_REPOSITORY) private readonly friendshipRepository: FriendshipRepository,
     @Inject(UserRepository) private readonly userRepository: UserRepository,
     @Inject(UserProvisioningService) private readonly userProvisioning: UserProvisioningService,
   ) {}

@@ -1,7 +1,7 @@
-import { BaseRepository } from '../../../shared/application/ports/base-repository';
+import { BaseRepository } from '../../../shared/application/ports/base-repository.port';
 import { User } from '../../domain/aggregates/user';
 import { QueryCriteria, SortCriteria } from '../../../shared/application/criteria/query-criteria';
-import { Page } from '../../../shared/domain/entities/page';
+import { Page } from '../../../shared/application/pagination/page';
 import { UserSummary } from '../models/user-summary';
 
 export abstract class UserRepository implements BaseRepository<User> {

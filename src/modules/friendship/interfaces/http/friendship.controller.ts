@@ -1,20 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import {
-  ApiConflictResponse,
-  ApiCreatedResponse,
-  ApiForbiddenResponse,
-  ApiNoContentResponse,
-  ApiNotFoundResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-  ApiUnauthorizedResponse,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../../auth/jwt.auth.guard';
-import { Page } from '../../../shared/domain/entities/page';
-import type { AuthenticatedRequest } from '../../../shared/interfaces/http/authenticated-request';
-import { ErrorDto } from '../../../shared/interfaces/http/dto/error-dto';
+import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiErrors } from '../../../shared/interfaces/http/api-errors.decorator';
+import type { AuthenticatedUser } from '../../../shared/interfaces/http/authenticated-request';
+import { CurrentUser } from '../../../shared/interfaces/http/current-user.decorator';
+import { JwtAuthGuard } from '../../../shared/infrastructure/security/jwt-auth.guard';
+import { Page } from '../../../shared/application/pagination/page';
 import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query';
 import { CreateFriendshipRequestCommand } from '../../application/cqrs/commands/create-friendship-request.command';
 import { DeleteFriendshipCommand } from '../../application/cqrs/commands/delete-friendship.command';
@@ -39,11 +30,10 @@ export class FriendshipController {
   @Post('')
   @ApiOperation({ operationId: 'createFriendshipRequest', summary: 'Create friendship request' })
   @ApiCreatedResponse({ type: FriendshipDto, description: 'Created' })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  @ApiConflictResponse({ description: 'Friendship already exists', type: ErrorDto })
-  async create(@Request() req: AuthenticatedRequest, @Body() body: CreateFriendshipRequestDto): Promise<FriendshipDto> {
-    const userId = req.user.id;
-    const roles = req.user.roles;
+  @ApiErrors({ 409: 'Friendship already exists' })
+  async create(@CurrentUser() user: AuthenticatedUser, @Body() body: CreateFriendshipRequestDto): Promise<FriendshipDto> {
+    const userId = user.id;
+    const roles = user.roles;
     const command = new CreateFriendshipRequestCommand(body.addresseeName, body.message ?? null, userId, roles);
     const friendship = await this.commandBus.execute<CreateFriendshipRequestCommand, Friendship>(command);
     return FriendshipDto.fromEntity(friendship);
@@ -52,9 +42,9 @@ export class FriendshipController {
   @Get('')
   @ApiOperation({ operationId: 'listFriendships', summary: 'List current friendships' })
   @ApiOkResponse({ type: FriendshipPageDto, description: 'Success' })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  async find(@Request() req: AuthenticatedRequest, @Query() query: PagedQueryDto): Promise<FriendshipPageDto> {
-    const userId = req.user.id;
+  @ApiErrors()
+  async find(@CurrentUser() user: AuthenticatedUser, @Query() query: PagedQueryDto): Promise<FriendshipPageDto> {
+    const userId = user.id;
     const friendships = await this.queryBus.execute<ListFriendshipsQuery, Page<Friendship>>(
       new ListFriendshipsQuery(userId, query.q, query.page, query.size),
     );
@@ -64,10 +54,9 @@ export class FriendshipController {
   @Get(':id')
   @ApiOperation({ operationId: 'getFriendship', summary: 'Get friendship by id' })
   @ApiOkResponse({ type: FriendshipDto, description: 'Success' })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  @ApiNotFoundResponse({ description: 'Friendship not found', type: ErrorDto })
-  async findById(@Request() req: AuthenticatedRequest, @Param('id') id: string): Promise<FriendshipDto> {
-    const userId = req.user.id;
+  @ApiErrors({ 404: 'Friendship not found' })
+  async findById(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string): Promise<FriendshipDto> {
+    const userId = user.id;
     const friendship = await this.queryBus.execute<GetFriendshipQuery, Friendship>(new GetFriendshipQuery(id, userId));
     return FriendshipDto.fromEntity(friendship);
   }
@@ -75,12 +64,10 @@ export class FriendshipController {
   @Patch(':id')
   @ApiOperation({ operationId: 'updateFriendship', summary: 'Update friendship' })
   @ApiOkResponse({ type: FriendshipDto, description: 'Success' })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  @ApiForbiddenResponse({ description: 'Forbidden friendship operation', type: ErrorDto })
-  @ApiNotFoundResponse({ description: 'Friendship not found', type: ErrorDto })
-  async update(@Request() req: AuthenticatedRequest, @Param('id') id: string, @Body() body: UpdateFriendshipDto): Promise<FriendshipDto> {
-    const userId = req.user.id;
-    const roles = req.user.roles;
+  @ApiErrors({ 403: 'Forbidden friendship operation', 404: 'Friendship not found' })
+  async update(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() body: UpdateFriendshipDto): Promise<FriendshipDto> {
+    const userId = user.id;
+    const roles = user.roles;
     const command = new UpdateFriendshipCommand(id, body.status, userId, roles);
     const friendship = await this.commandBus.execute<UpdateFriendshipCommand, Friendship>(command);
     return FriendshipDto.fromEntity(friendship);
@@ -90,11 +77,10 @@ export class FriendshipController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ operationId: 'deleteFriendship', summary: 'Delete friendship' })
   @ApiNoContentResponse({ description: 'Deleted' })
-  @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  @ApiNotFoundResponse({ description: 'Friendship not found', type: ErrorDto })
-  async delete(@Request() req: AuthenticatedRequest, @Param('id') id: string): Promise<void> {
-    const userId = req.user.id;
-    const roles = req.user.roles;
+  @ApiErrors({ 404: 'Friendship not found' })
+  async delete(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string): Promise<void> {
+    const userId = user.id;
+    const roles = user.roles;
     await this.commandBus.execute<DeleteFriendshipCommand, Friendship>(new DeleteFriendshipCommand(id, userId, roles));
   }
 }

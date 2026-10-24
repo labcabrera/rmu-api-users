@@ -1,7 +1,7 @@
 import type { Mock } from 'vitest';
 import { UserClaims } from '../../../../../src/modules/user/application/models/user-claims';
 import { IamUserPort, UserApiResponse } from '../../../../../src/modules/user/application/ports/iam-user.port';
-import { UserEventBusPort } from '../../../../../src/modules/user/application/ports/user-event-bus.port';
+import type { DomainEventPublisher } from '../../../../../src/modules/shared/application/ports/domain-event-publisher.port';
 import {
   LAST_LOGIN_REFRESH_MS,
   UserProvisioningService,
@@ -36,13 +36,13 @@ const existingUser = (id: string, name: string) =>
 
 describe('UserProvisioningService', () => {
   let repository: InMemoryUserRepository;
-  let publish: Mock<UserEventBusPort['publish']>;
+  let publish: Mock<DomainEventPublisher['publish']>;
   let iam: { [K in keyof IamUserPort]: Mock };
   let service: UserProvisioningService;
 
   beforeEach(() => {
     repository = new InMemoryUserRepository();
-    publish = vi.fn<UserEventBusPort['publish']>();
+    publish = vi.fn<DomainEventPublisher['publish']>().mockResolvedValue(undefined);
     iam = {
       findById: vi.fn(),
       findByUsername: vi.fn<() => Promise<UserApiResponse | null>>().mockResolvedValue(null),
@@ -50,7 +50,7 @@ describe('UserProvisioningService', () => {
       addUserToGroup: vi.fn(),
       findGroups: vi.fn(),
     };
-    service = new UserProvisioningService(repository, iam, { publish });
+    service = new UserProvisioningService(repository, iam, { publish, publishChanges: vi.fn() });
   });
 
   describe('provisionFromClaims', () => {
@@ -68,7 +68,7 @@ describe('UserProvisioningService', () => {
       expect(user.claimsFingerprint).toBe(UserProvisioningService.fingerprint(claims()));
       expect(repository.store.has('user-1')).toBe(true);
       expect(publish).toHaveBeenCalledTimes(1);
-      expect(publish.mock.calls[0][0].eventType).toBe('created');
+      expect(publish.mock.calls[0][1].eventType).toBe('created');
       expect(Object.values(iam).every(fn => fn.mock.calls.length === 0)).toBe(true);
     });
 
@@ -121,7 +121,7 @@ describe('UserProvisioningService', () => {
       expect(user.lastLoginAt).toEqual(t1);
       expect(repository.store.get('user-1')!.email).toBe('alice@new.example.com');
       expect(publish).toHaveBeenCalledTimes(1);
-      expect(publish.mock.calls[0][0].eventType).toBe('updated');
+      expect(publish.mock.calls[0][1].eventType).toBe('updated');
     });
 
     it('keeps the display name chosen by the user when the username claim changes', async () => {
