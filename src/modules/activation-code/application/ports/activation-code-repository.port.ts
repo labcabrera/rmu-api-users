@@ -12,8 +12,10 @@ export abstract class ActivationCodeRepository implements BaseRepository<Activat
     filter?: QueryCriteria,
     sort?: SortCriteria,
   ): Promise<Page<ActivationCode>>;
-  abstract save(entity: Partial<ActivationCode>): Promise<ActivationCode>;
-  abstract update(id: string, entity: Partial<ActivationCode>): Promise<ActivationCode>;
+  /** Throws ConflictError (`duplicate-key`) when the id or the owner's code already exists. */
+  abstract save(entity: ActivationCode): Promise<ActivationCode>;
+  /** Throws ConflictError (`version-conflict`) when the code changed since it was loaded. */
+  abstract update(entity: ActivationCode): Promise<ActivationCode>;
   abstract deleteById(id: string): Promise<ActivationCode | null>;
   /** Exact match on the code value (parameterized query, never RSQL). */
   abstract findByCode(code: string): Promise<ActivationCode | null>;

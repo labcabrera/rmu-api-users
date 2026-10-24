@@ -17,7 +17,10 @@ type UserBody = {
   settings: { measurementSystem: string };
   imageUrl: string | null;
   claimsFingerprint?: string;
+  version: number;
 };
+
+type ErrorBody = { statusCode: number; error: string; code: string; message: string; timestamp: string; path: string };
 
 type PageBody<T> = { content: T[]; pagination: { page: number; size: number; totalElements: number; totalPages: number } };
 
@@ -150,7 +153,7 @@ describe('PATCH /v1/users/me', () => {
   it('answers 409 on a display name taken by another profile, ignoring case', async () => {
     const response = await patchMe('owner', { name: 'CAROL.SMITH' });
     expect(response.status).toBe(409);
-    expect((response.body as { error: string }).error).toBe('ConflictError');
+    expect(response.body).toMatchObject({ statusCode: 409, error: 'ConflictError', code: 'conflict', path: '/v1/users/me' });
   });
 
   it('keeps its own name in another case', async () => {
@@ -171,13 +174,27 @@ describe('PATCH /v1/users/me', () => {
     expect(response.status).toBe(404);
   });
 
-  // F-users-23: current behaviour, changed in phase 5 (a PATCH without changes publishes nothing).
-  it('writes and publishes an update even when nothing changes', async () => {
+  // F-users-23, corrected in phase 5: a PATCH without changes returns the profile, without a write or an event.
+  it('neither writes nor publishes when nothing changes', async () => {
     const current = (await me('owner')).body as UserBody;
     const before = e2e.events.events.length;
-    const response = await patchMe('owner', { name: current.name });
+    const response = await patchMe('owner', { name: current.name, version: current.version });
     expect(response.status).toBe(200);
-    expect(e2e.events.types().slice(before)).toEqual(['user.updated']);
+    expect((response.body as UserBody).version).toBe(current.version);
+    expect(e2e.events.types().slice(before)).toEqual([]);
+  });
+
+  it('moves the version on each change and answers 409 to a stale one', async () => {
+    const current = (await me('owner')).body as UserBody;
+    const changed = await patchMe('owner', { imageUrl: 'https://example.test/a.png', version: current.version });
+    expect(changed.status).toBe(200);
+    expect((changed.body as UserBody).version).toBe(current.version + 1);
+
+    const stale = await patchMe('owner', { imageUrl: null, version: current.version });
+    expect(stale.status).toBe(409);
+    expect((stale.body as ErrorBody).code).toBe('version-conflict');
+    expect((await patchMe('owner', { imageUrl: null, version: -1 })).status).toBe(400);
+    expect((await patchMe('owner', { imageUrl: null })).status).toBe(200);
   });
 
   it('never calls the Keycloak admin API', async () => {
@@ -248,9 +265,11 @@ describe('GET /v1/users', () => {
     expect((await request(e2e.server).get('/v1/users').query({ q: '$where==1' }).set('Authorization', e2e.auth('admin'))).status).toBe(400);
   });
 
-  // F-users-21: the page size has no maximum outside /users/search (changed in phase 5).
-  it('accepts any page size', async () => {
-    const response = await request(e2e.server).get('/v1/users').query({ size: 100000 }).set('Authorization', e2e.auth('admin'));
-    expect(response.status).toBe(200);
+  // F-users-21, corrected in phase 5: pages of at most 100 elements.
+  it('caps the page size at 100', async () => {
+    expect((await request(e2e.server).get('/v1/users').query({ size: 100 }).set('Authorization', e2e.auth('admin'))).status).toBe(200);
+    const tooBig = await request(e2e.server).get('/v1/users').query({ size: 101 }).set('Authorization', e2e.auth('admin'));
+    expect(tooBig.status).toBe(400);
+    expect(tooBig.body).toMatchObject({ statusCode: 400, code: 'bad-request', path: '/v1/users?size=101' });
   });
 });

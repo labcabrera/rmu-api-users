@@ -8,6 +8,8 @@ export class UpdateCurrentUserCommand extends AuthenticatedCommand {
     public readonly imageUrl: string | null | undefined,
     userId: string,
     roles: string[],
+    /** Version the client read; a different stored version is a ConflictError (`version-conflict`). */
+    public readonly expectedVersion?: number,
   ) {
     super(userId, roles);
   }

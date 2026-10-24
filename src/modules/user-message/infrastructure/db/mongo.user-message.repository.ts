@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import type { HydratedDocument, Model } from 'mongoose';
 import { QueryCriteria } from '../../../shared/application/criteria/query-criteria.js';
 import { Page } from '../../../shared/application/pagination/page.js';
 import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository.js';
@@ -21,7 +21,7 @@ export class MongoUserMessageRepository extends MongoBaseRepository<UserMessage,
     });
   }
 
-  protected mapToEntity(doc: UserMessageDocument): UserMessage {
+  protected mapToEntity(doc: HydratedDocument<UserMessageDocument>): UserMessage {
     return UserMessage.fromProps({
       id: doc._id.toString(),
       userId: doc.userId,

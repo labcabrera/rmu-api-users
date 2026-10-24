@@ -9,6 +9,7 @@ type FriendshipBody = {
   addresseeName: string;
   status: string;
   message: string | null;
+  version: number;
 };
 
 type PageBody<T> = { content: T[]; pagination: { page: number; size: number; totalElements: number } };
@@ -137,7 +138,18 @@ describe('answer', () => {
     const accepted = await patch('noRole', created.id, 'accepted');
     expect(accepted.status).toBe(200);
     expect((accepted.body as FriendshipBody).status).toBe('accepted');
+    expect((accepted.body as FriendshipBody).version).toBe(1);
     expect((await befriend('admin', 'guest')).status).toBe(409);
+
+    // A stale version is a 409; the same status again changes nothing.
+    const send = (body: object) =>
+      request(e2e.server).patch(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth('noRole')).send(body);
+    const stale = await send({ status: 'rejected', version: 0 });
+    expect(stale.status).toBe(409);
+    expect((stale.body as { code: string }).code).toBe('version-conflict');
+    const same = await send({ status: 'accepted', version: 1 });
+    expect(same.status).toBe(200);
+    expect((same.body as FriendshipBody).version).toBe(1);
   });
 
   it('forbids the requester and other users to answer', async () => {

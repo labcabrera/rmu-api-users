@@ -10,6 +10,7 @@ type CodeBody = {
   expiresAt?: string;
   activatedAt?: string | null;
   activatedBy?: string | null;
+  version: number;
 };
 
 type PageBody<T> = { content: T[]; pagination: { page: number; size: number; totalElements: number } };
@@ -104,7 +105,21 @@ describe('read, update and delete', () => {
       .set('Authorization', e2e.auth('admin'))
       .send({ features: ['treasure-law'], expiresAt: '2098-06-01T00:00:00.000Z' });
     expect(updated.status).toBe(200);
-    expect(updated.body).toMatchObject({ features: ['treasure-law'], expiresAt: '2098-06-01T00:00:00.000Z' });
+    expect(updated.body).toMatchObject({ features: ['treasure-law'], expiresAt: '2098-06-01T00:00:00.000Z', version: 1 });
+
+    // A stale version is a 409; a PATCH that changes nothing keeps the version.
+    const stale = await request(e2e.server)
+      .patch(`/v1/activation-codes/${code.id}`)
+      .set('Authorization', e2e.auth('admin'))
+      .send({ features: ['core-law'], version: 0 });
+    expect(stale.status).toBe(409);
+    expect((stale.body as { code: string }).code).toBe('version-conflict');
+    const same = await request(e2e.server)
+      .patch(`/v1/activation-codes/${code.id}`)
+      .set('Authorization', e2e.auth('admin'))
+      .send({ features: ['treasure-law'], version: 1 });
+    expect(same.status).toBe(200);
+    expect((same.body as CodeBody).version).toBe(1);
 
     const deleted = await request(e2e.server).delete(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth('admin'));
     // F-users-13: the OpenAPI document says 204, the endpoint answers 200 with an empty body.
@@ -219,7 +234,7 @@ describe('activate', () => {
 
   // F-users-11: the value is only unique per owner. Another admin's code can take it (two codes, one value), and a
   // value taken by a code of the same admin is a duplicate key that answers 500.
-  it('lets codes of two admins share a value, and fails with 500 within one admin', async () => {
+  it('lets codes of two admins share a value, and answers 409 within one admin', async () => {
     const first = await createOne();
     const second = await createOne();
     const otherAdmin = { sub: 'e2e-admin-3', preferred_username: 'admin3', groups: ['rmu-admin'] };
@@ -241,7 +256,9 @@ describe('activate', () => {
       .patch(`/v1/activation-codes/${second.id}`)
       .set('Authorization', e2e.auth('admin'))
       .send({ code: first.code });
-    expect(duplicate.status).toBe(500);
+    // F-users-11: a 500 until phase 5, now the duplicate key is a 409.
+    expect(duplicate.status).toBe(409);
+    expect((duplicate.body as { code: string }).code).toBe('duplicate-key');
   });
 
   it.skip('rejects a code value that another code already has [F-users-11]', async () => {

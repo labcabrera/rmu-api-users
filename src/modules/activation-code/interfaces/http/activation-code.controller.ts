@@ -79,7 +79,7 @@ export class ActivationCodeController {
   @Patch(':id')
   @ApiOperation({ operationId: 'updateActivationCode', summary: 'Update activation code' })
   @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
-  @ApiErrors({ 404: 'Activation code not found' })
+  @ApiErrors({ 404: 'Activation code not found', 409: 'Stale version (version-conflict) or code already in use (duplicate-key)' })
   async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
@@ -93,6 +93,7 @@ export class ActivationCodeController {
       body.features,
       body.expiresAt ? new Date(body.expiresAt) : undefined,
       body.activatedAt === undefined ? undefined : body.activatedAt === null ? null : new Date(body.activatedAt),
+      body.version,
     );
     const activationCode = await this.commandBus.execute<UpdateActivationCodeCommand, ActivationCode>(command);
     return ActivationCodeDto.fromEntity(activationCode);

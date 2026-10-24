@@ -60,10 +60,18 @@ export class UserProvisioningService {
         claimsFingerprint: fingerprint,
         lastLoginAt: now,
       });
-      const updated = await this.userRepository.update(existing.id, existing);
-      this.logger.log(`Profile ${existing.id} updated from token claims`);
-      void this.events.publish('user', new UserUpdatedEvent(updated.getProps()));
-      return updated;
+      try {
+        const updated = await this.userRepository.update(existing);
+        this.logger.log(`Profile ${existing.id} updated from token claims`);
+        void this.events.publish('user', new UserUpdatedEvent(updated.getProps()));
+        return updated;
+      } catch (err) {
+        // Two concurrent GET /me with the new claims: the other request already stored them.
+        if (!(err instanceof ConflictError && err.code === 'version-conflict')) throw err;
+        const current = await this.userRepository.findById(existing.id);
+        if (!current) throw err;
+        return current;
+      }
     }
     if (!existing.lastLoginAt || now.getTime() - existing.lastLoginAt.getTime() >= LAST_LOGIN_REFRESH_MS) {
       await this.userRepository.updateLastLoginAt(existing.id, now);

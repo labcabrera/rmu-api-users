@@ -7,7 +7,8 @@ export interface FriendshipRepository {
   findByParticipants(userId: string, friendId: string): Promise<Friendship | null>;
   findByRsql(rsql: string | undefined, page: number, size: number, filter?: QueryCriteria): Promise<Page<Friendship>>;
   save(friendship: Friendship): Promise<Friendship>;
-  update(id: string, friendship: Partial<Friendship>): Promise<Friendship>;
+  /** Throws ConflictError (`version-conflict`) when the friendship changed since it was loaded. */
+  update(friendship: Friendship): Promise<Friendship>;
   deleteById(id: string): Promise<Friendship | null>;
 }
 
