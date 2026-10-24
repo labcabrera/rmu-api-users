@@ -120,8 +120,11 @@ describe('UserProvisioningService', () => {
       expect(user.name).toBe('alice');
       expect(user.lastLoginAt).toEqual(t1);
       expect(repository.store.get('user-1')!.email).toBe('alice@new.example.com');
+      // F-users-27: the login goes through its own write, not through the versioned update.
+      expect(repository.store.get('user-1')!.lastLoginAt).toEqual(t1);
       expect(publish).toHaveBeenCalledTimes(1);
       expect(publish.mock.calls[0][1].eventType).toBe('updated');
+      expect((publish.mock.calls[0][1].data as { lastLoginAt: Date }).lastLoginAt).toEqual(t1);
     });
 
     it('keeps the display name chosen by the user when the username claim changes', async () => {

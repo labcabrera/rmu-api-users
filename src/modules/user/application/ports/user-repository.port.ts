@@ -15,7 +15,10 @@ export interface UserRepository extends BaseRepository<User> {
   findByRsql(rsql: string | undefined, page: number, size: number, filter?: QueryCriteria, sort?: SortCriteria): Promise<Page<User>>;
   /** Throws ConflictError when the id or the display name already exists. */
   save(entity: User): Promise<User>;
-  /** Throws ConflictError when the display name already exists, or (`version-conflict`) when the profile changed since it was loaded. */
+  /**
+   * Throws ConflictError when the display name already exists, or (`version-conflict`) when the profile changed since it
+   * was loaded. It never writes `lastLoginAt`, which only updateLastLoginAt writes (F-users-27).
+   */
   update(entity: User): Promise<User>;
   /** Writes `lastLoginAt` only (no other field, no `updatedAt`, no version: a login is not a change of the profile). */
   updateLastLoginAt(id: string, at: Date): Promise<void>;
