@@ -40,10 +40,13 @@ export class CreateFriendshipRequestHandler implements ICommandHandler<CreateFri
           throw new ConflictError('Friendship request already pending between users');
         case 'accepted':
           throw new ConflictError('Users are already friends');
+        case 'blocked':
+          throw new ConflictError('Friendship is blocked', 'friendship-blocked');
         case 'rejected':
-        //TODO invisible error?
+          // F-users-17: a new request after a rejection reopens it, in the direction of the new request.
+          current.reopen({ id: requester.id, name: requester.name }, { id: addressee.id, name: addressee.name }, command.message);
+          return this.friendshipRepository.update(current);
       }
-      throw new ConflictError('Not implemented friendship status');
     }
     const friendship = Friendship.create({
       requesterId: command.userId,

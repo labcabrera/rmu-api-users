@@ -30,7 +30,11 @@ export class FriendshipController {
   @Post('')
   @ApiOperation({ operationId: 'createFriendshipRequest', summary: 'Create friendship request' })
   @ApiCreatedResponse({ type: FriendshipDto, description: 'Created' })
-  @ApiErrors({ 403: 'Caller is not in the rmu-user or rmu-admin group', 409: 'Friendship already exists' })
+  @ApiErrors({
+    400: 'Unknown addressee, or the caller itself',
+    403: 'Caller is not in the rmu-user or rmu-admin group',
+    409: 'Friendship already pending, accepted or blocked (a rejected one is reopened)',
+  })
   async create(@CurrentUser() user: AuthenticatedUser, @Body() body: CreateFriendshipRequestDto): Promise<FriendshipDto> {
     const userId = user.id;
     const roles = user.roles;
@@ -65,6 +69,7 @@ export class FriendshipController {
   @ApiOperation({ operationId: 'updateFriendship', summary: 'Update friendship' })
   @ApiOkResponse({ type: FriendshipDto, description: 'Success' })
   @ApiErrors({
+    400: 'Status that cannot follow the current one (invalid-status-transition)',
     403: 'Caller is the requester, not the addressee',
     404: 'Friendship not found or caller outside it',
     409: 'Stale version (version-conflict)',

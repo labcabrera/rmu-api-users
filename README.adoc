@@ -125,6 +125,10 @@ Creating (a friendship request, a message) needs the `rmu-user` or `rmu-admin` g
 
 * a friendship is read and deleted by its two participants, and answered (`PATCH`) by its addressee (`403` to the requester).
   Anybody else, admins included, gets `404`, as if it did not exist;
+* the status follows `pending` -> `accepted` | `rejected` | `blocked` and `accepted` -> `blocked`; the same status again is no
+  change, anything else a `400 invalid-status-transition`. A new request between two users answers `409` while their
+  friendship is pending, accepted or blocked, and reopens a rejected one (pending again, from whoever asks now). The
+  addressee is the user of `addresseeName`; participants are compared by id;
 * a message goes to a user that exists (`404` otherwise) and is an accepted friend of the sender (`403 not-friends`
   otherwise); an `rmu-admin` (the service account among them) sends to any user. Only the recipient reads, marks as read and
   deletes it; anybody else gets `404`.

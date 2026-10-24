@@ -173,40 +173,72 @@ describe('answer', () => {
     expect((await patch('noRole', created.id, 'married')).status).toBe(400);
   });
 
-  // F-users-16: any status can follow any other one, so an accepted friendship goes back to pending.
-  it('lets the addressee move an accepted friendship back to pending', async () => {
-    const created = (await befriend('admin', 'dave')).body as FriendshipBody;
-    const daveToken = { sub: 'kc-dave', preferred_username: 'dave' };
-    const answer = (status: string) =>
-      request(e2e.server).patch(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth(daveToken)).send({ status });
-    expect((await answer('accepted')).status).toBe(200);
-    const back = await answer('pending');
-    expect(back.status).toBe(200);
-    expect((back.body as FriendshipBody).status).toBe('pending');
-  });
-
-  it.skip('rejects moving an accepted friendship back to pending [F-users-16]', async () => {
+  it('rejects moving an accepted friendship back to pending [F-users-16]', async () => {
     const created = (await befriend('owner', 'erin')).body as FriendshipBody;
     const erinToken = { sub: 'kc-erin', preferred_username: 'erin' };
     const answer = (status: string) =>
       request(e2e.server).patch(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth(erinToken)).send({ status });
     expect((await answer('accepted')).status).toBe(200);
-    expect((await answer('pending')).status).toBe(400);
+    const back = await answer('pending');
+    expect(back.status).toBe(400);
+    expect((back.body as { code: string }).code).toBe('invalid-status-transition');
+    expect((await answer('rejected')).status).toBe(400);
+    // An accepted friendship can still be blocked, and a blocked one is final.
+    expect((await answer('blocked')).status).toBe(200);
+    expect((await answer('accepted')).status).toBe(400);
+    expect((await befriend('owner', 'erin')).status).toBe(409);
   });
 
-  // F-users-17: after a rejection no new request is possible: it answers 409 'Not implemented friendship status'.
-  it('blocks a new request after a rejection', async () => {
-    const created = (await befriend('admin', 'erin')).body as FriendshipBody;
-    const erinToken = { sub: 'kc-erin', preferred_username: 'erin' };
-    await request(e2e.server).patch(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth(erinToken)).send({ status: 'rejected' });
-    const again = await befriend('admin', 'erin');
-    expect(again.status).toBe(409);
-    expect((again.body as { message: string }).message).toBe('Not implemented friendship status');
-  });
+  it('reopens a rejected request on a new request, from whoever asks now [F-users-17]', async () => {
+    const created = (await befriend('admin', 'dave')).body as FriendshipBody;
+    const daveToken = { sub: 'kc-dave', preferred_username: 'dave' };
+    const rejected = await request(e2e.server)
+      .patch(`/v1/friendships/${created.id}`)
+      .set('Authorization', e2e.auth(daveToken))
+      .send({ status: 'rejected' });
+    expect(rejected.status).toBe(200);
+    expect((rejected.body as FriendshipBody).status).toBe('rejected');
+    expect(
+      (
+        await request(e2e.server)
+          .patch(`/v1/friendships/${created.id}`)
+          .set('Authorization', e2e.auth(daveToken))
+          .send({ status: 'accepted' })
+      ).status,
+    ).toBe(400);
 
-  it.skip('allows a new request after a rejection [F-users-17]', async () => {
-    const again = await befriend('admin', 'erin');
+    const again = await befriend('admin', 'dave', 'Second try');
     expect(again.status).toBe(201);
+    expect(again.body).toMatchObject({
+      id: created.id,
+      status: 'pending',
+      requesterName: 'admin',
+      addresseeName: 'dave',
+      message: 'Second try',
+    });
+
+    await request(e2e.server).patch(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth(daveToken)).send({ status: 'rejected' });
+    const reverse = await request(e2e.server)
+      .post('/v1/friendships')
+      .set('Authorization', e2e.auth({ ...daveToken, groups: ['rmu-user'] }))
+      .send({ addresseeName: 'admin' });
+    expect(reverse.status).toBe(201);
+    expect(reverse.body).toMatchObject({
+      id: created.id,
+      status: 'pending',
+      requesterId: 'kc-dave',
+      addresseeId: USERS.admin.sub,
+      message: null,
+    });
+  });
+
+  it('ignores an addresseeId in the request: the addressee is the user of addresseeName [F-users-20]', async () => {
+    const response = await request(e2e.server)
+      .post('/v1/friendships')
+      .set('Authorization', e2e.auth('other'))
+      .send({ addresseeName: 'guest', addresseeId: USERS.admin.sub });
+    expect(response.status).toBe(201);
+    expect(response.body).toMatchObject({ addresseeId: USERS.noRole.sub, addresseeName: 'guest' });
   });
 });
 
