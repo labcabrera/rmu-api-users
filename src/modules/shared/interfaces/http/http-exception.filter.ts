@@ -27,6 +27,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const request = ctx.getRequest<Request>();
+    // `path` is the route without the query string (F-receta-22); the logs keep the full URL.
     // Bodies that are not errors of ours, like the health report of a failed /v1/health, go out untouched.
     if (
       exception instanceof HttpException &&
@@ -47,7 +48,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     ctx
       .getResponse<Response>()
       .status(body.statusCode)
-      .json({ ...body, timestamp: new Date().toISOString(), path: request.originalUrl } satisfies ErrorDto);
+      .json({ ...body, timestamp: new Date().toISOString(), path: request.path } satisfies ErrorDto);
   }
 }
 

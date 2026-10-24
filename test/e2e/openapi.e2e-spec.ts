@@ -25,6 +25,28 @@ describe('OpenAPI', () => {
     );
   });
 
+  type Operation = { security?: unknown[]; responses?: Record<string, { content?: Record<string, { schema?: unknown }> }> };
+  const operations = async () => {
+    const spec = (await request(e2e.server).get('/api-spec')).body as { paths: Record<string, Record<string, Operation>> };
+    return spec.paths;
+  };
+
+  it('documents the health check without security and every other operation with it', async () => {
+    const paths = await operations();
+    expect(paths['/v1/health'].get.security).toBeUndefined();
+    for (const [path, methods] of Object.entries(paths)) {
+      if (path === '/v1/health') continue;
+      for (const operation of Object.values(methods)) expect(operation.security).toEqual([{ oauth2: [], 'access-token': [] }]);
+    }
+  });
+
+  it('documents the error body with an example of this API', async () => {
+    const spec = (await request(e2e.server).get('/api-spec')).body as {
+      components: { schemas: { ErrorDto: { properties: Record<string, { example?: unknown }> } } };
+    };
+    expect(spec.components.schemas.ErrorDto.properties.path.example).toMatch(/^\/v1\/friendships\//);
+  });
+
   it('serves the Swagger UI', async () => {
     const response = await request(e2e.server).get('/api-docs/');
     expect(response.status).toBe(200);
