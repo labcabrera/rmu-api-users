@@ -1,11 +1,25 @@
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { randomInt } from 'crypto';
 import { ConflictError } from '../../../../shared/domain/errors/errors.js';
 import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
+import { MAX_CODES_PER_REQUEST } from '../../../domain/aggregates/activation-code-props.js';
 import { type ActivationCodeRepository, ACTIVATION_CODE_REPOSITORY } from '../../ports/activation-code-repository.port.js';
 import { CreateActivationCodeCommand } from '../commands/create-activation-code.command.js';
 import { ActivationCodeGuardAdapter } from '../../../infrastructure/security/activation-code-guard.adapter.js';
+
+const CODE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const MAX_ATTEMPTS = 10;
+
+/** A random code of `length` characters from a cryptographic source (F-users-15): codes grant access to content. */
+export function generateActivationCode(length: number): string {
+  let code = '';
+  for (let i = 0; i < length; i++) code += CODE_CHARS.charAt(randomInt(CODE_CHARS.length));
+  return code;
+}
+
+const isDuplicateKey = (err: unknown) => err instanceof ConflictError && err.code === 'duplicate-key';
 
 @CommandHandler(CreateActivationCodeCommand)
 export class CreateActivationCodeHandler implements ICommandHandler<CreateActivationCodeCommand, ActivationCode[]> {
@@ -18,42 +32,30 @@ export class CreateActivationCodeHandler implements ICommandHandler<CreateActiva
   async execute(command: CreateActivationCodeCommand): Promise<ActivationCode[]> {
     this.guard.checkCreate(command.roles);
     const size = this.configService.get<number>('RMU_USERS_ACTIVATION_CODE_SIZE', 8);
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const generateCode = (len: number) => {
-      let s = '';
-      for (let i = 0; i < len; i++) {
-        s += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return s;
-    };
+    // The DTO already limits the count; the same constant keeps a direct caller within it.
+    const count = Math.max(1, Math.min(MAX_CODES_PER_REQUEST, command.count ?? 1));
     const results: ActivationCode[] = [];
-    const used = new Set<string>();
-    const maxAttempts = 10;
-    const count = Math.max(1, Math.min(1000, command.count ?? 1));
-
     for (let i = 0; i < count; i++) {
-      let code: string | undefined;
-      let existing;
-      for (let attempt = 0; attempt < maxAttempts; attempt++) {
-        code = generateCode(size);
-        if (used.has(code)) continue;
-        existing = await this.activationCodeRepository.findByCode(code);
-        if (!existing) break;
-      }
-      if (existing) {
-        throw new ConflictError(`Could not generate unique activation code after ${maxAttempts} attempts`);
-      }
-      used.add(code!);
+      results.push(await this.createOne(command, size));
+    }
+    return results;
+  }
+
+  /** Saves a code with a fresh value; the unique index decides, so a value taken meanwhile is retried. */
+  private async createOne(command: CreateActivationCodeCommand, size: number): Promise<ActivationCode> {
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       const activationCode = ActivationCode.create({
-        code: code!,
+        code: generateActivationCode(size),
         owner: command.owner,
         features: command.features,
         expiresAt: command.expiresAt,
       });
-      const saved = await this.activationCodeRepository.save(activationCode);
-      results.push(saved);
+      try {
+        return await this.activationCodeRepository.save(activationCode);
+      } catch (err) {
+        if (!isDuplicateKey(err)) throw err;
+      }
     }
-
-    return results;
+    throw new ConflictError(`Could not generate unique activation code after ${MAX_ATTEMPTS} attempts`);
   }
 }

@@ -22,9 +22,7 @@ export class MongoFriendshipRepository extends MongoBaseRepository<Friendship, F
   async findByParticipants(userId: string, friendId: string): Promise<Friendship | null> {
     const doc = await this.model.findOne({
       $or: [
-        { requesterId: userId, addresseeName: friendId },
         { requesterId: userId, addresseeId: friendId },
-        { requesterId: friendId, addresseeName: userId },
         { requesterId: friendId, addresseeId: userId },
       ],
     });
