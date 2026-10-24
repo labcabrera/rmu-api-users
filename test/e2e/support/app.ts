@@ -11,8 +11,14 @@ import {
   type DomainEventPublisher,
 } from '../../../src/modules/shared/application/ports/domain-event-publisher.port.js';
 import type { DomainEvent } from '../../../src/modules/shared/domain/events/domain-event.js';
+import { BadGatewayError } from '../../../src/modules/shared/domain/errors/errors.js';
 import { KafkaProducerService } from '../../../src/modules/shared/infrastructure/messaging/kafka-producer.service.js';
-import { IamUserPort, type UserApiResponse, type UserGroup } from '../../../src/modules/user/application/ports/iam-user.port.js';
+import {
+  type IamUserPort,
+  IAM_USER_PORT,
+  type UserApiResponse,
+  type UserGroup,
+} from '../../../src/modules/user/application/ports/iam-user.port.js';
 import { AUDIENCE, ISSUER, LocalJwks, type TokenClaims } from './jwks.js';
 
 export type Server = Parameters<typeof request>[0];
@@ -63,7 +69,7 @@ export class InMemoryEventPublisher implements DomainEventPublisher {
 }
 
 /** The Keycloak admin API of the suite: accounts by id, the realm groups and the group assignments. */
-export class FakeKeycloak extends IamUserPort {
+export class FakeKeycloak implements IamUserPort {
   readonly users = new Map<string, UserApiResponse>();
   readonly groups: UserGroup[] = [
     { id: 'g-core-law', name: 'core-law' },
@@ -86,7 +92,9 @@ export class FakeKeycloak extends IamUserPort {
   }
 
   addUserToGroup(userId: string, groupId: string): Promise<void> {
-    if (this.failGroupAssignment) return Promise.reject(new Error('Keycloak admin API PUT failed with status 503'));
+    // What KeycloakIamUserAdapter throws for a 503 of the admin API (the HttpClient mapping).
+    if (this.failGroupAssignment)
+      return Promise.reject(new BadGatewayError('rmu-keycloak/sso/admin/realms/rmu/users/x/groups/y answered 503'));
     this.assignments.push({ userId, groupId });
     return Promise.resolve();
   }
@@ -142,7 +150,7 @@ export async function startApp(env: Record<string, string> = {}): Promise<E2eApp
     .useValue({ emit: () => Promise.resolve() })
     .overrideProvider(DOMAIN_EVENT_PUBLISHER)
     .useValue(events)
-    .overrideProvider(IamUserPort)
+    .overrideProvider(IAM_USER_PORT)
     .useValue(keycloak)
     .compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>({ logger: ['error'] });

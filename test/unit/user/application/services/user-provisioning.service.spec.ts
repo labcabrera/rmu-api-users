@@ -1,6 +1,6 @@
 import type { Mock } from 'vitest';
 import type { UserClaims } from '../../../../../src/modules/user/application/models/user-claims.js';
-import { IamUserPort, type UserApiResponse } from '../../../../../src/modules/user/application/ports/iam-user.port.js';
+import { type IamUserPort, type UserApiResponse } from '../../../../../src/modules/user/application/ports/iam-user.port.js';
 import type { DomainEventPublisher } from '../../../../../src/modules/shared/application/ports/domain-event-publisher.port.js';
 import {
   LAST_LOGIN_REFRESH_MS,

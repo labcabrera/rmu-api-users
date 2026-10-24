@@ -1,7 +1,7 @@
 import { Page } from '../../src/modules/shared/application/pagination/page.js';
 import { ConflictError, NotFoundError } from '../../src/modules/shared/domain/errors/errors.js';
 import type { UserSummary } from '../../src/modules/user/application/models/user-summary.js';
-import { UserRepository } from '../../src/modules/user/application/ports/user-repository.port.js';
+import { type UserRepository } from '../../src/modules/user/application/ports/user-repository.port.js';
 import { User } from '../../src/modules/user/domain/aggregates/user.js';
 import type { UserProps } from '../../src/modules/user/domain/aggregates/user-props.js';
 
@@ -9,7 +9,7 @@ import type { UserProps } from '../../src/modules/user/domain/aggregates/user-pr
  * UserRepository backed by a Map, with the same uniqueness rules as the Mongo one (id, case-insensitive name) and the
  * same versions (a stale update is a ConflictError `version-conflict`).
  */
-export class InMemoryUserRepository extends UserRepository {
+export class InMemoryUserRepository implements UserRepository {
   readonly store = new Map<string, UserProps>();
   readonly versions = new Map<string, number>();
   writes = 0;

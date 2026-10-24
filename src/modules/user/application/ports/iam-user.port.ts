@@ -19,12 +19,14 @@ export interface UserGroup {
  * Keycloak admin API. Only used as a fallback for users that have no RMU profile yet and to assign groups
  * when an activation code is redeemed. Never called on the GET /me hot path.
  */
-export abstract class IamUserPort {
-  abstract findById(id: string): Promise<UserApiResponse | null>;
+export interface IamUserPort {
+  findById(id: string): Promise<UserApiResponse | null>;
   /** Exact username match. */
-  abstract findByUsername(username: string): Promise<UserApiResponse | null>;
+  findByUsername(username: string): Promise<UserApiResponse | null>;
   /** Exact email match. */
-  abstract findByEmail(email: string): Promise<UserApiResponse | null>;
-  abstract addUserToGroup(userId: string, groupId: string): Promise<void>;
-  abstract findGroups(): Promise<UserGroup[]>;
+  findByEmail(email: string): Promise<UserApiResponse | null>;
+  addUserToGroup(userId: string, groupId: string): Promise<void>;
+  findGroups(): Promise<UserGroup[]>;
 }
+
+export const IAM_USER_PORT = Symbol('IamUserPort');

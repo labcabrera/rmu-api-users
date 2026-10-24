@@ -6,9 +6,9 @@ import { UserCreatedEvent, UserUpdatedEvent } from '../../domain/events/user-eve
 import { deriveBaseDisplayName, displayNameCandidate, looksLikeEmail } from '../../domain/services/display-name.js';
 import { UserSettings } from '../../domain/value-objects/user-settings.vo.js';
 import type { UserClaims } from '../models/user-claims.js';
-import { IamUserPort, type UserApiResponse } from '../ports/iam-user.port.js';
+import { type IamUserPort, IAM_USER_PORT, type UserApiResponse } from '../ports/iam-user.port.js';
 import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../../shared/application/ports/domain-event-publisher.port.js';
-import { UserRepository } from '../ports/user-repository.port.js';
+import { type UserRepository, USER_REPOSITORY } from '../ports/user-repository.port.js';
 
 /** `lastLoginAt` is written at most once per this interval when the claims did not change. */
 export const LAST_LOGIN_REFRESH_MS = 60 * 60 * 1000;
@@ -24,8 +24,8 @@ export class UserProvisioningService {
   private readonly logger = new Logger(UserProvisioningService.name);
 
   constructor(
-    @Inject(UserRepository) private readonly userRepository: UserRepository,
-    @Inject(IamUserPort) private readonly iamUserPort: IamUserPort,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
+    @Inject(IAM_USER_PORT) private readonly iamUserPort: IamUserPort,
     @Inject(DOMAIN_EVENT_PUBLISHER) private readonly events: DomainEventPublisher,
   ) {}
 

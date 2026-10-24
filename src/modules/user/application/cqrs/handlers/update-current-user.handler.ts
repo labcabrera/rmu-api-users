@@ -1,12 +1,11 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
 import { ConflictError, NotFoundError, ValidationError } from '../../../../shared/domain/errors/errors.js';
-import { sameState } from '../../../../shared/domain/aggregates/same-state.js';
 import { User } from '../../../domain/aggregates/user.js';
 import { UserUpdatedEvent } from '../../../domain/events/user-events.js';
 import { DISPLAY_NAME_MAX_LENGTH, DISPLAY_NAME_MIN_LENGTH, DISPLAY_NAME_PATTERN } from '../../../domain/services/display-name.js';
 import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../../../shared/application/ports/domain-event-publisher.port.js';
-import { UserRepository } from '../../ports/user-repository.port.js';
+import { type UserRepository, USER_REPOSITORY } from '../../ports/user-repository.port.js';
 import { UpdateCurrentUserCommand } from '../commands/update-current-user.command.js';
 
 /** Updates the RMU profile only. The Keycloak account (username included) is never touched. */
@@ -15,7 +14,7 @@ export class UpdateCurrentUserHandler implements ICommandHandler<UpdateCurrentUs
   private readonly logger = new Logger(UpdateCurrentUserHandler.name);
 
   constructor(
-    @Inject(UserRepository) private readonly userRepository: UserRepository,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(DOMAIN_EVENT_PUBLISHER) private readonly events: DomainEventPublisher,
   ) {}
 
@@ -32,13 +31,12 @@ export class UpdateCurrentUserHandler implements ICommandHandler<UpdateCurrentUs
       throw new ConflictError(`User name ${name} is already in use`);
     }
 
-    const before = user.getProps();
     user.update({
       name,
       settings: command.settings,
       imageUrl: command.imageUrl,
     });
-    if (sameState(before, user.getProps())) return user;
+    if (!user.hasChanges()) return user;
     const updated = await this.userRepository.update(user);
     this.logger.verbose(`Profile ${user.id} updated`);
     void this.events.publish('user', new UserUpdatedEvent(updated.getProps()));

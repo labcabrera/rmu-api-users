@@ -13,7 +13,7 @@ import { MongoActivationCodeRepository } from './infrastructure/db/mongo.activat
 import { ActivationCodeModel, ActivationCodeSchema } from './infrastructure/persistence/models/activation-code.model.js';
 import { ActivationCodeController } from './interfaces/http/activation-code.controller.js';
 import { UserModule } from '../user/user.module.js';
-import { ActivationCodeRepository } from './application/ports/activation-code-repository.port.js';
+import { ACTIVATION_CODE_REPOSITORY } from './application/ports/activation-code-repository.port.js';
 import { CheckActivationCodeHandler } from './application/cqrs/handlers/check-activation-code.handler.js';
 import { ActivationCodeGuardAdapter } from './infrastructure/security/activation-code-guard.adapter.js';
 
@@ -40,7 +40,7 @@ const QueryHandlers = [GetActivationCodeHandler, ListActivationCodesHandler, Che
     ...QueryHandlers,
     ActivationCodeGuardAdapter,
     {
-      provide: ActivationCodeRepository,
+      provide: ACTIVATION_CODE_REPOSITORY,
       useClass: MongoActivationCodeRepository,
     },
   ],

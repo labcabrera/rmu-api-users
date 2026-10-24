@@ -4,7 +4,7 @@ import { Page } from '../../../../shared/application/pagination/page.js';
 import { RMU_ADMIN } from '../../../../shared/domain/entities/user-roles.js';
 import { ForbiddenError } from '../../../../shared/domain/errors/errors.js';
 import { User } from '../../../domain/aggregates/user.js';
-import { UserRepository } from '../../ports/user-repository.port.js';
+import { type UserRepository, USER_REPOSITORY } from '../../ports/user-repository.port.js';
 import { GetUsersQuery } from '../queries/get-users.query.js';
 
 /** Full profiles (with email) for administrators only. Everybody else uses SearchUsersQuery. */
@@ -12,7 +12,7 @@ import { GetUsersQuery } from '../queries/get-users.query.js';
 export class GetUsersHandler implements IQueryHandler<GetUsersQuery, Page<User>> {
   private readonly logger = new Logger(GetUsersHandler.name);
 
-  constructor(@Inject(UserRepository) private readonly userRepository: UserRepository) {}
+  constructor(@Inject(USER_REPOSITORY) private readonly userRepository: UserRepository) {}
 
   async execute(query: GetUsersQuery): Promise<Page<User>> {
     if (!query.roles.includes(RMU_ADMIN)) {

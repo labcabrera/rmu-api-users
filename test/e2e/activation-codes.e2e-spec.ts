@@ -206,7 +206,8 @@ describe('activate', () => {
     e2e.keycloak.failGroupAssignment = true;
     try {
       const response = await post('activate', 'other', { code: code.code });
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(502);
+      expect((response.body as { code: string }).code).toBe('bad-gateway');
     } finally {
       e2e.keycloak.failGroupAssignment = false;
     }
