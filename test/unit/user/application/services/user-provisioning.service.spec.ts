@@ -1,10 +1,13 @@
-import { describe, expect, it, jest, beforeEach } from '@jest/globals';
-import { UserClaims } from 'src/modules/user/application/models/user-claims';
-import { IamUserPort, UserApiResponse } from 'src/modules/user/application/ports/iam-user.port';
-import { UserEventBusPort } from 'src/modules/user/application/ports/user-event-bus.port';
-import { LAST_LOGIN_REFRESH_MS, UserProvisioningService } from 'src/modules/user/application/services/user-provisioning.service';
-import { User } from 'src/modules/user/domain/aggregates/user';
-import { UserSettings } from 'src/modules/user/domain/value-objects/user-settings.vo';
+import type { Mock } from 'vitest';
+import { UserClaims } from '../../../../../src/modules/user/application/models/user-claims';
+import { IamUserPort, UserApiResponse } from '../../../../../src/modules/user/application/ports/iam-user.port';
+import { UserEventBusPort } from '../../../../../src/modules/user/application/ports/user-event-bus.port';
+import {
+  LAST_LOGIN_REFRESH_MS,
+  UserProvisioningService,
+} from '../../../../../src/modules/user/application/services/user-provisioning.service';
+import { User } from '../../../../../src/modules/user/domain/aggregates/user';
+import { UserSettings } from '../../../../../src/modules/user/domain/value-objects/user-settings.vo';
 import { InMemoryUserRepository } from '../../../../support/in-memory-user.repository';
 
 const claims = (overrides: Partial<UserClaims> = {}): UserClaims => ({
@@ -33,19 +36,19 @@ const existingUser = (id: string, name: string) =>
 
 describe('UserProvisioningService', () => {
   let repository: InMemoryUserRepository;
-  let publish: jest.Mock<UserEventBusPort['publish']>;
-  let iam: { [K in keyof IamUserPort]: jest.Mock<any> };
+  let publish: Mock<UserEventBusPort['publish']>;
+  let iam: { [K in keyof IamUserPort]: Mock };
   let service: UserProvisioningService;
 
   beforeEach(() => {
     repository = new InMemoryUserRepository();
-    publish = jest.fn<UserEventBusPort['publish']>();
+    publish = vi.fn<UserEventBusPort['publish']>();
     iam = {
-      findById: jest.fn(),
-      findByUsername: jest.fn<() => Promise<UserApiResponse | null>>().mockResolvedValue(null),
-      findByEmail: jest.fn<() => Promise<UserApiResponse | null>>().mockResolvedValue(null),
-      addUserToGroup: jest.fn(),
-      findGroups: jest.fn(),
+      findById: vi.fn(),
+      findByUsername: vi.fn<() => Promise<UserApiResponse | null>>().mockResolvedValue(null),
+      findByEmail: vi.fn<() => Promise<UserApiResponse | null>>().mockResolvedValue(null),
+      addUserToGroup: vi.fn(),
+      findGroups: vi.fn(),
     };
     service = new UserProvisioningService(repository, iam, { publish });
   });
@@ -147,8 +150,8 @@ describe('UserProvisioningService', () => {
     });
 
     it('returns the concurrent winner when another request created the same profile', async () => {
-      const save = (user: User) => InMemoryUserRepository.prototype.save.call(repository, user) as Promise<User>;
-      jest.spyOn(repository, 'save').mockImplementationOnce(async (user: User) => {
+      const save = InMemoryUserRepository.prototype.save.bind(repository);
+      vi.spyOn(repository, 'save').mockImplementationOnce(async (user: User) => {
         await save(existingUser('user-1', 'alice-from-other-request'));
         return save(user);
       });

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
@@ -10,10 +9,11 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/modules/auth/jwt.auth.guard';
-import { Page } from 'src/modules/shared/domain/entities/page';
-import { ErrorDto } from 'src/modules/shared/interfaces/http/dto/error-dto';
-import { PagedQueryDto } from 'src/modules/shared/interfaces/http/dto/paged-rsql-query';
+import { JwtAuthGuard } from '../../../auth/jwt.auth.guard';
+import { Page } from '../../../shared/domain/entities/page';
+import type { AuthenticatedRequest } from '../../../shared/interfaces/http/authenticated-request';
+import { ErrorDto } from '../../../shared/interfaces/http/dto/error-dto';
+import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query';
 import { CreateUserMessageCommand } from '../../application/cqrs/commands/create-user-message.command';
 import { DeleteUserMessageCommand } from '../../application/cqrs/commands/delete-user-message.command';
 import { MarkUserMessageReadCommand } from '../../application/cqrs/commands/mark-user-message-read.command';
@@ -36,9 +36,9 @@ export class MessageController {
   @ApiOperation({ operationId: 'listMessages', summary: 'List user messages' })
   @ApiOkResponse({ type: UserMessagePageDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  async findUnread(@Request() req, @Query() dto: PagedQueryDto): Promise<UserMessagePageDto> {
-    const userId = req.user!.id as string;
-    const roles = req.user!.roles as string[];
+  async findUnread(@Request() req: AuthenticatedRequest, @Query() dto: PagedQueryDto): Promise<UserMessagePageDto> {
+    const userId = req.user.id;
+    const roles = req.user.roles;
     const query = new GetUserMessagesQuery(dto.q, dto.page, dto.size, userId, roles);
     const page = await this.queryBus.execute<GetUserMessagesQuery, Page<UserMessage>>(query);
     return UserMessagePageDto.fromPage(page);
@@ -48,9 +48,9 @@ export class MessageController {
   @ApiOperation({ operationId: 'createMessage', summary: 'Create user message' })
   @ApiCreatedResponse({ type: UserMessageDto, description: 'Created' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  async create(@Request() req, @Body() body: CreateUserMessageDto): Promise<UserMessageDto> {
-    const userId = req.user!.id as string;
-    const roles = req.user!.roles as string[];
+  async create(@Request() req: AuthenticatedRequest, @Body() body: CreateUserMessageDto): Promise<UserMessageDto> {
+    const userId = req.user.id;
+    const roles = req.user.roles;
     const command = new CreateUserMessageCommand(body.message, body.type, body.recipientId, userId, roles);
     const message = await this.commandBus.execute<CreateUserMessageCommand, UserMessage>(command);
     return UserMessageDto.fromEntity(message);
@@ -61,9 +61,9 @@ export class MessageController {
   @ApiOkResponse({ type: UserMessageDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   @ApiNotFoundResponse({ description: 'Message not found', type: ErrorDto })
-  async markAsRead(@Request() req, @Param('id') id: string): Promise<UserMessageDto> {
-    const userId = req.user!.id as string;
-    const roles = req.user!.roles as string[];
+  async markAsRead(@Request() req: AuthenticatedRequest, @Param('id') id: string): Promise<UserMessageDto> {
+    const userId = req.user.id;
+    const roles = req.user.roles;
     const message = await this.commandBus.execute<MarkUserMessageReadCommand, UserMessage>(
       new MarkUserMessageReadCommand(id, userId, roles),
     );
@@ -76,9 +76,9 @@ export class MessageController {
   @ApiNoContentResponse({ description: 'Deleted' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   @ApiNotFoundResponse({ description: 'Message not found', type: ErrorDto })
-  async delete(@Request() req, @Param('id') id: string): Promise<void> {
-    const userId = req.user!.id as string;
-    const roles = req.user!.roles as string[];
+  async delete(@Request() req: AuthenticatedRequest, @Param('id') id: string): Promise<void> {
+    const userId = req.user.id;
+    const roles = req.user.roles;
     await this.commandBus.execute<DeleteUserMessageCommand, UserMessage>(new DeleteUserMessageCommand(id, userId, roles));
   }
 }

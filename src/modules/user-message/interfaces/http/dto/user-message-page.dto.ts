@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Page } from 'src/modules/shared/domain/entities/page';
-import { PaginationDto } from 'src/modules/shared/interfaces/http/dto/page.dto';
+import { Page } from '../../../../shared/domain/entities/page';
+import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto';
 import { UserMessage } from '../../../domain/aggregates/user-message';
 import { UserMessageDto } from './user-message.dto';
 

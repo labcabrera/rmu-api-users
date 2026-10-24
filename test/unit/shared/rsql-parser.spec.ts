@@ -1,7 +1,6 @@
-import { describe, expect, it } from '@jest/globals';
-import { InvalidSearchExpression } from 'src/modules/shared/domain/errors/errors';
-import { RsqlParser } from 'src/modules/shared/infrastructure/persistence/repositories/rsql-parser';
-import { escapeRegex } from 'src/modules/user/infrastructure/db/mongo-user.repository';
+import { InvalidSearchExpression } from '../../../src/modules/shared/domain/errors/errors';
+import { RsqlParser } from '../../../src/modules/shared/infrastructure/persistence/repositories/rsql-parser';
+import { escapeRegex } from '../../../src/modules/user/infrastructure/db/mongo-user.repository';
 
 describe('query hardening', () => {
   const parser = new RsqlParser();

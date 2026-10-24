@@ -14,14 +14,14 @@ export class UpdateActivationCodeDto {
   @IsOptional()
   expiresAt?: string;
 
-  @ApiPropertyOptional({ description: 'Activation date', example: '2026-06-01T12:00:00.000Z', nullable: true })
+  @ApiPropertyOptional({ type: String, description: 'Activation date', example: '2026-06-01T12:00:00.000Z', nullable: true })
   @IsDateString()
   @IsOptional()
   activatedAt?: string | null;
 
   @ApiPropertyOptional({ description: 'Enabled features', example: ['core-law'], enum: ACTIVATION_FEATURES, type: [String] })
   @IsArray()
-  @IsIn(ACTIVATION_FEATURES as any, { each: true })
+  @IsIn(ACTIVATION_FEATURES, { each: true })
   @IsOptional()
   features?: ActivationFeature[];
 }

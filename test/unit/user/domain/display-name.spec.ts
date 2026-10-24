@@ -1,5 +1,8 @@
-import { describe, expect, it } from '@jest/globals';
-import { deriveBaseDisplayName, displayNameCandidate, sanitizeDisplayName } from 'src/modules/user/domain/services/display-name';
+import {
+  deriveBaseDisplayName,
+  displayNameCandidate,
+  sanitizeDisplayName,
+} from '../../../../src/modules/user/domain/services/display-name';
 
 describe('display name', () => {
   it('sanitizes raw values', () => {

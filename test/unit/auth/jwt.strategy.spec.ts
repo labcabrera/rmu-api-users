@@ -1,7 +1,6 @@
-import { describe, expect, it } from '@jest/globals';
 import { ConfigService } from '@nestjs/config';
-import { mapJwtPayload } from 'src/modules/auth/authenticated-user';
-import { buildJwtStrategyOptions } from 'src/modules/auth/jwt.strategy';
+import { mapJwtPayload } from '../../../src/modules/auth/authenticated-user';
+import { buildJwtStrategyOptions } from '../../../src/modules/auth/jwt.strategy';
 
 describe('JwtStrategy', () => {
   const config = new ConfigService({

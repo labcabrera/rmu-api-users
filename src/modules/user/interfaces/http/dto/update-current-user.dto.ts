@@ -1,10 +1,10 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsIn, IsObject, IsOptional, IsString, Matches, MaxLength, MinLength, ValidateNested } from 'class-validator';
-import { DISPLAY_NAME_MAX_LENGTH, DISPLAY_NAME_MIN_LENGTH, DISPLAY_NAME_PATTERN } from 'src/modules/user/domain/services/display-name';
+import { DISPLAY_NAME_MAX_LENGTH, DISPLAY_NAME_MIN_LENGTH, DISPLAY_NAME_PATTERN } from '../../../domain/services/display-name';
 
 export class UpdateCurrentUserSettingsDto {
-  @ApiPropertyOptional({ description: 'Measurement system used by the user', enum: ['metric', 'imperial'] })
+  @ApiPropertyOptional({ type: String, description: 'Measurement system used by the user', enum: ['metric', 'imperial'] })
   @IsOptional()
   @IsIn(['metric', 'imperial'])
   measurementSystem?: 'metric' | 'imperial';
@@ -26,7 +26,7 @@ export class UpdateCurrentUserDto {
   @Type(() => UpdateCurrentUserSettingsDto)
   settings?: UpdateCurrentUserSettingsDto;
 
-  @ApiPropertyOptional({ description: 'URL to the user profile image', nullable: true })
+  @ApiPropertyOptional({ type: String, description: 'URL to the user profile image', nullable: true })
   @IsOptional()
   @IsString()
   imageUrl?: string | null;

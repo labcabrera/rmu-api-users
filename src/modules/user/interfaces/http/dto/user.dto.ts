@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsString, IsBoolean, IsArray, IsOptional, ValidateNested } from 'class-validator';
-import { User } from 'src/modules/user/domain/aggregates/user';
+import { User } from '../../../domain/aggregates/user';
 import { UserSettingsDto } from './user-settings.dto';
 
 export class UserDto {
@@ -35,7 +35,7 @@ export class UserDto {
   @Type(() => UserSettingsDto)
   settings: UserSettingsDto;
 
-  @ApiPropertyOptional({ description: 'URL to the user profile image', required: false })
+  @ApiPropertyOptional({ type: String, description: 'URL to the user profile image', required: false })
   @IsOptional()
   @IsString()
   imageUrl?: string | null;
@@ -43,10 +43,10 @@ export class UserDto {
   @ApiProperty({ description: 'How the user signs in: local (username/password) or the identity provider alias', example: 'local' })
   identityProvider: string;
 
-  @ApiPropertyOptional({ description: 'Given name from the identity provider', nullable: true })
+  @ApiPropertyOptional({ type: String, description: 'Given name from the identity provider', nullable: true })
   firstName: string | null;
 
-  @ApiPropertyOptional({ description: 'Family name from the identity provider', nullable: true })
+  @ApiPropertyOptional({ type: String, description: 'Family name from the identity provider', nullable: true })
   lastName: string | null;
 
   @ApiPropertyOptional({ description: 'Last login (refreshed at most once per hour)', type: String, format: 'date-time', nullable: true })

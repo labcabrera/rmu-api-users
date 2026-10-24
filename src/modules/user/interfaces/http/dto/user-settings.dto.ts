@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { UserSettings } from 'src/modules/user/domain/value-objects/user-settings.vo';
+import { UserSettings } from '../../../domain/value-objects/user-settings.vo';
 
 export class UserSettingsDto {
-  @ApiProperty({ description: 'Measurement system used by the user', required: true, enum: ['metric', 'imperial'] })
+  @ApiProperty({ type: String, description: 'Measurement system used by the user', required: true, enum: ['metric', 'imperial'] })
   @IsString()
   measurementSystem: 'metric' | 'imperial';
 

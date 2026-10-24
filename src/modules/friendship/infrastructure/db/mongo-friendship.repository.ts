@@ -4,10 +4,10 @@ import { Model } from 'mongoose';
 import { FriendshipRepository } from '../../application/ports/friendship.repository';
 import { Friendship } from '../../domain/aggregates/friendship';
 import { FriendshipDocument, FriendshipModel } from '../persistence/models/friendship.model';
-import { MongoBaseRepository } from 'src/modules/shared/infrastructure/db/mongo.base.repository';
-import { RsqlParser } from 'src/modules/shared/infrastructure/persistence/repositories/rsql-parser';
-import { Page } from 'src/modules/shared/domain/entities/page';
-import { QueryCriteria } from 'src/modules/shared/application/criteria/query-criteria';
+import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository';
+import { RsqlParser } from '../../../shared/infrastructure/persistence/repositories/rsql-parser';
+import { Page } from '../../../shared/domain/entities/page';
+import { QueryCriteria } from '../../../shared/application/criteria/query-criteria';
 
 @Injectable()
 export class MongoFriendshipRepository extends MongoBaseRepository<Friendship, FriendshipDocument> implements FriendshipRepository {

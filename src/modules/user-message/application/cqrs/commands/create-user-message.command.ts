@@ -1,4 +1,4 @@
-import { AuthenticatedCommand } from 'src/modules/shared/application/cqrs/authenticated-command';
+import { AuthenticatedCommand } from '../../../../shared/application/cqrs/authenticated-command';
 import { MessageType } from '../../../domain/value-objects/message-type.vo';
 
 export class CreateUserMessageCommand extends AuthenticatedCommand {

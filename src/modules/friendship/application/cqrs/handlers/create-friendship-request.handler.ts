@@ -1,11 +1,11 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateFriendshipRequestCommand } from '../commands/create-friendship-request.command';
-import { ConflictError, ValidationError } from 'src/modules/shared/domain/errors/errors';
+import { ConflictError, ValidationError } from '../../../../shared/domain/errors/errors';
 import { Friendship } from '../../../domain/aggregates/friendship';
 import type { FriendshipRepository } from '../../ports/friendship.repository';
-import { UserRepository } from 'src/modules/user/application/ports/user-repository';
-import { UserProvisioningService } from 'src/modules/user/application/services/user-provisioning.service';
+import { UserRepository } from '../../../../user/application/ports/user-repository';
+import { UserProvisioningService } from '../../../../user/application/services/user-provisioning.service';
 
 @CommandHandler(CreateFriendshipRequestCommand)
 export class CreateFriendshipRequestHandler implements ICommandHandler<CreateFriendshipRequestCommand, Friendship> {

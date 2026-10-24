@@ -9,11 +9,11 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthenticatedUser } from 'src/modules/auth/authenticated-user';
-import { JwtAuthGuard } from 'src/modules/auth/jwt.auth.guard';
-import { Page } from 'src/modules/shared/domain/entities/page';
-import { ErrorDto } from 'src/modules/shared/interfaces/http/dto/error-dto';
-import { PagedQueryDto } from 'src/modules/shared/interfaces/http/dto/paged-rsql-query';
+import { AuthenticatedUser } from '../../../auth/authenticated-user';
+import { JwtAuthGuard } from '../../../auth/jwt.auth.guard';
+import { Page } from '../../../shared/domain/entities/page';
+import { ErrorDto } from '../../../shared/interfaces/http/dto/error-dto';
+import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query';
 import { UpdateCurrentUserCommand } from '../../application/cqrs/commands/update-current-user.command';
 import { GetUserQuery } from '../../application/cqrs/queries/get-user-query';
 import { GetUsersQuery } from '../../application/cqrs/queries/get-users-query';

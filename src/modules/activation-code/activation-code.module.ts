@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from 'src/modules/auth/auth.module';
+import { AuthModule } from '../auth/auth.module';
 import { SharedModule } from '../shared/shared.module';
 import { ActivateActivationCodeHandler } from './application/cqrs/handlers/activate-activation-code.handler';
 import { CreateActivationCodeHandler } from './application/cqrs/handlers/create-activation-code.handler';

@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import { BaseAggregateRoot } from 'src/modules/shared/domain/aggregates/base-aggregate';
+import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate';
 import { MessageType } from '../value-objects/message-type.vo';
 import { UserMessageProps } from './user-message-props';
 

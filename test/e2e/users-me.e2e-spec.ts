@@ -1,4 +1,3 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { INestApplication } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -8,15 +7,15 @@ import { AddressInfo } from 'net';
 import { createSign, generateKeyPairSync, KeyObject } from 'crypto';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { configureApp } from 'src/app.setup';
-import { JwtStrategy } from 'src/modules/auth/jwt.strategy';
-import { IamUserPort } from 'src/modules/user/application/ports/iam-user.port';
-import { UserEventBusPort } from 'src/modules/user/application/ports/user-event-bus.port';
-import { UserRepository } from 'src/modules/user/application/ports/user-repository';
-import { UserProvisioningService } from 'src/modules/user/application/services/user-provisioning.service';
-import { UserController } from 'src/modules/user/interfaces/http/user.controller';
-import { USER_HANDLERS } from 'src/modules/user/user.module';
-import { InMemoryUserRepository } from './support/in-memory-user.repository';
+import { configureApp } from '../../src/app.setup';
+import { JwtStrategy } from '../../src/modules/auth/jwt.strategy';
+import { IamUserPort } from '../../src/modules/user/application/ports/iam-user.port';
+import { UserEventBusPort } from '../../src/modules/user/application/ports/user-event-bus.port';
+import { UserRepository } from '../../src/modules/user/application/ports/user-repository';
+import { UserProvisioningService } from '../../src/modules/user/application/services/user-provisioning.service';
+import { UserController } from '../../src/modules/user/interfaces/http/user.controller';
+import { USER_HANDLERS } from '../../src/modules/user/user.module';
+import { InMemoryUserRepository } from '../support/in-memory-user.repository';
 
 const ISSUER = 'http://localhost/sso/realms/rmu';
 const AUDIENCE = 'rmu-api';
@@ -42,8 +41,8 @@ describe('/v1/users (e2e)', () => {
   let app: INestApplication<App>;
   const http = () => app.getHttpServer();
   let repository: InMemoryUserRepository;
-  const publish = jest.fn<UserEventBusPort['publish']>();
-  const iamCalls = jest.fn();
+  const publish = vi.fn<UserEventBusPort['publish']>();
+  const iamCalls = vi.fn<(...args: unknown[]) => unknown>();
   const iam = new Proxy({} as IamUserPort, {
     get: (_target, prop) => (prop === 'then' ? undefined : (...args: unknown[]) => iamCalls(prop, ...args)),
   });

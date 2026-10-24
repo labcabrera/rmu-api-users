@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ConflictError } from 'src/modules/shared/domain/errors/errors';
+import { ConflictError } from '../../../../shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
 import { ActivationCodeRepository } from '../../ports/activation-code.repository';
 import { CreateActivationCodeCommand } from '../commands/create-activation-code.command';

@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NotFoundError } from 'src/modules/shared/domain/errors/errors';
+import { NotFoundError } from '../../../../shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
 import { ActivationCodeRepository } from '../../ports/activation-code.repository';
 import { UpdateActivationCodeCommand } from '../commands/update-activation-code.command';

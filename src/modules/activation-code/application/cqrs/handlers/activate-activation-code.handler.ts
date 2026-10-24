@@ -1,8 +1,8 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ConflictError, NotFoundError, ValidationError } from 'src/modules/shared/domain/errors/errors';
-import { IamUserPort, UserGroup } from 'src/modules/user/application/ports/iam-user.port';
-import { UserRepository } from 'src/modules/user/application/ports/user-repository';
+import { ConflictError, NotFoundError, ValidationError } from '../../../../shared/domain/errors/errors';
+import { IamUserPort, UserGroup } from '../../../../user/application/ports/iam-user.port';
+import { UserRepository } from '../../../../user/application/ports/user-repository';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
 import { ActivationCodeRepository } from '../../ports/activation-code.repository';
 import { ActivateActivationCodeCommand } from '../commands/activate-activation-code.command';

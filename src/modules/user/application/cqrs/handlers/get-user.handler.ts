@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { User } from 'src/modules/user/domain/aggregates/user';
+import { User } from '../../../domain/aggregates/user';
 import { UserProvisioningService } from '../../services/user-provisioning.service';
 import { GetUserQuery } from '../queries/get-user-query';
 
