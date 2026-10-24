@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsDateString, IsIn, IsInt, Min, Max, IsOptional } from 'class-validator';
-import { ACTIVATION_FEATURES, type ActivationFeature } from '../../../domain/aggregates/activation-code-props.js';
+import { ACTIVATION_FEATURES, MAX_CODES_PER_REQUEST, type ActivationFeature } from '../../../domain/aggregates/activation-code-props.js';
 
 export class CreateActivationCodeDto {
   @ApiProperty({ description: 'Expiration date (optional)', example: '2026-12-31T23:59:59.000Z', required: false })
@@ -13,10 +13,10 @@ export class CreateActivationCodeDto {
   @IsIn(ACTIVATION_FEATURES, { each: true })
   features: ActivationFeature[];
 
-  @ApiProperty({ description: 'Number of codes to generate', example: 1, required: false })
+  @ApiProperty({ description: 'Number of codes to generate', example: 1, required: false, minimum: 1, maximum: MAX_CODES_PER_REQUEST })
   @IsOptional()
   @IsInt()
   @Min(1)
-  @Max(100)
+  @Max(MAX_CODES_PER_REQUEST)
   count?: number;
 }
