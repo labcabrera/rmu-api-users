@@ -1,7 +1,7 @@
-import { Page } from '../../src/modules/shared/domain/entities/page';
+import { Page } from '../../src/modules/shared/application/pagination/page';
 import { ConflictError, NotFoundError } from '../../src/modules/shared/domain/errors/errors';
 import { UserSummary } from '../../src/modules/user/application/models/user-summary';
-import { UserRepository } from '../../src/modules/user/application/ports/user-repository';
+import { UserRepository } from '../../src/modules/user/application/ports/user-repository.port';
 import { User } from '../../src/modules/user/domain/aggregates/user';
 import { UserProps } from '../../src/modules/user/domain/aggregates/user-props';
 

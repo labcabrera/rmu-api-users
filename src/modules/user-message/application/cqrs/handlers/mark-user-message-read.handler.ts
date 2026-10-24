@@ -2,7 +2,7 @@ import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundError } from '../../../../shared/domain/errors/errors';
 import { UserMessage } from '../../../domain/aggregates/user-message';
-import { UserMessageRepository } from '../../ports/user-message.repository';
+import { UserMessageRepository } from '../../ports/user-message-repository.port';
 import { MarkUserMessageReadCommand } from '../commands/mark-user-message-read.command';
 
 @CommandHandler(MarkUserMessageReadCommand)

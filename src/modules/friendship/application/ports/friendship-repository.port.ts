@@ -1,4 +1,4 @@
-import { Page } from '../../../shared/domain/entities/page';
+import { Page } from '../../../shared/application/pagination/page';
 import { QueryCriteria } from '../../../shared/application/criteria/query-criteria';
 import { Friendship } from '../../domain/aggregates/friendship';
 
@@ -10,3 +10,5 @@ export interface FriendshipRepository {
   update(id: string, friendship: Partial<Friendship>): Promise<Friendship>;
   deleteById(id: string): Promise<Friendship | null>;
 }
+
+export const FRIENDSHIP_REPOSITORY = Symbol('FriendshipRepository');

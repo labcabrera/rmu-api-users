@@ -2,7 +2,7 @@ import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { ConflictError, ValidationError } from '../../../../shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeRepository } from '../../ports/activation-code.repository';
+import { ActivationCodeRepository } from '../../ports/activation-code-repository.port';
 import { CheckActivationCodeQuery } from '../queries/check-activation-code.query';
 
 /** Tells whether a code can be redeemed. The lookup is an exact, parameterized match on the code value. */

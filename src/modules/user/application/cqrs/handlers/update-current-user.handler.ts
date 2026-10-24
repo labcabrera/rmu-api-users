@@ -4,8 +4,8 @@ import { ConflictError, NotFoundError, ValidationError } from '../../../../share
 import { User } from '../../../domain/aggregates/user';
 import { UserUpdatedEvent } from '../../../domain/events/user-events';
 import { DISPLAY_NAME_MAX_LENGTH, DISPLAY_NAME_MIN_LENGTH, DISPLAY_NAME_PATTERN } from '../../../domain/services/display-name';
-import { UserEventBusPort } from '../../ports/user-event-bus.port';
-import { UserRepository } from '../../ports/user-repository';
+import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../../../shared/application/ports/domain-event-publisher.port';
+import { UserRepository } from '../../ports/user-repository.port';
 import { UpdateCurrentUserCommand } from '../commands/update-current-user.command';
 
 /** Updates the RMU profile only. The Keycloak account (username included) is never touched. */
@@ -15,7 +15,7 @@ export class UpdateCurrentUserHandler implements ICommandHandler<UpdateCurrentUs
 
   constructor(
     @Inject(UserRepository) private readonly userRepository: UserRepository,
-    @Inject(UserEventBusPort) private readonly userEventBus: UserEventBusPort,
+    @Inject(DOMAIN_EVENT_PUBLISHER) private readonly events: DomainEventPublisher,
   ) {}
 
   async execute(command: UpdateCurrentUserCommand): Promise<User> {
@@ -37,7 +37,7 @@ export class UpdateCurrentUserHandler implements ICommandHandler<UpdateCurrentUs
     });
     const updated = await this.userRepository.update(user.id, user);
     this.logger.verbose(`Profile ${user.id} updated`);
-    this.userEventBus.publish(new UserUpdatedEvent(updated.getProps()));
+    void this.events.publish('user', new UserUpdatedEvent(updated.getProps()));
     return updated;
   }
 

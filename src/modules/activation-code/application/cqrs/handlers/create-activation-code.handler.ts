@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ConflictError } from '../../../../shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeRepository } from '../../ports/activation-code.repository';
+import { ActivationCodeRepository } from '../../ports/activation-code-repository.port';
 import { CreateActivationCodeCommand } from '../commands/create-activation-code.command';
-import { ActivationCodeGuardAdapter } from '../../../infrastructure/security/realm-guard.adapter';
+import { ActivationCodeGuardAdapter } from '../../../infrastructure/security/activation-code-guard.adapter';
 
 @CommandHandler(CreateActivationCodeCommand)
 export class CreateActivationCodeHandler implements ICommandHandler<CreateActivationCodeCommand, ActivationCode[]> {

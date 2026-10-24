@@ -2,9 +2,9 @@ import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ConflictError, NotFoundError, ValidationError } from '../../../../shared/domain/errors/errors';
 import { IamUserPort, UserGroup } from '../../../../user/application/ports/iam-user.port';
-import { UserRepository } from '../../../../user/application/ports/user-repository';
+import { UserRepository } from '../../../../user/application/ports/user-repository.port';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeRepository } from '../../ports/activation-code.repository';
+import { ActivationCodeRepository } from '../../ports/activation-code-repository.port';
 import { ActivateActivationCodeCommand } from '../commands/activate-activation-code.command';
 
 /** Redeems a single-use code: it is claimed atomically first, then the user is added to the Keycloak groups. */

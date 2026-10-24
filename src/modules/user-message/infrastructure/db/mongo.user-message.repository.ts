@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { QueryCriteria } from '../../../shared/application/criteria/query-criteria';
-import { Page } from '../../../shared/domain/entities/page';
+import { Page } from '../../../shared/application/pagination/page';
 import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository';
-import { RsqlParser } from '../../../shared/infrastructure/persistence/repositories/rsql-parser';
-import { UserMessageRepository } from '../../application/ports/user-message.repository';
+import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser';
+import { UserMessageRepository } from '../../application/ports/user-message-repository.port';
 import { UserMessage } from '../../domain/aggregates/user-message';
 import { UserMessageDocument, UserMessageModel } from '../persistence/models/user-message.model';
 

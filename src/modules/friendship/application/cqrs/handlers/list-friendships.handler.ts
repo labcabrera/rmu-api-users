@@ -1,14 +1,14 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { QueryCriteria } from '../../../../shared/application/criteria/query-criteria';
-import { Page } from '../../../../shared/domain/entities/page';
+import { Page } from '../../../../shared/application/pagination/page';
 import { Friendship } from '../../../domain/aggregates/friendship';
-import type { FriendshipRepository } from '../../ports/friendship.repository';
+import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port';
 import { ListFriendshipsQuery } from '../queries/list-friendships.query';
 
 @QueryHandler(ListFriendshipsQuery)
 export class ListFriendshipsHandler implements IQueryHandler<ListFriendshipsQuery, Page<Friendship>> {
-  constructor(@Inject('FriendshipRepository') private readonly friendshipRepository: FriendshipRepository) {}
+  constructor(@Inject(FRIENDSHIP_REPOSITORY) private readonly friendshipRepository: FriendshipRepository) {}
 
   async execute(query: ListFriendshipsQuery): Promise<Page<Friendship>> {
     //TODO check security filter

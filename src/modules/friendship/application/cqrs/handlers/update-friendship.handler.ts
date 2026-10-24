@@ -2,12 +2,12 @@ import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ForbiddenError, NotFoundError } from '../../../../shared/domain/errors/errors';
 import { Friendship } from '../../../domain/aggregates/friendship';
-import type { FriendshipRepository } from '../../ports/friendship.repository';
+import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port';
 import { UpdateFriendshipCommand } from '../commands/update-friendship.command';
 
 @CommandHandler(UpdateFriendshipCommand)
 export class UpdateFriendshipHandler implements ICommandHandler<UpdateFriendshipCommand, Friendship> {
-  constructor(@Inject('FriendshipRepository') private readonly friendshipRepository: FriendshipRepository) {}
+  constructor(@Inject(FRIENDSHIP_REPOSITORY) private readonly friendshipRepository: FriendshipRepository) {}
 
   async execute(command: UpdateFriendshipCommand): Promise<Friendship> {
     const friendship = await this.friendshipRepository.findById(command.id);

@@ -3,7 +3,7 @@ import { ActivateActivationCodeHandler } from '../../../../../../src/modules/act
 import { CheckActivationCodeHandler } from '../../../../../../src/modules/activation-code/application/cqrs/handlers/check-activation-code.handler';
 import { ActivateActivationCodeCommand } from '../../../../../../src/modules/activation-code/application/cqrs/commands/activate-activation-code.command';
 import { CheckActivationCodeQuery } from '../../../../../../src/modules/activation-code/application/cqrs/queries/check-activation-code.query';
-import { ActivationCodeRepository } from '../../../../../../src/modules/activation-code/application/ports/activation-code.repository';
+import { ActivationCodeRepository } from '../../../../../../src/modules/activation-code/application/ports/activation-code-repository.port';
 import { ActivationCode } from '../../../../../../src/modules/activation-code/domain/aggregates/activation-code';
 import { ActivationCodeProps } from '../../../../../../src/modules/activation-code/domain/aggregates/activation-code-props';
 import { ConflictError, NotFoundError, ValidationError } from '../../../../../../src/modules/shared/domain/errors/errors';

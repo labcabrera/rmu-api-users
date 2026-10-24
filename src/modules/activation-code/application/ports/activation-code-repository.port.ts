@@ -1,7 +1,7 @@
-import { BaseRepository } from '../../../shared/application/ports/base-repository';
+import { BaseRepository } from '../../../shared/application/ports/base-repository.port';
 import { ActivationCode } from '../../domain/aggregates/activation-code';
 import { QueryCriteria, SortCriteria } from '../../../shared/application/criteria/query-criteria';
-import { Page } from '../../../shared/domain/entities/page';
+import { Page } from '../../../shared/application/pagination/page';
 
 export abstract class ActivationCodeRepository implements BaseRepository<ActivationCode> {
   abstract findById(id: string): Promise<ActivationCode | null>;

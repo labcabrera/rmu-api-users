@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../shared/infrastructure/security/auth.module';
 import { SharedModule } from '../shared/shared.module';
 import { ActivateActivationCodeHandler } from './application/cqrs/handlers/activate-activation-code.handler';
 import { CreateActivationCodeHandler } from './application/cqrs/handlers/create-activation-code.handler';
@@ -9,13 +9,13 @@ import { DeleteActivationCodeHandler } from './application/cqrs/handlers/delete-
 import { GetActivationCodeHandler } from './application/cqrs/handlers/get-activation-code.handler';
 import { ListActivationCodesHandler } from './application/cqrs/handlers/list-activation-codes.handler';
 import { UpdateActivationCodeHandler } from './application/cqrs/handlers/update-activation-code.handler';
-import { MongoActivationCodeRepository } from './infrastructure/db/mongo-activation-code.repository';
+import { MongoActivationCodeRepository } from './infrastructure/db/mongo.activation-code.repository';
 import { ActivationCodeModel, ActivationCodeSchema } from './infrastructure/persistence/models/activation-code.model';
 import { ActivationCodeController } from './interfaces/http/activation-code.controller';
 import { UserModule } from '../user/user.module';
-import { ActivationCodeRepository } from './application/ports/activation-code.repository';
+import { ActivationCodeRepository } from './application/ports/activation-code-repository.port';
 import { CheckActivationCodeHandler } from './application/cqrs/handlers/check-activation-code.handler';
-import { ActivationCodeGuardAdapter } from './infrastructure/security/realm-guard.adapter';
+import { ActivationCodeGuardAdapter } from './infrastructure/security/activation-code-guard.adapter';
 
 const CommandHandlers = [
   ActivateActivationCodeHandler,

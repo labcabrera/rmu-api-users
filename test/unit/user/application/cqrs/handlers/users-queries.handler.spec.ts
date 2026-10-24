@@ -1,11 +1,11 @@
 import { ForbiddenError } from '../../../../../../src/modules/shared/domain/errors/errors';
-import { GetUsersHandler } from '../../../../../../src/modules/user/application/cqrs/handlers/list-users.handler';
+import { GetUsersHandler } from '../../../../../../src/modules/user/application/cqrs/handlers/get-users.handler';
 import {
   SEARCH_USERS_MAX_SIZE,
   SearchUsersHandler,
 } from '../../../../../../src/modules/user/application/cqrs/handlers/search-users.handler';
-import { GetUsersQuery } from '../../../../../../src/modules/user/application/cqrs/queries/get-users-query';
-import { SearchUsersQuery } from '../../../../../../src/modules/user/application/cqrs/queries/search-users-query';
+import { GetUsersQuery } from '../../../../../../src/modules/user/application/cqrs/queries/get-users.query';
+import { SearchUsersQuery } from '../../../../../../src/modules/user/application/cqrs/queries/search-users.query';
 import { User } from '../../../../../../src/modules/user/domain/aggregates/user';
 import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo';
 import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository';

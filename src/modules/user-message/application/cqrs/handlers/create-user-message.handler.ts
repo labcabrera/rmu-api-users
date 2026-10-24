@@ -1,9 +1,9 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserMessage } from '../../../domain/aggregates/user-message';
-import { UserMessageRepository } from '../../ports/user-message.repository';
+import { UserMessageRepository } from '../../ports/user-message-repository.port';
 import { CreateUserMessageCommand } from '../commands/create-user-message.command';
-import { UserRepository } from '../../../../user/application/ports/user-repository';
+import { UserRepository } from '../../../../user/application/ports/user-repository.port';
 
 @CommandHandler(CreateUserMessageCommand)
 export class CreateUserMessageHandler implements ICommandHandler<CreateUserMessageCommand, UserMessage> {

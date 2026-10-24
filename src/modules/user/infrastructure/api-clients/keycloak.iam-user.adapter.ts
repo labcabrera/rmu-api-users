@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
-import { TokenService } from '../../../auth/token.service';
+import { TokenService } from '../../../shared/infrastructure/security/token.service';
 import { IamUserPort, UserApiResponse, UserGroup } from '../../application/ports/iam-user.port';
 
 interface KeycloakUserRepresentation {
@@ -28,17 +27,8 @@ export class KeycloakIamUserAdapter extends IamUserPort {
   }
 
   async findById(id: string): Promise<UserApiResponse | null> {
-    try {
-      const response = await axios.get<KeycloakUserRepresentation>(`${this.keycloakBaseUrl}/users/${encodeURIComponent(id)}`, {
-        headers: await this.headers(),
-      });
-      return response.data ? this.map(response.data) : null;
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 404) {
-        return null;
-      }
-      throw err;
-    }
+    const user = await this.request<KeycloakUserRepresentation>('GET', `/users/${encodeURIComponent(id)}`, { notFoundAsNull: true });
+    return user ? this.map(user) : null;
   }
 
   findByUsername(username: string): Promise<UserApiResponse | null> {
@@ -50,13 +40,11 @@ export class KeycloakIamUserAdapter extends IamUserPort {
   }
 
   async addUserToGroup(userId: string, groupId: string): Promise<void> {
-    const uri = `${this.keycloakBaseUrl}/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupId)}`;
-    await axios.put(uri, {}, { headers: await this.headers() });
+    await this.request('PUT', `/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupId)}`, { body: {} });
   }
 
   async findGroups(): Promise<UserGroup[]> {
-    const response = await axios.get<UserGroup[]>(`${this.keycloakBaseUrl}/groups`, { headers: await this.headers() });
-    return response.data;
+    return (await this.request<UserGroup[]>('GET', '/groups')) ?? [];
   }
 
   private async findExact(
@@ -65,15 +53,33 @@ export class KeycloakIamUserAdapter extends IamUserPort {
     matches: (user: KeycloakUserRepresentation) => boolean,
   ): Promise<UserApiResponse | null> {
     const params = new URLSearchParams({ [param]: value, exact: 'true', briefRepresentation: 'false', max: '2' });
-    const response = await axios.get<KeycloakUserRepresentation[]>(`${this.keycloakBaseUrl}/users?${params.toString()}`, {
-      headers: await this.headers(),
-    });
-    const user = (response.data ?? []).find(matches);
+    const users = await this.request<KeycloakUserRepresentation[]>('GET', `/users?${params.toString()}`);
+    const user = (users ?? []).find(matches);
     return user ? this.map(user) : null;
   }
 
-  private async headers(): Promise<Record<string, string>> {
-    return { Authorization: `Bearer ${await this.tokenService.getToken()}` };
+  /**
+   * One admin API call with the service account token. A status other than 2xx throws, as axios did before (spec
+   * 020), except a 404 when `notFoundAsNull` is set. An empty body is undefined.
+   */
+  private async request<T>(
+    method: 'GET' | 'PUT',
+    path: string,
+    options: { body?: unknown; notFoundAsNull?: boolean } = {},
+  ): Promise<T | undefined> {
+    const headers: Record<string, string> = { Authorization: `Bearer ${await this.tokenService.getToken()}` };
+    if (options.body !== undefined) headers['Content-Type'] = 'application/json';
+    const response = await fetch(`${this.keycloakBaseUrl}${path}`, {
+      method,
+      headers,
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+    });
+    if (response.status === 404 && options.notFoundAsNull) return undefined;
+    if (!response.ok) {
+      throw new Error(`Keycloak admin API ${method} ${path.split('?')[0]} failed with status ${response.status}`);
+    }
+    const text = await response.text();
+    return text ? (JSON.parse(text) as T) : undefined;
   }
 
   private map(user: KeycloakUserRepresentation): UserApiResponse {
