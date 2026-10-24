@@ -14,9 +14,9 @@ image::diagrams/c4-context.png[API Core Context System]
 
 == Running locally
 
-Start the infrastructure from `rmu-platform` (`make up-infra`), copy `.env.example` to `.env` and run `npm run start:dev`.
+Start the infrastructure from `rmu-platform` (`make up-infra`), copy `.env.example` to `.env` and run `pnpm start:dev` (see <<Development>>).
 The service listens on `PORT` (default 3010) and serves Swagger UI at `/api-docs`.
-Every variable is validated at startup by the Joi schema in `src/app.module.ts`; a missing one stops the service.
+Every variable is validated at startup by the Joi schema in `src/config/env.schema.ts`; a missing one stops the service.
 
 [cols="1,3"]
 |===
@@ -33,8 +33,7 @@ Every variable is validated at startup by the Joi schema in `src/app.module.ts`;
 |`RMU_USERS_ACTIVATION_CODE_SIZE` |Length of generated activation codes (default 8).
 |===
 
-`npm run lint`, `npm run build`, `npm test` (unit tests under `test/unit`) and `npm run test:e2e` (`test/*.e2e-spec.ts`; no Mongo,
-Kafka or Keycloak needed: the e2e signs its own tokens against a local JWKS and uses in-memory adapters).
+The HTTP variables (`RMU_CORS_ORIGINS`, `RMU_THROTTLE_*`, `RMU_TRUST_PROXY`) are described in <<Development>>.
 
 == Authentication
 
@@ -99,3 +98,38 @@ logged and never fails the request.
 Domain errors are returned as `{ "error": "<ErrorName>", "message": "...", "timestamp": "..." }` with the status of the error
 (`400` validation, `403` forbidden, `404` not found, `409` conflict). Invalid request bodies or query parameters are rejected
 by the global `ValidationPipe` (`whitelist`, `transform`) with `400`; unknown properties are stripped.
+
+== Development
+
+This API follows the platform and conventions of https://github.com/labcabrera/rmu-api-core[rmu-api-core] (workspace
+spec 020): Node.js 24 (`nvm use`), pnpm 10 through corepack, native ESM with relative `.js` imports, SWC build, Vitest
+and the hexagonal + CQRS layout of core's README (*Project layout*, *HTTP contract*).
+
+```bash
+cp .env.example .env   # host ports of the rmu-platform infrastructure (make up-infra)
+pnpm install
+pnpm start:dev         # http://localhost:3010, Swagger UI on /api-docs, OpenAPI JSON on /api-spec
+make check             # lint, typecheck, unit and e2e tests
+```
+
+[cols="1,3"]
+|===
+| Command | What it does
+
+| `pnpm build` / `pnpm typecheck` | SWC build to `dist/` / `tsc --noEmit`
+| `pnpm lint` / `pnpm format` | typed ESLint + Prettier / Prettier over `src` and `test`
+| `pnpm test` | unit tests (`test/unit`)
+| `pnpm test:e2e` | one file per resource booting `AppModule` against mongodb-memory-server, with tokens signed against a local JWKS; calls to other APIs and the Kafka producer are replaced (`test/e2e/support`)
+| `pnpm test:cov` | unit and e2e tests with the coverage thresholds of `vitest.config.ts` (what CI runs)
+| `make docker-build` / `make docker-run` | image `labcabrera/rmu-api-users:latest` (`node:24-bookworm-slim`, `node` user, `HEALTHCHECK`); `docker-run` needs `.env.docker`
+| `make create-release` | semantic-release from a clean `develop` into `master`
+|===
+
+The Joi schema in `src/config/env.schema.ts` fails startup on a missing required variable. Besides `PORT` (`3010`),
+`LOG_LEVEL` (`info`) and `RMU_MONGO_USERS_URI`, the HTTP layer reads `RMU_CORS_ORIGINS` (empty: no CORS, browsers come through the
+gateway), `RMU_THROTTLE_LIMIT` / `RMU_THROTTLE_TTL_MS` (`300` per `60000` ms and client IP, `0` turns it off) and
+`RMU_TRUST_PROXY` (`loopback, linklocal, uniquelocal`).
+
+Errors answer `{ statusCode, error, code, message, timestamp, path }`. Responses carry the `version` of the entity and a
+`PATCH` may send it back: a stale one is a 409 `version-conflict`. `size` goes up to 100.
+Open problems found during the migration are listed in `docs/reports/api-template-rollout-findings.md` of the workspace.
