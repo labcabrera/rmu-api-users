@@ -100,6 +100,24 @@ logged and never fails the request.
   then adds the user to the Keycloak groups of the code's features. A used code answers `409`, an unknown one `404`, an expired
   one `400`. If the group assignment fails the code is released.
 
+* The code value is unique across owners (index `code_1`, unique): a value taken by another code, whoever owns it, answers
+  `409 duplicate-key`.
+
+=== Moving an existing database to the unique index
+
+Before spec 021 the unique index was `owner` + `code`, so two admins could share a value. Mongoose does not replace an
+existing index, so a database created before needs `scripts/activation-code-unique-index.mjs` once. It reads the connection
+string from `RMU_MONGO_USERS_URI` in the environment (never from `.env`), lists the values that several codes share and,
+outside a dry run, replaces `code_1` and `owner_1_code_1` with the unique `code_1`. With duplicates it changes nothing and
+exits with `1`; resolve them by hand first (keep the redeemed code, delete or change the others).
+
+[source,bash]
+----
+export RMU_MONGO_USERS_URI='mongodb://<user>:<password>@<host>:27017/rmu-users?authSource=admin'
+DRY_RUN=1 node scripts/activation-code-unique-index.mjs   # report only
+node scripts/activation-code-unique-index.mjs             # create the unique index (idempotent)
+----
+
 == Friendships and messages
 
 Creating (a friendship request, a message) needs the `rmu-user` or `rmu-admin` group: a token without groups is read-only

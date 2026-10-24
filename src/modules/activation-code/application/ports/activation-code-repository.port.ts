@@ -12,7 +12,7 @@ export interface ActivationCodeRepository extends BaseRepository<ActivationCode>
     filter?: QueryCriteria,
     sort?: SortCriteria,
   ): Promise<Page<ActivationCode>>;
-  /** Throws ConflictError (`duplicate-key`) when the id or the owner's code already exists. */
+  /** Throws ConflictError (`duplicate-key`) when the id or the code value already exists (whoever owns it). */
   save(entity: ActivationCode): Promise<ActivationCode>;
   /** Throws ConflictError (`version-conflict`) when the code changed since it was loaded. */
   update(entity: ActivationCode): Promise<ActivationCode>;
