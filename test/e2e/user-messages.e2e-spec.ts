@@ -1,12 +1,22 @@
 import request from 'supertest';
-import { ids, startApp, USERS, type E2eApp, type UserName } from './support/app.js';
+import { ids, provision, startApp, USERS, type E2eApp, type UserName } from './support/app.js';
 
 type MessageBody = { id: string; userId: string; from: string; message: string; type: string; readed: string | null; createdAt: string };
 
 let e2e: E2eApp;
 
+// owner (alice) and other (bob) are accepted friends; noRole (guest) and admin are friends of nobody.
 beforeAll(async () => {
   e2e = await startApp();
+  await provision(e2e, 'owner', 'other', 'noRole', 'admin');
+  const friendship = await request(e2e.server)
+    .post('/v1/friendships')
+    .set('Authorization', e2e.auth('owner'))
+    .send({ addresseeName: 'bob' });
+  await request(e2e.server)
+    .patch(`/v1/friendships/${(friendship.body as { id: string }).id}`)
+    .set('Authorization', e2e.auth('other'))
+    .send({ status: 'accepted' });
 });
 
 afterAll(async () => {
@@ -19,19 +29,22 @@ const send = (user: UserName, recipientId: string, message = 'Hello', type = 'in
 const inbox = (user: UserName) => request(e2e.server).get('/v1/user-messages').set('Authorization', e2e.auth(user));
 
 describe('send', () => {
-  it('stores a message from the caller to the recipient', async () => {
+  it('stores a message from the caller to an accepted friend', async () => {
     const response = await send('owner', USERS.other.sub, 'Hi Bob', 'alert');
     expect(response.status).toBe(201);
     expect(response.body).toMatchObject({ userId: USERS.other.sub, from: USERS.owner.sub, message: 'Hi Bob', type: 'alert', readed: null });
   });
 
-  // F-users-09: any authenticated user, even without roles, sends to any id, including one that is no user at all.
-  it('accepts a message from a user without roles to an unknown recipient', async () => {
-    expect((await send('noRole', 'no-such-user')).status).toBe(201);
+  it('rejects a message to an unknown recipient [F-users-09]', async () => {
+    const response = await send('owner', 'no-such-user');
+    expect(response.status).toBe(404);
+    expect((response.body as { code: string }).code).toBe('not-found');
   });
 
-  it.skip('rejects a message to an unknown recipient [F-users-09]', async () => {
-    expect((await send('owner', 'no-such-user')).status).toBe(404);
+  it('rejects a message to a user that is not an accepted friend [F-users-09]', async () => {
+    const response = await send('owner', USERS.noRole.sub);
+    expect(response.status).toBe(403);
+    expect((response.body as { code: string }).code).toBe('not-friends');
   });
 
   it('rejects an unknown type, a missing recipient and a message over 1000 characters', async () => {
@@ -42,25 +55,15 @@ describe('send', () => {
     ).toBe(400);
     expect((await send('owner', USERS.other.sub, 'x'.repeat(1001))).status).toBe(400);
   });
-
-  it('requires a token', async () => {
-    expect((await request(e2e.server).post('/v1/user-messages').send({ recipientId: 'x', message: 'Hi', type: 'info' })).status).toBe(401);
-  });
 });
 
 describe('inbox', () => {
-  // F-users-08: the query filters on recipientId, a field the messages do not have (they store userId), so the inbox
-  // is always empty. The q parameter is ignored.
-  it('lists no message, not even the unread ones of the caller', async () => {
+  it.skip('lists the messages of the caller, newest first [F-users-08]', async () => {
     await send('admin', USERS.owner.sub, 'Welcome');
+    await send('other', USERS.owner.sub, 'Hi Alice');
     const response = await inbox('owner');
     expect(response.status).toBe(200);
-    expect(ids(response.body)).toEqual([]);
-  });
-
-  it.skip('lists the unread messages of the caller, newest first [F-users-08]', async () => {
-    const response = await inbox('owner');
-    expect((response.body as { content: MessageBody[] }).content.map(m => m.message)).toEqual(['Welcome']);
+    expect((response.body as { content: MessageBody[] }).content.map(m => m.message)).toEqual(['Hi Alice', 'Welcome']);
   });
 });
 
@@ -84,5 +87,34 @@ describe('read and delete', () => {
 
   it('answers 404 for an unknown message', async () => {
     expect((await request(e2e.server).patch('/v1/user-messages/unknown/read').set('Authorization', e2e.auth('owner'))).status).toBe(404);
+  });
+});
+
+// Spec 021, decision 2: the recipient (owner of the message), the sender, another user, an admin, a user without roles
+// and no token, for each change.
+describe('permission matrix', () => {
+  it('sends with rmu-user (to a friend) or rmu-admin (to anybody) only', async () => {
+    expect((await send('other', USERS.owner.sub)).status).toBe(201);
+    expect((await send('admin', USERS.noRole.sub)).status).toBe(201);
+    expect((await send('noRole', USERS.owner.sub)).status).toBe(403);
+    expect(
+      (await request(e2e.server).post('/v1/user-messages').send({ recipientId: USERS.owner.sub, message: 'Hi', type: 'info' })).status,
+    ).toBe(401);
+  });
+
+  it.each([
+    ['mark as read', (id: string) => request(e2e.server).patch(`/v1/user-messages/${id}/read`), 200],
+    ['delete', (id: string) => request(e2e.server).delete(`/v1/user-messages/${id}`), 204],
+  ] as const)('lets only the recipient %s: 404 to anybody else', async (_action, call, ok) => {
+    const message = (await send('other', USERS.owner.sub, 'Matrix')).body as MessageBody;
+    for (const user of ['other', 'admin', 'noRole'] as const)
+      expect((await call(message.id).set('Authorization', e2e.auth(user))).status).toBe(404);
+    expect((await call(message.id)).status).toBe(401);
+    expect((await call(message.id).set('Authorization', e2e.auth('owner'))).status).toBe(ok);
+  });
+
+  it.skip('lists only the messages of the caller [F-users-08]', async () => {
+    expect(ids((await inbox('noRole')).body)).toHaveLength(1);
+    expect((await request(e2e.server).get('/v1/user-messages')).status).toBe(401);
   });
 });

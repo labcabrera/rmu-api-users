@@ -40,7 +40,10 @@ export class MessageController {
   @Post('')
   @ApiOperation({ operationId: 'createMessage', summary: 'Create user message' })
   @ApiCreatedResponse({ type: UserMessageDto, description: 'Created' })
-  @ApiErrors()
+  @ApiErrors({
+    403: 'Caller is not in the rmu-user or rmu-admin group, or the recipient is not an accepted friend (not-friends)',
+    404: 'Recipient not found',
+  })
   async create(@CurrentUser() user: AuthenticatedUser, @Body() body: CreateUserMessageDto): Promise<UserMessageDto> {
     const userId = user.id;
     const roles = user.roles;

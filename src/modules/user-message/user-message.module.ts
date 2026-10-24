@@ -12,6 +12,8 @@ import { UserMessageModel, UserMessageSchema } from './infrastructure/persistenc
 import { MessageController } from './interfaces/http/user-message.controller.js';
 import { USER_MESSAGE_REPOSITORY } from './application/ports/user-message-repository.port.js';
 import { UserModule } from '../user/user.module.js';
+import { FriendshipModule } from '../friendship/friendship.module.js';
+import { UserMessageGuard } from './infrastructure/security/user-message.guard.js';
 
 const CommandHandlers = [CreateUserMessageHandler, DeleteUserMessageHandler, MarkUserMessageReadHandler];
 const QueryHandlers = [GetUserMessagesHandler];
@@ -23,11 +25,13 @@ const QueryHandlers = [GetUserMessagesHandler];
     AuthModule,
     SharedModule,
     UserModule,
+    FriendshipModule,
   ],
   controllers: [MessageController],
   providers: [
     ...CommandHandlers,
     ...QueryHandlers,
+    UserMessageGuard,
     {
       provide: USER_MESSAGE_REPOSITORY,
       useClass: MongoUserMessageRepository,

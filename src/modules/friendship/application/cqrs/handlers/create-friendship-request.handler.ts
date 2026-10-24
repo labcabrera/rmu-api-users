@@ -5,6 +5,7 @@ import { ConflictError, ValidationError } from '../../../../shared/domain/errors
 import { Friendship } from '../../../domain/aggregates/friendship.js';
 import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port.js';
 import { type UserRepository, USER_REPOSITORY } from '../../../../user/application/ports/user-repository.port.js';
+import { FriendshipGuard } from '../../../infrastructure/security/friendship.guard.js';
 import { UserProvisioningService } from '../../../../user/application/services/user-provisioning.service.js';
 
 @CommandHandler(CreateFriendshipRequestCommand)
@@ -15,9 +16,11 @@ export class CreateFriendshipRequestHandler implements ICommandHandler<CreateFri
     @Inject(FRIENDSHIP_REPOSITORY) private readonly friendshipRepository: FriendshipRepository,
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(UserProvisioningService) private readonly userProvisioning: UserProvisioningService,
+    @Inject(FriendshipGuard) private readonly guard: FriendshipGuard,
   ) {}
 
   async execute(command: CreateFriendshipRequestCommand): Promise<Friendship> {
+    this.guard.checkCreate(command.roles);
     const requester = await this.userRepository.findById(command.userId);
     if (!requester) {
       throw new ValidationError('Requester user not found');

@@ -12,6 +12,7 @@ import { MongoFriendshipRepository } from './infrastructure/db/mongo.friendship.
 import { FriendshipModel, FriendshipSchema } from './infrastructure/persistence/models/friendship.model.js';
 import { FriendshipController } from './interfaces/http/friendship.controller.js';
 import { UserModule } from '../user/user.module.js';
+import { FriendshipGuard } from './infrastructure/security/friendship.guard.js';
 
 import { FRIENDSHIP_REPOSITORY } from './application/ports/friendship-repository.port.js';
 const CommandHandlers = [CreateFriendshipRequestHandler, DeleteFriendshipHandler, UpdateFriendshipHandler];
@@ -29,10 +30,12 @@ const QueryHandlers = [GetFriendshipHandler, ListFriendshipsHandler];
   providers: [
     ...CommandHandlers,
     ...QueryHandlers,
+    FriendshipGuard,
     {
       provide: FRIENDSHIP_REPOSITORY,
       useClass: MongoFriendshipRepository,
     },
   ],
+  exports: [FRIENDSHIP_REPOSITORY],
 })
 export class FriendshipModule {}
