@@ -13,7 +13,8 @@ export class ActivationCodeModel {
   @Prop({ type: Number, default: 0 })
   version: number;
 
-  @Prop({ type: String, required: true, index: true })
+  /** Unique across owners (F-users-11); scripts/activation-code-unique-index.mjs moves existing databases to it. */
+  @Prop({ type: String, required: true })
   code: string;
 
   @Prop({ type: String, required: true, index: true })
@@ -39,4 +40,4 @@ export class ActivationCodeModel {
 }
 
 export const ActivationCodeSchema = SchemaFactory.createForClass(ActivationCodeModel);
-ActivationCodeSchema.index({ owner: 1, code: 1 }, { unique: true });
+ActivationCodeSchema.index({ code: 1 }, { unique: true, name: 'code_1' });

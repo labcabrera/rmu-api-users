@@ -58,12 +58,30 @@ describe('send', () => {
 });
 
 describe('inbox', () => {
-  it.skip('lists the messages of the caller, newest first [F-users-08]', async () => {
+  it('lists the messages of the caller, newest first [F-users-08]', async () => {
     await send('admin', USERS.owner.sub, 'Welcome');
+    await new Promise(resolve => setTimeout(resolve, 5));
     await send('other', USERS.owner.sub, 'Hi Alice');
     const response = await inbox('owner');
     expect(response.status).toBe(200);
     expect((response.body as { content: MessageBody[] }).content.map(m => m.message)).toEqual(['Hi Alice', 'Welcome']);
+  });
+
+  it('filters with q inside the messages of the caller [F-users-08]', async () => {
+    const welcome = (await inbox('owner')).body as { content: MessageBody[] };
+    const id = welcome.content.find(m => m.message === 'Welcome')!.id;
+    await request(e2e.server).patch(`/v1/user-messages/${id}/read`).set('Authorization', e2e.auth('owner'));
+    const unread = await request(e2e.server).get('/v1/user-messages').query({ q: 'readed==null' }).set('Authorization', e2e.auth('owner'));
+    expect((unread.body as { content: MessageBody[] }).content.map(m => m.message)).toEqual(['Hi Alice']);
+    // The messages of another user cannot be reached through q.
+    const foreign = await request(e2e.server)
+      .get('/v1/user-messages')
+      .query({ q: `userId==${USERS.other.sub}` })
+      .set('Authorization', e2e.auth('owner'));
+    expect(ids(foreign.body)).toEqual([]);
+    expect(
+      (await request(e2e.server).get('/v1/user-messages').query({ q: 'userId==' }).set('Authorization', e2e.auth('owner'))).status,
+    ).toBe(400);
   });
 });
 
@@ -113,7 +131,7 @@ describe('permission matrix', () => {
     expect((await call(message.id).set('Authorization', e2e.auth('owner'))).status).toBe(ok);
   });
 
-  it.skip('lists only the messages of the caller [F-users-08]', async () => {
+  it('lists only the messages of the caller', async () => {
     expect(ids((await inbox('noRole')).body)).toHaveLength(1);
     expect((await request(e2e.server).get('/v1/user-messages')).status).toBe(401);
   });

@@ -241,8 +241,7 @@ describe('activate', () => {
     expect((await post('activate', 'noRole', { code: code.code })).status).toBe(201);
   });
 
-  // F-users-12: clearing activatedAt leaves activatedBy, so the code stays used and cannot be redeemed again.
-  it('keeps a code used after its activation date is cleared', async () => {
+  it('releases a code when its activation date is cleared [F-users-12]', async () => {
     const code = await createOne();
     await post('activate', 'owner', { code: code.code });
     const cleared = await request(e2e.server)
@@ -250,13 +249,13 @@ describe('activate', () => {
       .set('Authorization', e2e.auth('admin'))
       .send({ activatedAt: null });
     expect(cleared.status).toBe(200);
-    expect(cleared.body).toMatchObject({ activatedAt: null, activatedBy: USERS.owner.sub });
-    expect((await post('check', 'other', { code: code.code })).status).toBe(409);
+    expect(cleared.body).toMatchObject({ activatedAt: null, activatedBy: null });
+    expect((await post('check', 'other', { code: code.code })).status).toBe(201);
+    const again = await post('activate', 'other', { code: code.code });
+    expect(again.body).toMatchObject({ activatedBy: USERS.other.sub });
   });
 
-  // F-users-11: the value is only unique per owner. Another admin's code can take it (two codes, one value), and a
-  // value taken by a code of the same admin is a duplicate key that answers 500.
-  it('lets codes of two admins share a value, and answers 409 within one admin', async () => {
+  it('rejects a code value that another code already has, whoever owns it [F-users-11]', async () => {
     const first = await createOne();
     const second = await createOne();
     const otherAdmin = { sub: 'e2e-admin-3', preferred_username: 'admin3', groups: ['rmu-admin'] };
@@ -268,28 +267,19 @@ describe('activate', () => {
           .send({ features: ['core-law'] })
       ).body as CodeBody[]
     )[0];
-    const shared = await request(e2e.server)
-      .patch(`/v1/activation-codes/${foreign.id}`)
-      .set('Authorization', e2e.auth(otherAdmin))
-      .send({ code: first.code });
-    expect(shared.status).toBe(200);
-
-    const duplicate = await request(e2e.server)
-      .patch(`/v1/activation-codes/${second.id}`)
-      .set('Authorization', e2e.auth('admin'))
-      .send({ code: first.code });
-    // F-users-11: a 500 until phase 5, now the duplicate key is a 409.
-    expect(duplicate.status).toBe(409);
-    expect((duplicate.body as { code: string }).code).toBe('duplicate-key');
+    for (const [auth, id] of [
+      [e2e.auth(otherAdmin), foreign.id],
+      [e2e.auth('admin'), second.id],
+    ]) {
+      const response = await request(e2e.server).patch(`/v1/activation-codes/${id}`).set('Authorization', auth).send({ code: first.code });
+      expect(response.status).toBe(409);
+      expect((response.body as { code: string }).code).toBe('duplicate-key');
+    }
   });
 
-  it.skip('rejects a code value that another code already has [F-users-11]', async () => {
-    const first = await createOne();
-    const second = await createOne();
-    const response = await request(e2e.server)
-      .patch(`/v1/activation-codes/${second.id}`)
-      .set('Authorization', e2e.auth('admin'))
-      .send({ code: first.code });
-    expect(response.status).toBe(409);
+  it('stores the codes with a unique index on the value', async () => {
+    const indexes = await e2e.connection.collection('activation-codes').indexes();
+    expect(indexes.find(index => index.name === 'code_1')).toMatchObject({ key: { code: 1 }, unique: true });
+    expect(indexes.some(index => index.name === 'owner_1_code_1')).toBe(false);
   });
 });
