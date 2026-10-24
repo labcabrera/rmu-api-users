@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { HttpClient, isUpstreamHttpError } from '../../../shared/infrastructure/http/http-client.js';
 import { TokenService } from '../../../shared/infrastructure/security/token.service.js';
-import { IamUserPort, type UserApiResponse, type UserGroup } from '../../application/ports/iam-user.port.js';
+import { type IamUserPort, type UserApiResponse, type UserGroup } from '../../application/ports/iam-user.port.js';
 
 interface KeycloakUserRepresentation {
   readonly id: string;
@@ -15,14 +16,14 @@ interface KeycloakUserRepresentation {
 }
 
 @Injectable()
-export class KeycloakIamUserAdapter extends IamUserPort {
+export class KeycloakIamUserAdapter implements IamUserPort {
   private readonly keycloakBaseUrl: string;
 
   constructor(
     private readonly tokenService: TokenService,
+    private readonly http: HttpClient,
     configService: ConfigService,
   ) {
-    super();
     this.keycloakBaseUrl = configService.getOrThrow<string>('RMU_IAM_ADMIN_URI');
   }
 
@@ -59,27 +60,23 @@ export class KeycloakIamUserAdapter extends IamUserPort {
   }
 
   /**
-   * One admin API call with the service account token. A status other than 2xx throws, as axios did before (spec
-   * 020), except a 404 when `notFoundAsNull` is set. An empty body is undefined.
+   * One admin API call with the service account token, through the shared HttpClient (spec 021, decision 7): it has the
+   * `RMU_HTTP_TIMEOUT_MS` timeout (504 `upstream-timeout`), and a non-2xx answer is a 400 (400/422) or a 502, except a
+   * 404 when `notFoundAsNull` is set. An empty body is undefined.
    */
   private async request<T>(
     method: 'GET' | 'PUT',
     path: string,
     options: { body?: unknown; notFoundAsNull?: boolean } = {},
   ): Promise<T | undefined> {
-    const headers: Record<string, string> = { Authorization: `Bearer ${await this.tokenService.getToken()}` };
-    if (options.body !== undefined) headers['Content-Type'] = 'application/json';
-    const response = await fetch(`${this.keycloakBaseUrl}${path}`, {
-      method,
-      headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    });
-    if (response.status === 404 && options.notFoundAsNull) return undefined;
-    if (!response.ok) {
-      throw new Error(`Keycloak admin API ${method} ${path.split('?')[0]} failed with status ${response.status}`);
+    const url = `${this.keycloakBaseUrl}${path}`;
+    const token = await this.tokenService.getToken();
+    try {
+      return method === 'GET' ? await this.http.get<T>(url, { token }) : await this.http.put<T>(url, options.body, { token });
+    } catch (err) {
+      if (options.notFoundAsNull && isUpstreamHttpError(err) && err.status === 404) return undefined;
+      throw err;
     }
-    const text = await response.text();
-    return text ? (JSON.parse(text) as T) : undefined;
   }
 
   private map(user: KeycloakUserRepresentation): UserApiResponse {

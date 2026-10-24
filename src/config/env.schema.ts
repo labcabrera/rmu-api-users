@@ -23,5 +23,7 @@ export const envSchema = Joi.object({
   RMU_THROTTLE_LIMIT: Joi.number().integer().min(0).default(300),
   RMU_THROTTLE_TTL_MS: Joi.number().integer().min(1).default(60_000),
   RMU_TRUST_PROXY: Joi.string().default('loopback, linklocal, uniquelocal'),
+  // Timeout of the calls to other services (the Keycloak token and admin API): 504 `upstream-timeout` after it.
+  RMU_HTTP_TIMEOUT_MS: Joi.number().integer().min(1).default(10_000),
   RMU_USERS_ACTIVATION_CODE_SIZE: Joi.number().integer().min(4).max(64).default(8),
 });
