@@ -241,8 +241,7 @@ describe('activate', () => {
     expect((await post('activate', 'noRole', { code: code.code })).status).toBe(201);
   });
 
-  // F-users-12: clearing activatedAt leaves activatedBy, so the code stays used and cannot be redeemed again.
-  it('keeps a code used after its activation date is cleared', async () => {
+  it('releases a code when its activation date is cleared [F-users-12]', async () => {
     const code = await createOne();
     await post('activate', 'owner', { code: code.code });
     const cleared = await request(e2e.server)
@@ -250,8 +249,10 @@ describe('activate', () => {
       .set('Authorization', e2e.auth('admin'))
       .send({ activatedAt: null });
     expect(cleared.status).toBe(200);
-    expect(cleared.body).toMatchObject({ activatedAt: null, activatedBy: USERS.owner.sub });
-    expect((await post('check', 'other', { code: code.code })).status).toBe(409);
+    expect(cleared.body).toMatchObject({ activatedAt: null, activatedBy: null });
+    expect((await post('check', 'other', { code: code.code })).status).toBe(201);
+    const again = await post('activate', 'other', { code: code.code });
+    expect(again.body).toMatchObject({ activatedBy: USERS.other.sub });
   });
 
   // F-users-11: the value is only unique per owner. Another admin's code can take it (two codes, one value), and a

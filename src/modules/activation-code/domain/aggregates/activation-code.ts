@@ -41,6 +41,8 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
     if (props.expiresAt !== undefined) this.expiresAt = props.expiresAt;
     if (props.activatedAt !== undefined) this.activatedAt = props.activatedAt;
     if (props.activatedBy !== undefined) this.activatedBy = props.activatedBy ?? null;
+    // Clearing the activation date releases the code: without the user it can be redeemed again (F-users-12).
+    if (props.activatedAt === null) this.activatedBy = null;
     this.updatedAt = new Date();
   }
 
