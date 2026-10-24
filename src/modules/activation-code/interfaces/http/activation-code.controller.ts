@@ -47,7 +47,7 @@ export class ActivationCodeController {
   @Get('')
   @ApiOperation({ operationId: 'listActivationCodes', summary: 'List activation codes' })
   @ApiOkResponse({ type: ActivationCodePageDto, description: 'Success' })
-  @ApiErrors()
+  @ApiErrors({ 403: 'Caller is not in the rmu-admin group' })
   async find(@CurrentUser() user: AuthenticatedUser, @Query() dto: PagedQueryDto): Promise<ActivationCodePageDto> {
     const userId = user.id;
     const roles = user.roles;
@@ -59,10 +59,9 @@ export class ActivationCodeController {
   @Get(':id')
   @ApiOperation({ operationId: 'getActivationCode', summary: 'Get activation code by id' })
   @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
-  @ApiErrors({ 404: 'Activation code not found' })
+  @ApiErrors({ 403: 'Caller is not in the rmu-admin group', 404: 'Activation code not found' })
   async findById(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string): Promise<ActivationCodeDto> {
-    const owner = user.id;
-    const query = new GetActivationCodeQuery(id, owner);
+    const query = new GetActivationCodeQuery(id, user.id, user.roles);
     const activationCode = await this.queryBus.execute<GetActivationCodeQuery, ActivationCode>(query);
     return ActivationCodeDto.fromEntity(activationCode);
   }
@@ -79,16 +78,20 @@ export class ActivationCodeController {
   @Patch(':id')
   @ApiOperation({ operationId: 'updateActivationCode', summary: 'Update activation code' })
   @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
-  @ApiErrors({ 404: 'Activation code not found', 409: 'Stale version (version-conflict) or code already in use (duplicate-key)' })
+  @ApiErrors({
+    403: 'Caller is not in the rmu-admin group',
+    404: 'Activation code not found',
+    409: 'Stale version (version-conflict) or code already in use (duplicate-key)',
+  })
   async update(
     @CurrentUser() user: AuthenticatedUser,
     @Param('id') id: string,
     @Body() body: UpdateActivationCodeDto,
   ): Promise<ActivationCodeDto> {
-    const owner = user.id;
     const command = new UpdateActivationCodeCommand(
       id,
-      owner,
+      user.id,
+      user.roles,
       body.code,
       body.features,
       body.expiresAt ? new Date(body.expiresAt) : undefined,
@@ -114,9 +117,8 @@ export class ActivationCodeController {
   @Delete(':id')
   @ApiOperation({ operationId: 'deleteActivationCode', summary: 'Delete activation code' })
   @ApiNoContentResponse({ description: 'Deleted' })
-  @ApiErrors({ 404: 'Activation code not found' })
+  @ApiErrors({ 403: 'Caller is not in the rmu-admin group', 404: 'Activation code not found' })
   async delete(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string): Promise<void> {
-    const owner = user.id;
-    await this.commandBus.execute<DeleteActivationCodeCommand, ActivationCode>(new DeleteActivationCodeCommand(id, owner));
+    await this.commandBus.execute<DeleteActivationCodeCommand, ActivationCode>(new DeleteActivationCodeCommand(id, user.id, user.roles));
   }
 }

@@ -1,6 +1,11 @@
-export class DeleteActivationCodeCommand {
+import { AuthenticatedCommand } from '../../../../shared/application/cqrs/authenticated-command.js';
+
+export class DeleteActivationCodeCommand extends AuthenticatedCommand {
   constructor(
     public readonly id: string,
-    public readonly owner: string,
-  ) {}
+    userId: string,
+    roles: string[],
+  ) {
+    super(userId, roles);
+  }
 }
