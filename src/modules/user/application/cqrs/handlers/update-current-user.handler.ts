@@ -1,9 +1,9 @@
 import { Inject, Logger } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ConflictError, NotFoundError, ValidationError } from 'src/modules/shared/domain/errors/errors';
-import { User } from 'src/modules/user/domain/aggregates/user';
-import { UserUpdatedEvent } from 'src/modules/user/domain/events/user-events';
-import { DISPLAY_NAME_MAX_LENGTH, DISPLAY_NAME_MIN_LENGTH, DISPLAY_NAME_PATTERN } from 'src/modules/user/domain/services/display-name';
+import { ConflictError, NotFoundError, ValidationError } from '../../../../shared/domain/errors/errors';
+import { User } from '../../../domain/aggregates/user';
+import { UserUpdatedEvent } from '../../../domain/events/user-events';
+import { DISPLAY_NAME_MAX_LENGTH, DISPLAY_NAME_MIN_LENGTH, DISPLAY_NAME_PATTERN } from '../../../domain/services/display-name';
 import { UserEventBusPort } from '../../ports/user-event-bus.port';
 import { UserRepository } from '../../ports/user-repository';
 import { UpdateCurrentUserCommand } from '../commands/update-current-user.command';

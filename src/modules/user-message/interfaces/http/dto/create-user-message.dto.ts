@@ -13,7 +13,7 @@ export class CreateUserMessageDto {
   @IsString()
   recipientId: string;
 
-  @ApiProperty({ description: 'Message type', enum: MESSAGE_TYPES, example: 'info' })
+  @ApiProperty({ type: String, description: 'Message type', enum: MESSAGE_TYPES, example: 'info' })
   @IsIn(MESSAGE_TYPES)
   type: MessageType;
 }

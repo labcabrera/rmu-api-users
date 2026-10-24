@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from 'src/modules/auth/auth.module';
+import { AuthModule } from '../auth/auth.module';
 import { SharedModule } from '../shared/shared.module';
 import { CreateFriendshipRequestHandler } from './application/cqrs/handlers/create-friendship-request.handler';
 import { DeleteFriendshipHandler } from './application/cqrs/handlers/delete-friendship.handler';

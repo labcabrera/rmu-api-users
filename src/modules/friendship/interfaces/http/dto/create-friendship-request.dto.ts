@@ -12,7 +12,7 @@ export class CreateFriendshipRequestDto {
   @IsString()
   addresseeId?: string;
 
-  @ApiPropertyOptional({ description: 'Optional request message', example: 'Want to connect?' })
+  @ApiPropertyOptional({ type: String, description: 'Optional request message', example: 'Want to connect?' })
   @IsOptional()
   @IsString()
   @MaxLength(500)

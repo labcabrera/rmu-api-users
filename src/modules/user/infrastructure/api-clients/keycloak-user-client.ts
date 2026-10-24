@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import { TokenService } from 'src/modules/auth/token.service';
+import { TokenService } from '../../../auth/token.service';
 import { IamUserPort, UserApiResponse, UserGroup } from '../../application/ports/iam-user.port';
 
 interface KeycloakUserRepresentation {

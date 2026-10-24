@@ -1,15 +1,15 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { ActivateActivationCodeHandler } from 'src/modules/activation-code/application/cqrs/handlers/activate-activation-code.handler';
-import { CheckActivationCodeHandler } from 'src/modules/activation-code/application/cqrs/handlers/check-activation-code.handler';
-import { ActivateActivationCodeCommand } from 'src/modules/activation-code/application/cqrs/commands/activate-activation-code.command';
-import { CheckActivationCodeQuery } from 'src/modules/activation-code/application/cqrs/queries/check-activation-code.query';
-import { ActivationCodeRepository } from 'src/modules/activation-code/application/ports/activation-code.repository';
-import { ActivationCode } from 'src/modules/activation-code/domain/aggregates/activation-code';
-import { ActivationCodeProps } from 'src/modules/activation-code/domain/aggregates/activation-code-props';
-import { ConflictError, NotFoundError, ValidationError } from 'src/modules/shared/domain/errors/errors';
-import { IamUserPort } from 'src/modules/user/application/ports/iam-user.port';
-import { User } from 'src/modules/user/domain/aggregates/user';
-import { UserSettings } from 'src/modules/user/domain/value-objects/user-settings.vo';
+import type { Mock } from 'vitest';
+import { ActivateActivationCodeHandler } from '../../../../../../src/modules/activation-code/application/cqrs/handlers/activate-activation-code.handler';
+import { CheckActivationCodeHandler } from '../../../../../../src/modules/activation-code/application/cqrs/handlers/check-activation-code.handler';
+import { ActivateActivationCodeCommand } from '../../../../../../src/modules/activation-code/application/cqrs/commands/activate-activation-code.command';
+import { CheckActivationCodeQuery } from '../../../../../../src/modules/activation-code/application/cqrs/queries/check-activation-code.query';
+import { ActivationCodeRepository } from '../../../../../../src/modules/activation-code/application/ports/activation-code.repository';
+import { ActivationCode } from '../../../../../../src/modules/activation-code/domain/aggregates/activation-code';
+import { ActivationCodeProps } from '../../../../../../src/modules/activation-code/domain/aggregates/activation-code-props';
+import { ConflictError, NotFoundError, ValidationError } from '../../../../../../src/modules/shared/domain/errors/errors';
+import { IamUserPort } from '../../../../../../src/modules/user/application/ports/iam-user.port';
+import { User } from '../../../../../../src/modules/user/domain/aggregates/user';
+import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo';
 import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository';
 
 /** Minimal repository with the same atomic claim semantics as the Mongo one. */
@@ -46,7 +46,7 @@ class InMemoryActivationCodeRepository {
 describe('activation codes', () => {
   let codes: InMemoryActivationCodeRepository;
   let users: InMemoryUserRepository;
-  let iam: { findGroups: jest.Mock<any>; addUserToGroup: jest.Mock<any> };
+  let iam: { findGroups: Mock; addUserToGroup: Mock };
   let handler: ActivateActivationCodeHandler;
   let code: ActivationCode;
 
@@ -70,11 +70,11 @@ describe('activation codes', () => {
     code = ActivationCode.create({ code: 'ABCD1234', owner: 'admin', features: ['core-law', 'spell-law'] });
     codes.add(code);
     iam = {
-      findGroups: jest.fn<() => Promise<{ id: string; name: string }[]>>().mockResolvedValue([
+      findGroups: vi.fn<() => Promise<{ id: string; name: string }[]>>().mockResolvedValue([
         { id: 'g1', name: 'core-law' },
         { id: 'g2', name: 'spell-law' },
       ]),
-      addUserToGroup: jest.fn<() => Promise<void>>().mockResolvedValue(undefined),
+      addUserToGroup: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
     };
     handler = new ActivateActivationCodeHandler(codes as unknown as ActivationCodeRepository, users, iam as unknown as IamUserPort);
   });
@@ -122,7 +122,7 @@ describe('activation codes', () => {
   });
 
   it('check uses an exact lookup and reports used codes', async () => {
-    const findByCode = jest.spyOn(codes, 'findByCode');
+    const findByCode = vi.spyOn(codes, 'findByCode');
     const check = new CheckActivationCodeHandler(codes as unknown as ActivationCodeRepository);
 
     await expect(check.execute(new CheckActivationCodeQuery('ABCD1234'))).resolves.toBeInstanceOf(ActivationCode);

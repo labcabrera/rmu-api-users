@@ -10,7 +10,7 @@ export class CreateActivationCodeDto {
 
   @ApiProperty({ description: 'Enabled features', example: ['core-law'], enum: ACTIVATION_FEATURES, type: [String] })
   @IsArray()
-  @IsIn(ACTIVATION_FEATURES as any, { each: true })
+  @IsIn(ACTIVATION_FEATURES, { each: true })
   features: ActivationFeature[];
 
   @ApiProperty({ description: 'Number of codes to generate', example: 1, required: false })

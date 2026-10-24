@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
@@ -13,10 +12,11 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/modules/auth/jwt.auth.guard';
-import { Page } from 'src/modules/shared/domain/entities/page';
-import { ErrorDto } from 'src/modules/shared/interfaces/http/dto/error-dto';
-import { PagedQueryDto } from 'src/modules/shared/interfaces/http/dto/paged-rsql-query';
+import { JwtAuthGuard } from '../../../auth/jwt.auth.guard';
+import { Page } from '../../../shared/domain/entities/page';
+import type { AuthenticatedRequest } from '../../../shared/interfaces/http/authenticated-request';
+import { ErrorDto } from '../../../shared/interfaces/http/dto/error-dto';
+import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query';
 import { ActivateActivationCodeCommand } from '../../application/cqrs/commands/activate-activation-code.command';
 import { CreateActivationCodeCommand } from '../../application/cqrs/commands/create-activation-code.command';
 import { DeleteActivationCodeCommand } from '../../application/cqrs/commands/delete-activation-code.command';
@@ -45,9 +45,9 @@ export class ActivationCodeController {
   @ApiCreatedResponse({ type: ActivationCodeDto, isArray: true, description: 'Created' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   @ApiForbiddenResponse({ description: 'Caller is not in the rmu-admin group', type: ErrorDto })
-  async create(@Request() req, @Body() body: CreateActivationCodeDto): Promise<ActivationCodeDto[]> {
-    const owner = req.user!.id as string;
-    const roles = req.user!.roles as string[];
+  async create(@Request() req: AuthenticatedRequest, @Body() body: CreateActivationCodeDto): Promise<ActivationCodeDto[]> {
+    const owner = req.user.id;
+    const roles = req.user.roles;
     const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined;
     const count = body.count ?? 1;
     const command = new CreateActivationCodeCommand(owner, roles, body.features, expiresAt, count);
@@ -59,9 +59,9 @@ export class ActivationCodeController {
   @ApiOperation({ operationId: 'listActivationCodes', summary: 'List activation codes' })
   @ApiOkResponse({ type: ActivationCodePageDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
-  async find(@Request() req, @Query() dto: PagedQueryDto): Promise<ActivationCodePageDto> {
-    const userId = req.user!.id as string;
-    const roles = req.user!.roles as string[];
+  async find(@Request() req: AuthenticatedRequest, @Query() dto: PagedQueryDto): Promise<ActivationCodePageDto> {
+    const userId = req.user.id;
+    const roles = req.user.roles;
     const query = new ListActivationCodesQuery(dto.q, dto.page, dto.size, userId, roles);
     const page = await this.queryBus.execute<ListActivationCodesQuery, Page<ActivationCode>>(query);
     return ActivationCodePageDto.fromPage(page);
@@ -72,8 +72,8 @@ export class ActivationCodeController {
   @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   @ApiNotFoundResponse({ description: 'Activation code not found', type: ErrorDto })
-  async findById(@Request() req, @Param('id') id: string): Promise<ActivationCodeDto> {
-    const owner = req.user!.id as string;
+  async findById(@Request() req: AuthenticatedRequest, @Param('id') id: string): Promise<ActivationCodeDto> {
+    const owner = req.user.id;
     const query = new GetActivationCodeQuery(id, owner);
     const activationCode = await this.queryBus.execute<GetActivationCodeQuery, ActivationCode>(query);
     return ActivationCodeDto.fromEntity(activationCode);
@@ -95,8 +95,12 @@ export class ActivationCodeController {
   @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   @ApiNotFoundResponse({ description: 'Activation code not found', type: ErrorDto })
-  async update(@Request() req, @Param('id') id: string, @Body() body: UpdateActivationCodeDto): Promise<ActivationCodeDto> {
-    const owner = req.user!.id as string;
+  async update(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() body: UpdateActivationCodeDto,
+  ): Promise<ActivationCodeDto> {
+    const owner = req.user.id;
     const command = new UpdateActivationCodeCommand(
       id,
       owner,
@@ -115,9 +119,9 @@ export class ActivationCodeController {
   @ApiOkResponse({ type: ActivationCodeDto, description: 'Success' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   @ApiNotFoundResponse({ description: 'Activation code not found', type: ErrorDto })
-  async activate(@Request() req, @Body() body: ActivateActivationCodeDto): Promise<ActivationCodeDto> {
-    const userId = req.user!.id as string;
-    const roles = req.user!.roles as string[];
+  async activate(@Request() req: AuthenticatedRequest, @Body() body: ActivateActivationCodeDto): Promise<ActivationCodeDto> {
+    const userId = req.user.id;
+    const roles = req.user.roles;
     const command = new ActivateActivationCodeCommand(body.code, userId, roles);
     const activationCode = await this.commandBus.execute<ActivateActivationCodeCommand, ActivationCode>(command);
     return ActivationCodeDto.fromEntity(activationCode);
@@ -128,8 +132,8 @@ export class ActivationCodeController {
   @ApiNoContentResponse({ description: 'Deleted' })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing authentication token', type: ErrorDto })
   @ApiNotFoundResponse({ description: 'Activation code not found', type: ErrorDto })
-  async delete(@Request() req, @Param('id') id: string): Promise<void> {
-    const owner = req.user!.id as string;
+  async delete(@Request() req: AuthenticatedRequest, @Param('id') id: string): Promise<void> {
+    const owner = req.user.id;
     await this.commandBus.execute<DeleteActivationCodeCommand, ActivationCode>(new DeleteActivationCodeCommand(id, owner));
   }
 }

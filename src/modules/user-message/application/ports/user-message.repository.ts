@@ -1,7 +1,7 @@
-import { Page } from 'src/modules/shared/domain/entities/page';
+import { Page } from '../../../shared/domain/entities/page';
 import { UserMessage } from '../../domain/aggregates/user-message';
-import { BaseRepository } from 'src/modules/shared/application/ports/base-repository';
-import { QueryCriteria, SortCriteria } from 'src/modules/shared/application/criteria/query-criteria';
+import { BaseRepository } from '../../../shared/application/ports/base-repository';
+import { QueryCriteria, SortCriteria } from '../../../shared/application/criteria/query-criteria';
 
 export abstract class UserMessageRepository implements BaseRepository<UserMessage> {
   abstract findById(id: string): Promise<UserMessage | null>;

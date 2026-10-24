@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { QueryCriteria } from 'src/modules/shared/application/criteria/query-criteria';
-import { Page } from 'src/modules/shared/domain/entities/page';
+import { QueryCriteria } from '../../../../shared/application/criteria/query-criteria';
+import { Page } from '../../../../shared/domain/entities/page';
 import { Friendship } from '../../../domain/aggregates/friendship';
 import type { FriendshipRepository } from '../../ports/friendship.repository';
 import { ListFriendshipsQuery } from '../queries/list-friendships.query';

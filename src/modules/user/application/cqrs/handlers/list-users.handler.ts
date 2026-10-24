@@ -1,9 +1,9 @@
 import { Inject, Logger } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Page } from 'src/modules/shared/domain/entities/page';
-import { RMU_ADMIN } from 'src/modules/shared/domain/entities/user-roles';
-import { ForbiddenError } from 'src/modules/shared/domain/errors/errors';
-import { User } from 'src/modules/user/domain/aggregates/user';
+import { Page } from '../../../../shared/domain/entities/page';
+import { RMU_ADMIN } from '../../../../shared/domain/entities/user-roles';
+import { ForbiddenError } from '../../../../shared/domain/errors/errors';
+import { User } from '../../../domain/aggregates/user';
 import { UserRepository } from '../../ports/user-repository';
 import { GetUsersQuery } from '../queries/get-users-query';
 

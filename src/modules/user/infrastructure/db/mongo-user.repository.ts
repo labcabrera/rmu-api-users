@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
-import { QueryCriteria, SortCriteria } from 'src/modules/shared/application/criteria/query-criteria';
-import { Page } from 'src/modules/shared/domain/entities/page';
-import { ConflictError } from 'src/modules/shared/domain/errors/errors';
-import { MongoBaseRepository } from 'src/modules/shared/infrastructure/db/mongo.base.repository';
-import { RsqlParser } from 'src/modules/shared/infrastructure/persistence/repositories/rsql-parser';
+import type { QueryFilter, Model } from 'mongoose';
+import { QueryCriteria, SortCriteria } from '../../../shared/application/criteria/query-criteria';
+import { Page } from '../../../shared/domain/entities/page';
+import { ConflictError } from '../../../shared/domain/errors/errors';
+import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository';
+import { RsqlParser } from '../../../shared/infrastructure/persistence/repositories/rsql-parser';
 import { UserSummary } from '../../application/models/user-summary';
 import { UserRepository } from '../../application/ports/user-repository';
 import { User } from '../../domain/aggregates/user';
@@ -33,13 +33,13 @@ export class MongoUserRepository extends MongoBaseRepository<User, UserDocument>
   }
 
   async existsByName(name: string, excludeId?: string): Promise<boolean> {
-    const filter: FilterQuery<UserDocument> = excludeId ? { name, _id: { $ne: excludeId } } : { name };
+    const filter: QueryFilter<UserDocument> = excludeId ? { name, _id: { $ne: excludeId } } : { name };
     const doc = await this.model.findOne(filter, { _id: 1 }).collation(USER_NAME_COLLATION).lean();
     return doc !== null;
   }
 
   async searchByNamePrefix(prefix: string, page: number, size: number): Promise<Page<UserSummary>> {
-    const filter: FilterQuery<UserDocument> = { name: { $regex: `^${escapeRegex(prefix)}`, $options: 'i' }, enabled: true };
+    const filter: QueryFilter<UserDocument> = { name: { $regex: `^${escapeRegex(prefix)}`, $options: 'i' }, enabled: true };
     const [docs, total] = await Promise.all([
       this.model
         .find(filter, { _id: 1, name: 1, imageUrl: 1 })

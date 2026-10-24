@@ -18,7 +18,7 @@ export class UserMessageDto {
   @ApiProperty({ description: 'Message text', example: 'Your activation code has been redeemed' })
   message: string;
 
-  @ApiProperty({ description: 'Message type', enum: MESSAGE_TYPES, example: 'info' })
+  @ApiProperty({ type: String, description: 'Message type', enum: MESSAGE_TYPES, example: 'info' })
   type: MessageType;
 
   @ApiPropertyOptional({

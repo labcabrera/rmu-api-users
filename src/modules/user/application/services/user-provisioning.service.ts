@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
-import { ConflictError } from 'src/modules/shared/domain/errors/errors';
+import { ConflictError } from '../../../shared/domain/errors/errors';
 import { User } from '../../domain/aggregates/user';
 import { UserCreatedEvent, UserUpdatedEvent } from '../../domain/events/user-events';
 import { deriveBaseDisplayName, displayNameCandidate, looksLikeEmail } from '../../domain/services/display-name';

@@ -1,5 +1,5 @@
-import { Page } from 'src/modules/shared/domain/entities/page';
-import { QueryCriteria } from 'src/modules/shared/application/criteria/query-criteria';
+import { Page } from '../../../shared/domain/entities/page';
+import { QueryCriteria } from '../../../shared/application/criteria/query-criteria';
 import { Friendship } from '../../domain/aggregates/friendship';
 
 export interface FriendshipRepository {

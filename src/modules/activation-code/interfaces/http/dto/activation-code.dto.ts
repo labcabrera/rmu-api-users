@@ -57,6 +57,7 @@ export class ActivationCodeDto {
   activatedAt?: Date | null;
 
   @ApiPropertyOptional({
+    type: String,
     description: 'Identifier of the user that redeemed the activation code',
     example: '6beaa3fb-7e2a-4868-b926-89cf9fd9e71a',
     nullable: true,

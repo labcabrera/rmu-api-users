@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Page } from 'src/modules/shared/domain/entities/page';
-import { PaginationDto } from 'src/modules/shared/interfaces/http/dto/page.dto';
-import { UserSummary } from 'src/modules/user/application/models/user-summary';
+import { Page } from '../../../../shared/domain/entities/page';
+import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto';
+import { UserSummary } from '../../../application/models/user-summary';
 
 export class UserSummaryDto {
   @ApiProperty({ description: 'Unique identifier of the user' })
@@ -10,7 +10,7 @@ export class UserSummaryDto {
   @ApiProperty({ description: 'Display name of the user', example: 'alice' })
   name: string;
 
-  @ApiPropertyOptional({ description: 'URL to the user profile image', nullable: true })
+  @ApiPropertyOptional({ type: String, description: 'URL to the user profile image', nullable: true })
   imageUrl: string | null;
 
   static fromModel(summary: UserSummary): UserSummaryDto {

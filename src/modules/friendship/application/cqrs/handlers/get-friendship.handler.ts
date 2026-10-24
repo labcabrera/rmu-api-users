@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { NotFoundError } from 'src/modules/shared/domain/errors/errors';
+import { NotFoundError } from '../../../../shared/domain/errors/errors';
 import { Friendship } from '../../../domain/aggregates/friendship';
 import type { FriendshipRepository } from '../../ports/friendship.repository';
 import { GetFriendshipQuery } from '../queries/get-friendship.query';

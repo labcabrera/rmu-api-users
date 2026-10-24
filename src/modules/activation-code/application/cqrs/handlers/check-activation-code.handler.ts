@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { ConflictError, ValidationError } from 'src/modules/shared/domain/errors/errors';
+import { ConflictError, ValidationError } from '../../../../shared/domain/errors/errors';
 import { ActivationCode } from '../../../domain/aggregates/activation-code';
 import { ActivationCodeRepository } from '../../ports/activation-code.repository';
 import { CheckActivationCodeQuery } from '../queries/check-activation-code.query';

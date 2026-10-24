@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ForbiddenError, NotFoundError } from 'src/modules/shared/domain/errors/errors';
+import { ForbiddenError, NotFoundError } from '../../../../shared/domain/errors/errors';
 import { Friendship } from '../../../domain/aggregates/friendship';
 import type { FriendshipRepository } from '../../ports/friendship.repository';
 import { UpdateFriendshipCommand } from '../commands/update-friendship.command';

@@ -1,4 +1,4 @@
-import { BaseAggregateRoot } from 'src/modules/shared/domain/aggregates/base-aggregate';
+import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate';
 import { UserSettings } from '../value-objects/user-settings.vo';
 import { UserProps } from './user-props';
 

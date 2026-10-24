@@ -1,10 +1,10 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { ConflictError, NotFoundError, ValidationError } from 'src/modules/shared/domain/errors/errors';
-import { UpdateCurrentUserCommand } from 'src/modules/user/application/cqrs/commands/update-current-user.command';
-import { UpdateCurrentUserHandler } from 'src/modules/user/application/cqrs/handlers/update-current-user.handler';
-import { UserEventBusPort } from 'src/modules/user/application/ports/user-event-bus.port';
-import { User } from 'src/modules/user/domain/aggregates/user';
-import { UserSettings } from 'src/modules/user/domain/value-objects/user-settings.vo';
+import type { Mock } from 'vitest';
+import { ConflictError, NotFoundError, ValidationError } from '../../../../../../src/modules/shared/domain/errors/errors';
+import { UpdateCurrentUserCommand } from '../../../../../../src/modules/user/application/cqrs/commands/update-current-user.command';
+import { UpdateCurrentUserHandler } from '../../../../../../src/modules/user/application/cqrs/handlers/update-current-user.handler';
+import { UserEventBusPort } from '../../../../../../src/modules/user/application/ports/user-event-bus.port';
+import { User } from '../../../../../../src/modules/user/domain/aggregates/user';
+import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo';
 import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository';
 
 const user = (id: string, name: string) =>
@@ -21,14 +21,14 @@ const user = (id: string, name: string) =>
 
 describe('UpdateCurrentUserHandler', () => {
   let repository: InMemoryUserRepository;
-  let publish: jest.Mock<UserEventBusPort['publish']>;
+  let publish: Mock<UserEventBusPort['publish']>;
   let handler: UpdateCurrentUserHandler;
 
   beforeEach(() => {
     repository = new InMemoryUserRepository();
     repository.seed(user('user-1', 'alice'));
     repository.seed(user('user-2', 'bob'));
-    publish = jest.fn<UserEventBusPort['publish']>();
+    publish = vi.fn<UserEventBusPort['publish']>();
     handler = new UpdateCurrentUserHandler(repository, { publish });
   });
 

@@ -1,6 +1,6 @@
 import { Inject } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Page } from 'src/modules/shared/domain/entities/page';
+import { Page } from '../../../../shared/domain/entities/page';
 import { UserSummary } from '../../models/user-summary';
 import { UserRepository } from '../../ports/user-repository';
 import { SearchUsersQuery } from '../queries/search-users-query';

@@ -2,7 +2,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
-import { SEARCH_USERS_MAX_SIZE } from 'src/modules/user/application/cqrs/handlers/search-users.handler';
+import { SEARCH_USERS_MAX_SIZE } from '../../../application/cqrs/handlers/search-users.handler';
 
 export class SearchUsersDto {
   @ApiProperty({ description: 'Display name prefix (case-insensitive)', example: 'ali' })
