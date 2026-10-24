@@ -58,10 +58,12 @@ export class UserProvisioningService {
         firstName: claims.givenName ?? null,
         lastName: claims.familyName ?? null,
         claimsFingerprint: fingerprint,
-        lastLoginAt: now,
       });
       try {
         const updated = await this.userRepository.update(existing);
+        // lastLoginAt has its own write, outside the versioned one (F-users-27).
+        await this.userRepository.updateLastLoginAt(existing.id, now);
+        updated.touchLogin(now);
         this.logger.log(`Profile ${existing.id} updated from token claims`);
         void this.events.publish('user', new UserUpdatedEvent(updated.getProps()));
         return updated;

@@ -94,6 +94,17 @@ describe('read and delete', () => {
     const read = await request(e2e.server).patch(`/v1/user-messages/${message.id}/read`).set('Authorization', e2e.auth('owner'));
     expect(read.status).toBe(200);
     expect((read.body as MessageBody).readed).toEqual(expect.any(String));
+    expect((read.body as { version: number }).version).toBe(1);
+  });
+
+  it('keeps the first read date and the version when a message is read again [F-users-26]', async () => {
+    const message = (await send('admin', USERS.owner.sub, 'Read me twice')).body as MessageBody;
+    const markRead = () => request(e2e.server).patch(`/v1/user-messages/${message.id}/read`).set('Authorization', e2e.auth('owner'));
+    const first = (await markRead()).body as MessageBody & { version: number };
+    await new Promise(resolve => setTimeout(resolve, 5));
+    const second = await markRead();
+    expect(second.status).toBe(200);
+    expect(second.body).toMatchObject({ readed: first.readed, version: first.version });
   });
 
   it('lets the recipient delete a message, and nobody else', async () => {

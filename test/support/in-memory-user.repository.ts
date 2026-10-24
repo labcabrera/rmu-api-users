@@ -70,10 +70,11 @@ export class InMemoryUserRepository implements UserRepository {
       return Promise.reject(new ConflictError(`User name ${props.name} is already in use`, 'duplicate-key'));
     }
     this.writes++;
-    this.store.set(id, { ...props });
+    // As the Mongo one, update() never writes lastLoginAt (F-users-27).
+    this.store.set(id, { ...props, lastLoginAt: this.store.get(id)!.lastLoginAt });
     this.versions.set(id, version + 1);
     entity.restoreVersion(version + 1);
-    return Promise.resolve(this.load(props));
+    return Promise.resolve(this.load(this.store.get(id)!));
   }
 
   updateLastLoginAt(id: string, at: Date): Promise<void> {

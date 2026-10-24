@@ -32,7 +32,9 @@ export class UserMessage extends BaseAggregateRoot<UserMessageProps> {
     return new UserMessage(props.id, props.userId, props.from, props.message, props.type, props.readed, props.createdAt);
   }
 
+  /** Idempotent (F-users-26): a message already read keeps the date it was first read. */
   markAsRead(readed: Date = new Date()): void {
+    if (this.readed) return;
     this.readed = readed;
   }
 

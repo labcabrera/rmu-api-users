@@ -23,6 +23,9 @@ function isDuplicateKey(err: unknown): boolean {
 
 @Injectable()
 export class MongoUserRepository extends MongoBaseRepository<User, UserDocument> implements UserRepository {
+  /** Written by updateLastLoginAt only, so a profile loaded before a login never writes back the older value (F-users-27). */
+  protected readonly unversionedFields = ['lastLoginAt'];
+
   constructor(@InjectModel(UserModel.name) userModel: Model<UserDocument>, rsqlParser: RsqlParser) {
     super(userModel, rsqlParser);
   }

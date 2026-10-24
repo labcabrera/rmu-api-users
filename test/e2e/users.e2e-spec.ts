@@ -205,6 +205,22 @@ describe('PATCH /v1/users/me', () => {
   });
 });
 
+describe('lastLoginAt', () => {
+  it('is never written back by a profile loaded before a login [F-users-27]', async () => {
+    const repository = e2e.app.get<MongoUserRepository>(USER_REPOSITORY);
+    const stale = (await repository.findById(USERS.owner.sub))!;
+    const login = new Date('2030-01-01T00:00:00.000Z');
+    await repository.updateLastLoginAt(stale.id, login);
+
+    stale.update({ imageUrl: 'https://example.test/stale.png' });
+    const saved = await repository.update(stale);
+
+    expect(saved.imageUrl).toBe('https://example.test/stale.png');
+    expect(saved.lastLoginAt).toEqual(login);
+    expect((await repository.findById(stale.id))!.lastLoginAt).toEqual(login);
+  });
+});
+
 describe('GET /v1/users/search', () => {
   it('returns the public projection of the profiles whose name starts with the prefix', async () => {
     const response = await request(e2e.server)
