@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsDateString, IsOptional, IsIn, Matches, IsString } from 'class-validator';
-import { ACTIVATION_FEATURES, ActivationFeature } from '../../../domain/aggregates/activation-code-props';
+import { ACTIVATION_FEATURES, type ActivationFeature } from '../../../domain/aggregates/activation-code-props.js';
 
 export class UpdateActivationCodeDto {
   @ApiPropertyOptional({ description: 'Alphanumeric activation code', example: 'ABCD1234' })

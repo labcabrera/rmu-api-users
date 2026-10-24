@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { NotFoundError } from '../../../../shared/domain/errors/errors';
-import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeRepository } from '../../ports/activation-code-repository.port';
-import { GetActivationCodeQuery } from '../queries/get-activation-code.query';
+import { type IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { NotFoundError } from '../../../../shared/domain/errors/errors.js';
+import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
+import { ActivationCodeRepository } from '../../ports/activation-code-repository.port.js';
+import { GetActivationCodeQuery } from '../queries/get-activation-code.query.js';
 
 @QueryHandler(GetActivationCodeQuery)
 export class GetActivationCodeHandler implements IQueryHandler<GetActivationCodeQuery, ActivationCode> {

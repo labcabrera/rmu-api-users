@@ -1,11 +1,11 @@
 import { Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ConflictError } from '../../../../shared/domain/errors/errors';
-import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeRepository } from '../../ports/activation-code-repository.port';
-import { CreateActivationCodeCommand } from '../commands/create-activation-code.command';
-import { ActivationCodeGuardAdapter } from '../../../infrastructure/security/activation-code-guard.adapter';
+import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { ConflictError } from '../../../../shared/domain/errors/errors.js';
+import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
+import { ActivationCodeRepository } from '../../ports/activation-code-repository.port.js';
+import { CreateActivationCodeCommand } from '../commands/create-activation-code.command.js';
+import { ActivationCodeGuardAdapter } from '../../../infrastructure/security/activation-code-guard.adapter.js';
 
 @CommandHandler(CreateActivationCodeCommand)
 export class CreateActivationCodeHandler implements ICommandHandler<CreateActivationCodeCommand, ActivationCode[]> {

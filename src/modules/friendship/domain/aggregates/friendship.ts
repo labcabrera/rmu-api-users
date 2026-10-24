@@ -1,8 +1,8 @@
-import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate';
-import { FriendshipStatus } from '../value-objects/friendship-status.vo';
+import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate.js';
+import type { FriendshipStatus } from '../value-objects/friendship-status.vo.js';
 import { randomUUID } from 'crypto';
-import { ValidationError } from '../../../shared/domain/errors/errors';
-import { FriendshipProps } from './friendship-props';
+import { ValidationError } from '../../../shared/domain/errors/errors.js';
+import type { FriendshipProps } from './friendship-props.js';
 
 export class Friendship extends BaseAggregateRoot<FriendshipProps> {
   constructor(

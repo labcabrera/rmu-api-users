@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ForbiddenError, NotFoundError } from '../../../../shared/domain/errors/errors';
-import { Friendship } from '../../../domain/aggregates/friendship';
-import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port';
-import { UpdateFriendshipCommand } from '../commands/update-friendship.command';
+import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { ForbiddenError, NotFoundError } from '../../../../shared/domain/errors/errors.js';
+import { Friendship } from '../../../domain/aggregates/friendship.js';
+import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port.js';
+import { UpdateFriendshipCommand } from '../commands/update-friendship.command.js';
 
 @CommandHandler(UpdateFriendshipCommand)
 export class UpdateFriendshipHandler implements ICommandHandler<UpdateFriendshipCommand, Friendship> {

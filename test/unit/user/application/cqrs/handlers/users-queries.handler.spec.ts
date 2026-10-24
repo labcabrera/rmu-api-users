@@ -1,14 +1,14 @@
-import { ForbiddenError } from '../../../../../../src/modules/shared/domain/errors/errors';
-import { GetUsersHandler } from '../../../../../../src/modules/user/application/cqrs/handlers/get-users.handler';
+import { ForbiddenError } from '../../../../../../src/modules/shared/domain/errors/errors.js';
+import { GetUsersHandler } from '../../../../../../src/modules/user/application/cqrs/handlers/get-users.handler.js';
 import {
   SEARCH_USERS_MAX_SIZE,
   SearchUsersHandler,
-} from '../../../../../../src/modules/user/application/cqrs/handlers/search-users.handler';
-import { GetUsersQuery } from '../../../../../../src/modules/user/application/cqrs/queries/get-users.query';
-import { SearchUsersQuery } from '../../../../../../src/modules/user/application/cqrs/queries/search-users.query';
-import { User } from '../../../../../../src/modules/user/domain/aggregates/user';
-import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo';
-import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository';
+} from '../../../../../../src/modules/user/application/cqrs/handlers/search-users.handler.js';
+import { GetUsersQuery } from '../../../../../../src/modules/user/application/cqrs/queries/get-users.query.js';
+import { SearchUsersQuery } from '../../../../../../src/modules/user/application/cqrs/queries/search-users.query.js';
+import { User } from '../../../../../../src/modules/user/domain/aggregates/user.js';
+import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo.js';
+import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository.js';
 
 const user = (id: string, name: string) =>
   User.create({

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { ActivationCode } from '../../../domain/aggregates/activation-code';
+import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
 
 export type ActivationCodeDocument = ActivationCode & Document;
 
@@ -16,7 +16,7 @@ export class ActivationCodeModel {
   owner: string;
 
   @Prop({ type: [String], required: true })
-  features: import('../../../domain/aggregates/activation-code-props').ActivationFeature[];
+  features: import('../../../domain/aggregates/activation-code-props.js').ActivationFeature[];
 
   @Prop({ type: Date, required: true })
   createdAt: Date;

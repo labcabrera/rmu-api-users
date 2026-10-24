@@ -1,10 +1,10 @@
 import { Inject } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Page } from '../../../../shared/application/pagination/page';
-import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeRepository } from '../../ports/activation-code-repository.port';
-import { ListActivationCodesQuery } from '../queries/list-activation-codes.query';
-import { ForbiddenError } from '../../../../shared/domain/errors/errors';
+import { type IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { Page } from '../../../../shared/application/pagination/page.js';
+import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
+import { ActivationCodeRepository } from '../../ports/activation-code-repository.port.js';
+import { ListActivationCodesQuery } from '../queries/list-activation-codes.query.js';
+import { ForbiddenError } from '../../../../shared/domain/errors/errors.js';
 
 @QueryHandler(ListActivationCodesQuery)
 export class ListActivationCodesHandler implements IQueryHandler<ListActivationCodesQuery, Page<ActivationCode>> {

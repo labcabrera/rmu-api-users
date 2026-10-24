@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ActivationCodeGuardPort } from '../../application/ports/activation-code-guard.port';
-import { ActivationCode } from '../../domain/aggregates/activation-code';
-import { QueryCriteria } from '../../../shared/application/criteria/query-criteria';
-import { RMU_ADMIN } from '../../../shared/domain/entities/user-roles';
-import { ForbiddenError } from '../../../shared/domain/errors/errors';
+import type { ActivationCodeGuardPort } from '../../application/ports/activation-code-guard.port.js';
+import { ActivationCode } from '../../domain/aggregates/activation-code.js';
+import { QueryCriteria } from '../../../shared/application/criteria/query-criteria.js';
+import { RMU_ADMIN } from '../../../shared/domain/entities/user-roles.js';
+import { ForbiddenError } from '../../../shared/domain/errors/errors.js';
 
 @Injectable()
 export class ActivationCodeGuardAdapter implements ActivationCodeGuardPort {

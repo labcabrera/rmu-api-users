@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NotFoundError } from '../../../../shared/domain/errors/errors';
-import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeRepository } from '../../ports/activation-code-repository.port';
-import { UpdateActivationCodeCommand } from '../commands/update-activation-code.command';
+import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { NotFoundError } from '../../../../shared/domain/errors/errors.js';
+import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
+import { ActivationCodeRepository } from '../../ports/activation-code-repository.port.js';
+import { UpdateActivationCodeCommand } from '../commands/update-activation-code.command.js';
 
 @CommandHandler(UpdateActivationCodeCommand)
 export class UpdateActivationCodeHandler implements ICommandHandler<UpdateActivationCodeCommand, ActivationCode> {

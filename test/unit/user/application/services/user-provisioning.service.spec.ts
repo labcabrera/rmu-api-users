@@ -1,14 +1,14 @@
 import type { Mock } from 'vitest';
-import { UserClaims } from '../../../../../src/modules/user/application/models/user-claims';
-import { IamUserPort, UserApiResponse } from '../../../../../src/modules/user/application/ports/iam-user.port';
-import type { DomainEventPublisher } from '../../../../../src/modules/shared/application/ports/domain-event-publisher.port';
+import type { UserClaims } from '../../../../../src/modules/user/application/models/user-claims.js';
+import { IamUserPort, type UserApiResponse } from '../../../../../src/modules/user/application/ports/iam-user.port.js';
+import type { DomainEventPublisher } from '../../../../../src/modules/shared/application/ports/domain-event-publisher.port.js';
 import {
   LAST_LOGIN_REFRESH_MS,
   UserProvisioningService,
-} from '../../../../../src/modules/user/application/services/user-provisioning.service';
-import { User } from '../../../../../src/modules/user/domain/aggregates/user';
-import { UserSettings } from '../../../../../src/modules/user/domain/value-objects/user-settings.vo';
-import { InMemoryUserRepository } from '../../../../support/in-memory-user.repository';
+} from '../../../../../src/modules/user/application/services/user-provisioning.service.js';
+import { User } from '../../../../../src/modules/user/domain/aggregates/user.js';
+import { UserSettings } from '../../../../../src/modules/user/domain/value-objects/user-settings.vo.js';
+import { InMemoryUserRepository } from '../../../../support/in-memory-user.repository.js';
 
 const claims = (overrides: Partial<UserClaims> = {}): UserClaims => ({
   id: 'user-1',

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsDateString, IsIn, IsInt, Min, Max, IsOptional } from 'class-validator';
-import { ACTIVATION_FEATURES, ActivationFeature } from '../../../domain/aggregates/activation-code-props';
+import { ACTIVATION_FEATURES, type ActivationFeature } from '../../../domain/aggregates/activation-code-props.js';
 
 export class CreateActivationCodeDto {
   @ApiProperty({ description: 'Expiration date (optional)', example: '2026-12-31T23:59:59.000Z', required: false })

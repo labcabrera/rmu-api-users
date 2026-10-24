@@ -2,10 +2,10 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { AppModule } from './app.module';
-import { configureHttp } from './bootstrap/http';
-import { configureLogger } from './bootstrap/logger';
-import { configureOpenApi } from './bootstrap/openapi';
+import { AppModule } from './app.module.js';
+import { configureHttp } from './bootstrap/http.js';
+import { configureLogger } from './bootstrap/logger.js';
+import { configureOpenApi } from './bootstrap/openapi.js';
 
 // users only publishes to Kafka (KafkaProducerService): it has no consumers, so no microservice is connected.
 async function bootstrap() {

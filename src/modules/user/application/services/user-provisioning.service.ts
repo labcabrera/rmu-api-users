@@ -1,14 +1,14 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
-import { ConflictError } from '../../../shared/domain/errors/errors';
-import { User } from '../../domain/aggregates/user';
-import { UserCreatedEvent, UserUpdatedEvent } from '../../domain/events/user-events';
-import { deriveBaseDisplayName, displayNameCandidate, looksLikeEmail } from '../../domain/services/display-name';
-import { UserSettings } from '../../domain/value-objects/user-settings.vo';
-import { UserClaims } from '../models/user-claims';
-import { IamUserPort, UserApiResponse } from '../ports/iam-user.port';
-import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../../shared/application/ports/domain-event-publisher.port';
-import { UserRepository } from '../ports/user-repository.port';
+import { ConflictError } from '../../../shared/domain/errors/errors.js';
+import { User } from '../../domain/aggregates/user.js';
+import { UserCreatedEvent, UserUpdatedEvent } from '../../domain/events/user-events.js';
+import { deriveBaseDisplayName, displayNameCandidate, looksLikeEmail } from '../../domain/services/display-name.js';
+import { UserSettings } from '../../domain/value-objects/user-settings.vo.js';
+import type { UserClaims } from '../models/user-claims.js';
+import { IamUserPort, type UserApiResponse } from '../ports/iam-user.port.js';
+import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../../shared/application/ports/domain-event-publisher.port.js';
+import { UserRepository } from '../ports/user-repository.port.js';
 
 /** `lastLoginAt` is written at most once per this interval when the claims did not change. */
 export const LAST_LOGIN_REFRESH_MS = 60 * 60 * 1000;

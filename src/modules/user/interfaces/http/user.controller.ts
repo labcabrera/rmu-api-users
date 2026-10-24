@@ -1,25 +1,25 @@
 import { Body, Controller, Get, Patch, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiErrors } from '../../../shared/interfaces/http/api-errors.decorator';
-import type { AuthenticatedUser } from '../../../shared/interfaces/http/authenticated-request';
-import { CurrentUser } from '../../../shared/interfaces/http/current-user.decorator';
-import { JwtAuthGuard } from '../../../shared/infrastructure/security/jwt-auth.guard';
-import { Page } from '../../../shared/application/pagination/page';
-import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query';
-import { UpdateCurrentUserCommand } from '../../application/cqrs/commands/update-current-user.command';
-import { GetUserQuery } from '../../application/cqrs/queries/get-user.query';
-import { GetUsersQuery } from '../../application/cqrs/queries/get-users.query';
-import { SearchUsersQuery } from '../../application/cqrs/queries/search-users.query';
-import { UserClaims } from '../../application/models/user-claims';
-import { UserSummary } from '../../application/models/user-summary';
-import { User } from '../../domain/aggregates/user';
-import { UserSettings } from '../../domain/value-objects/user-settings.vo';
-import { SearchUsersDto } from './dto/search-users.dto';
-import { UpdateCurrentUserDto } from './dto/update-current-user.dto';
-import { UserPageDto } from './dto/user-page.dto';
-import { UserSummaryPageDto } from './dto/user-summary.dto';
-import { UserDto } from './dto/user.dto';
+import { ApiErrors } from '../../../shared/interfaces/http/api-errors.decorator.js';
+import type { AuthenticatedUser } from '../../../shared/interfaces/http/authenticated-request.js';
+import { CurrentUser } from '../../../shared/interfaces/http/current-user.decorator.js';
+import { JwtAuthGuard } from '../../../shared/infrastructure/security/jwt-auth.guard.js';
+import { Page } from '../../../shared/application/pagination/page.js';
+import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query.js';
+import { UpdateCurrentUserCommand } from '../../application/cqrs/commands/update-current-user.command.js';
+import { GetUserQuery } from '../../application/cqrs/queries/get-user.query.js';
+import { GetUsersQuery } from '../../application/cqrs/queries/get-users.query.js';
+import { SearchUsersQuery } from '../../application/cqrs/queries/search-users.query.js';
+import type { UserClaims } from '../../application/models/user-claims.js';
+import type { UserSummary } from '../../application/models/user-summary.js';
+import { User } from '../../domain/aggregates/user.js';
+import { UserSettings } from '../../domain/value-objects/user-settings.vo.js';
+import { SearchUsersDto } from './dto/search-users.dto.js';
+import { UpdateCurrentUserDto } from './dto/update-current-user.dto.js';
+import { UserPageDto } from './dto/user-page.dto.js';
+import { UserSummaryPageDto } from './dto/user-summary.dto.js';
+import { UserDto } from './dto/user.dto.js';
 
 function toClaims(user: AuthenticatedUser): UserClaims {
   return {

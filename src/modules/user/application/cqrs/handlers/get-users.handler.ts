@@ -1,11 +1,11 @@
 import { Inject, Logger } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Page } from '../../../../shared/application/pagination/page';
-import { RMU_ADMIN } from '../../../../shared/domain/entities/user-roles';
-import { ForbiddenError } from '../../../../shared/domain/errors/errors';
-import { User } from '../../../domain/aggregates/user';
-import { UserRepository } from '../../ports/user-repository.port';
-import { GetUsersQuery } from '../queries/get-users.query';
+import { type IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { Page } from '../../../../shared/application/pagination/page.js';
+import { RMU_ADMIN } from '../../../../shared/domain/entities/user-roles.js';
+import { ForbiddenError } from '../../../../shared/domain/errors/errors.js';
+import { User } from '../../../domain/aggregates/user.js';
+import { UserRepository } from '../../ports/user-repository.port.js';
+import { GetUsersQuery } from '../queries/get-users.query.js';
 
 /** Full profiles (with email) for administrators only. Everybody else uses SearchUsersQuery. */
 @QueryHandler(GetUsersQuery)

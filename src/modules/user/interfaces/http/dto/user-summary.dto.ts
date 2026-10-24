@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Page } from '../../../../shared/application/pagination/page';
-import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto';
-import { UserSummary } from '../../../application/models/user-summary';
+import { Page } from '../../../../shared/application/pagination/page.js';
+import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto.js';
+import type { UserSummary } from '../../../application/models/user-summary.js';
 
 export class UserSummaryDto {
   @ApiProperty({ description: 'Unique identifier of the user' })

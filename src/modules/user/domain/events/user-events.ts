@@ -1,5 +1,5 @@
-import { DomainEvent } from '../../../shared/domain/events/domain-event';
-import { UserProps } from '../aggregates/user-props';
+import { DomainEvent } from '../../../shared/domain/events/domain-event.js';
+import type { UserProps } from '../aggregates/user-props.js';
 
 export type UserEventData = Omit<UserProps, 'claimsFingerprint'>;
 

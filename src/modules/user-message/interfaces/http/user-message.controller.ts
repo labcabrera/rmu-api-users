@@ -1,20 +1,20 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiErrors } from '../../../shared/interfaces/http/api-errors.decorator';
-import type { AuthenticatedUser } from '../../../shared/interfaces/http/authenticated-request';
-import { CurrentUser } from '../../../shared/interfaces/http/current-user.decorator';
-import { JwtAuthGuard } from '../../../shared/infrastructure/security/jwt-auth.guard';
-import { Page } from '../../../shared/application/pagination/page';
-import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query';
-import { CreateUserMessageCommand } from '../../application/cqrs/commands/create-user-message.command';
-import { DeleteUserMessageCommand } from '../../application/cqrs/commands/delete-user-message.command';
-import { MarkUserMessageReadCommand } from '../../application/cqrs/commands/mark-user-message-read.command';
-import { GetUserMessagesQuery } from '../../application/cqrs/queries/get-user-messages.query';
-import { UserMessage } from '../../domain/aggregates/user-message';
-import { CreateUserMessageDto } from './dto/create-user-message.dto';
-import { UserMessageDto } from './dto/user-message.dto';
-import { UserMessagePageDto } from './dto/user-message-page.dto';
+import { ApiErrors } from '../../../shared/interfaces/http/api-errors.decorator.js';
+import type { AuthenticatedUser } from '../../../shared/interfaces/http/authenticated-request.js';
+import { CurrentUser } from '../../../shared/interfaces/http/current-user.decorator.js';
+import { JwtAuthGuard } from '../../../shared/infrastructure/security/jwt-auth.guard.js';
+import { Page } from '../../../shared/application/pagination/page.js';
+import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query.js';
+import { CreateUserMessageCommand } from '../../application/cqrs/commands/create-user-message.command.js';
+import { DeleteUserMessageCommand } from '../../application/cqrs/commands/delete-user-message.command.js';
+import { MarkUserMessageReadCommand } from '../../application/cqrs/commands/mark-user-message-read.command.js';
+import { GetUserMessagesQuery } from '../../application/cqrs/queries/get-user-messages.query.js';
+import { UserMessage } from '../../domain/aggregates/user-message.js';
+import { CreateUserMessageDto } from './dto/create-user-message.dto.js';
+import { UserMessageDto } from './dto/user-message.dto.js';
+import { UserMessagePageDto } from './dto/user-message-page.dto.js';
 
 @UseGuards(JwtAuthGuard)
 @Controller('v1/user-messages')

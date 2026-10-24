@@ -1,25 +1,25 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiErrors } from '../../../shared/interfaces/http/api-errors.decorator';
-import type { AuthenticatedUser } from '../../../shared/interfaces/http/authenticated-request';
-import { CurrentUser } from '../../../shared/interfaces/http/current-user.decorator';
-import { JwtAuthGuard } from '../../../shared/infrastructure/security/jwt-auth.guard';
-import { Page } from '../../../shared/application/pagination/page';
-import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query';
-import { ActivateActivationCodeCommand } from '../../application/cqrs/commands/activate-activation-code.command';
-import { CreateActivationCodeCommand } from '../../application/cqrs/commands/create-activation-code.command';
-import { DeleteActivationCodeCommand } from '../../application/cqrs/commands/delete-activation-code.command';
-import { UpdateActivationCodeCommand } from '../../application/cqrs/commands/update-activation-code.command';
-import { GetActivationCodeQuery } from '../../application/cqrs/queries/get-activation-code.query';
-import { ListActivationCodesQuery } from '../../application/cqrs/queries/list-activation-codes.query';
-import { ActivationCode } from '../../domain/aggregates/activation-code';
-import { ActivateActivationCodeDto } from './dto/activate-activation-code.dto';
-import { ActivationCodeDto } from './dto/activation-code.dto';
-import { ActivationCodePageDto } from './dto/activation-code-page.dto';
-import { CreateActivationCodeDto } from './dto/create-activation-code.dto';
-import { UpdateActivationCodeDto } from './dto/update-activation-code.dto';
-import { CheckActivationCodeQuery } from '../../application/cqrs/queries/check-activation-code.query';
+import { ApiErrors } from '../../../shared/interfaces/http/api-errors.decorator.js';
+import type { AuthenticatedUser } from '../../../shared/interfaces/http/authenticated-request.js';
+import { CurrentUser } from '../../../shared/interfaces/http/current-user.decorator.js';
+import { JwtAuthGuard } from '../../../shared/infrastructure/security/jwt-auth.guard.js';
+import { Page } from '../../../shared/application/pagination/page.js';
+import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query.js';
+import { ActivateActivationCodeCommand } from '../../application/cqrs/commands/activate-activation-code.command.js';
+import { CreateActivationCodeCommand } from '../../application/cqrs/commands/create-activation-code.command.js';
+import { DeleteActivationCodeCommand } from '../../application/cqrs/commands/delete-activation-code.command.js';
+import { UpdateActivationCodeCommand } from '../../application/cqrs/commands/update-activation-code.command.js';
+import { GetActivationCodeQuery } from '../../application/cqrs/queries/get-activation-code.query.js';
+import { ListActivationCodesQuery } from '../../application/cqrs/queries/list-activation-codes.query.js';
+import { ActivationCode } from '../../domain/aggregates/activation-code.js';
+import { ActivateActivationCodeDto } from './dto/activate-activation-code.dto.js';
+import { ActivationCodeDto } from './dto/activation-code.dto.js';
+import { ActivationCodePageDto } from './dto/activation-code-page.dto.js';
+import { CreateActivationCodeDto } from './dto/create-activation-code.dto.js';
+import { UpdateActivationCodeDto } from './dto/update-activation-code.dto.js';
+import { CheckActivationCodeQuery } from '../../application/cqrs/queries/check-activation-code.query.js';
 
 @UseGuards(JwtAuthGuard)
 @Controller('v1/activation-codes')

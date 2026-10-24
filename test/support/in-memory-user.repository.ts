@@ -1,9 +1,9 @@
-import { Page } from '../../src/modules/shared/application/pagination/page';
-import { ConflictError, NotFoundError } from '../../src/modules/shared/domain/errors/errors';
-import { UserSummary } from '../../src/modules/user/application/models/user-summary';
-import { UserRepository } from '../../src/modules/user/application/ports/user-repository.port';
-import { User } from '../../src/modules/user/domain/aggregates/user';
-import { UserProps } from '../../src/modules/user/domain/aggregates/user-props';
+import { Page } from '../../src/modules/shared/application/pagination/page.js';
+import { ConflictError, NotFoundError } from '../../src/modules/shared/domain/errors/errors.js';
+import type { UserSummary } from '../../src/modules/user/application/models/user-summary.js';
+import { UserRepository } from '../../src/modules/user/application/ports/user-repository.port.js';
+import { User } from '../../src/modules/user/domain/aggregates/user.js';
+import type { UserProps } from '../../src/modules/user/domain/aggregates/user-props.js';
 
 /** UserRepository backed by a Map, with the same uniqueness rules as the Mongo one (id, case-insensitive name). */
 export class InMemoryUserRepository extends UserRepository {

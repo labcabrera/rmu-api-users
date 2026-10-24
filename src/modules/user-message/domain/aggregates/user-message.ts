@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
-import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate';
-import { MessageType } from '../value-objects/message-type.vo';
-import { UserMessageProps } from './user-message-props';
+import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate.js';
+import type { MessageType } from '../value-objects/message-type.vo.js';
+import type { UserMessageProps } from './user-message-props.js';
 
 export class UserMessage extends BaseAggregateRoot<UserMessageProps> {
   constructor(

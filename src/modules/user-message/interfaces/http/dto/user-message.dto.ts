@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { UserMessage } from '../../../domain/aggregates/user-message';
-import { MESSAGE_TYPES } from '../../../domain/value-objects/message-type.vo';
-import type { MessageType } from '../../../domain/value-objects/message-type.vo';
+import { UserMessage } from '../../../domain/aggregates/user-message.js';
+import { MESSAGE_TYPES } from '../../../domain/value-objects/message-type.vo.js';
+import type { MessageType } from '../../../domain/value-objects/message-type.vo.js';
 
 export class UserMessageDto {
   @ApiProperty({ description: 'Unique identifier of the message', example: '2d7f1e0c-8c5d-4e91-9c1b-4e0c0cf7211e' })

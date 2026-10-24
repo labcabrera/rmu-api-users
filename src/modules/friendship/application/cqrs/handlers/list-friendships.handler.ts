@@ -1,10 +1,10 @@
 import { Inject } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { QueryCriteria } from '../../../../shared/application/criteria/query-criteria';
-import { Page } from '../../../../shared/application/pagination/page';
-import { Friendship } from '../../../domain/aggregates/friendship';
-import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port';
-import { ListFriendshipsQuery } from '../queries/list-friendships.query';
+import { type IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { QueryCriteria } from '../../../../shared/application/criteria/query-criteria.js';
+import { Page } from '../../../../shared/application/pagination/page.js';
+import { Friendship } from '../../../domain/aggregates/friendship.js';
+import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port.js';
+import { ListFriendshipsQuery } from '../queries/list-friendships.query.js';
 
 @QueryHandler(ListFriendshipsQuery)
 export class ListFriendshipsHandler implements IQueryHandler<ListFriendshipsQuery, Page<Friendship>> {

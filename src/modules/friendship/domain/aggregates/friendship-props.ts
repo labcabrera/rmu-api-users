@@ -1,4 +1,4 @@
-import { FriendshipStatus } from '../value-objects/friendship-status.vo';
+import type { FriendshipStatus } from '../value-objects/friendship-status.vo.js';
 
 export interface FriendshipProps {
   id: string;

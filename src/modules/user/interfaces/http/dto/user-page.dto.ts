@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Page } from '../../../../shared/application/pagination/page';
-import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto';
-import { User } from '../../../domain/aggregates/user';
-import { UserDto } from './user.dto';
+import { Page } from '../../../../shared/application/pagination/page.js';
+import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto.js';
+import { User } from '../../../domain/aggregates/user.js';
+import { UserDto } from './user.dto.js';
 
 export class UserPageDto {
   @ApiProperty({ type: [UserDto] })

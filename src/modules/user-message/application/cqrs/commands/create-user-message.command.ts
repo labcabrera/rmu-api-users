@@ -1,5 +1,5 @@
-import { AuthenticatedCommand } from '../../../../shared/application/cqrs/authenticated-command';
-import { MessageType } from '../../../domain/value-objects/message-type.vo';
+import { AuthenticatedCommand } from '../../../../shared/application/cqrs/authenticated-command.js';
+import type { MessageType } from '../../../domain/value-objects/message-type.vo.js';
 
 export class CreateUserMessageCommand extends AuthenticatedCommand {
   constructor(

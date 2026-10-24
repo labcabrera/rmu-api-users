@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsString, IsBoolean, IsArray, IsOptional, ValidateNested } from 'class-validator';
-import { User } from '../../../domain/aggregates/user';
-import { UserSettingsDto } from './user-settings.dto';
+import { User } from '../../../domain/aggregates/user.js';
+import { UserSettingsDto } from './user-settings.dto.js';
 
 export class UserDto {
   @ApiProperty({ description: 'Unique identifier of the user', required: true })

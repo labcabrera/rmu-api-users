@@ -1,22 +1,22 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ApiErrors } from '../../../shared/interfaces/http/api-errors.decorator';
-import type { AuthenticatedUser } from '../../../shared/interfaces/http/authenticated-request';
-import { CurrentUser } from '../../../shared/interfaces/http/current-user.decorator';
-import { JwtAuthGuard } from '../../../shared/infrastructure/security/jwt-auth.guard';
-import { Page } from '../../../shared/application/pagination/page';
-import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query';
-import { CreateFriendshipRequestCommand } from '../../application/cqrs/commands/create-friendship-request.command';
-import { DeleteFriendshipCommand } from '../../application/cqrs/commands/delete-friendship.command';
-import { UpdateFriendshipCommand } from '../../application/cqrs/commands/update-friendship.command';
-import { GetFriendshipQuery } from '../../application/cqrs/queries/get-friendship.query';
-import { ListFriendshipsQuery } from '../../application/cqrs/queries/list-friendships.query';
-import { Friendship } from '../../domain/aggregates/friendship';
-import { CreateFriendshipRequestDto } from './dto/create-friendship-request.dto';
-import { FriendshipDto } from './dto/friendship.dto';
-import { FriendshipPageDto } from './dto/friendship-page.dto';
-import { UpdateFriendshipDto } from './dto/update-friendship.dto';
+import { ApiErrors } from '../../../shared/interfaces/http/api-errors.decorator.js';
+import type { AuthenticatedUser } from '../../../shared/interfaces/http/authenticated-request.js';
+import { CurrentUser } from '../../../shared/interfaces/http/current-user.decorator.js';
+import { JwtAuthGuard } from '../../../shared/infrastructure/security/jwt-auth.guard.js';
+import { Page } from '../../../shared/application/pagination/page.js';
+import { PagedQueryDto } from '../../../shared/interfaces/http/dto/paged-rsql-query.js';
+import { CreateFriendshipRequestCommand } from '../../application/cqrs/commands/create-friendship-request.command.js';
+import { DeleteFriendshipCommand } from '../../application/cqrs/commands/delete-friendship.command.js';
+import { UpdateFriendshipCommand } from '../../application/cqrs/commands/update-friendship.command.js';
+import { GetFriendshipQuery } from '../../application/cqrs/queries/get-friendship.query.js';
+import { ListFriendshipsQuery } from '../../application/cqrs/queries/list-friendships.query.js';
+import { Friendship } from '../../domain/aggregates/friendship.js';
+import { CreateFriendshipRequestDto } from './dto/create-friendship-request.dto.js';
+import { FriendshipDto } from './dto/friendship.dto.js';
+import { FriendshipPageDto } from './dto/friendship-page.dto.js';
+import { UpdateFriendshipDto } from './dto/update-friendship.dto.js';
 
 @UseGuards(JwtAuthGuard)
 @Controller('v1/friendships')

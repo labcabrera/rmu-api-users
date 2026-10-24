@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { UserMessage } from '../../../domain/aggregates/user-message';
-import type { MessageType } from '../../../domain/value-objects/message-type.vo';
+import { UserMessage } from '../../../domain/aggregates/user-message.js';
+import type { MessageType } from '../../../domain/value-objects/message-type.vo.js';
 
 export type UserMessageDocument = UserMessage & Document;
 

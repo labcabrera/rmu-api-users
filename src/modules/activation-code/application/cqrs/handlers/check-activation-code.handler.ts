@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { ConflictError, ValidationError } from '../../../../shared/domain/errors/errors';
-import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeRepository } from '../../ports/activation-code-repository.port';
-import { CheckActivationCodeQuery } from '../queries/check-activation-code.query';
+import { type IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { ConflictError, ValidationError } from '../../../../shared/domain/errors/errors.js';
+import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
+import { ActivationCodeRepository } from '../../ports/activation-code-repository.port.js';
+import { CheckActivationCodeQuery } from '../queries/check-activation-code.query.js';
 
 /** Tells whether a code can be redeemed. The lookup is an exact, parameterized match on the code value. */
 @QueryHandler(CheckActivationCodeQuery)

@@ -2,7 +2,7 @@ import {
   deriveBaseDisplayName,
   displayNameCandidate,
   sanitizeDisplayName,
-} from '../../../../src/modules/user/domain/services/display-name';
+} from '../../../../src/modules/user/domain/services/display-name.js';
 
 describe('display name', () => {
   it('sanitizes raw values', () => {

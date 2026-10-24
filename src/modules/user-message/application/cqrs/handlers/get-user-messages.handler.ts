@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Page } from '../../../../shared/application/pagination/page';
-import { UserMessage } from '../../../domain/aggregates/user-message';
-import { UserMessageRepository } from '../../ports/user-message-repository.port';
-import { GetUserMessagesQuery } from '../queries/get-user-messages.query';
+import { type IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { Page } from '../../../../shared/application/pagination/page.js';
+import { UserMessage } from '../../../domain/aggregates/user-message.js';
+import { UserMessageRepository } from '../../ports/user-message-repository.port.js';
+import { GetUserMessagesQuery } from '../queries/get-user-messages.query.js';
 
 @QueryHandler(GetUserMessagesQuery)
 export class GetUserMessagesHandler implements IQueryHandler<GetUserMessagesQuery, Page<UserMessage>> {

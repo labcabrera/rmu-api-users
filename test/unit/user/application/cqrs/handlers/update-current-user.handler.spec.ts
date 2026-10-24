@@ -1,11 +1,11 @@
 import type { Mock } from 'vitest';
-import { ConflictError, NotFoundError, ValidationError } from '../../../../../../src/modules/shared/domain/errors/errors';
-import { UpdateCurrentUserCommand } from '../../../../../../src/modules/user/application/cqrs/commands/update-current-user.command';
-import { UpdateCurrentUserHandler } from '../../../../../../src/modules/user/application/cqrs/handlers/update-current-user.handler';
-import type { DomainEventPublisher } from '../../../../../../src/modules/shared/application/ports/domain-event-publisher.port';
-import { User } from '../../../../../../src/modules/user/domain/aggregates/user';
-import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo';
-import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository';
+import { ConflictError, NotFoundError, ValidationError } from '../../../../../../src/modules/shared/domain/errors/errors.js';
+import { UpdateCurrentUserCommand } from '../../../../../../src/modules/user/application/cqrs/commands/update-current-user.command.js';
+import { UpdateCurrentUserHandler } from '../../../../../../src/modules/user/application/cqrs/handlers/update-current-user.handler.js';
+import type { DomainEventPublisher } from '../../../../../../src/modules/shared/application/ports/domain-event-publisher.port.js';
+import { User } from '../../../../../../src/modules/user/domain/aggregates/user.js';
+import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo.js';
+import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository.js';
 
 const user = (id: string, name: string) =>
   User.create({
