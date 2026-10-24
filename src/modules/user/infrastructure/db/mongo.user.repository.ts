@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import type { QueryFilter, Model } from 'mongoose';
+import type { HydratedDocument, QueryFilter, Model } from 'mongoose';
 import { QueryCriteria, type SortCriteria } from '../../../shared/application/criteria/query-criteria.js';
 import { Page } from '../../../shared/application/pagination/page.js';
 import { ConflictError } from '../../../shared/domain/errors/errors.js';
@@ -11,14 +11,14 @@ import { UserRepository } from '../../application/ports/user-repository.port.js'
 import { User } from '../../domain/aggregates/user.js';
 import { USER_NAME_COLLATION, type UserDocument, UserModel } from '../persistence/models/user.model.js';
 
-const DUPLICATE_KEY = 11000;
-
 export function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/** A duplicate key, as the base maps it on save (ConflictError) or as Mongo reports it on update (E11000). */
 function isDuplicateKey(err: unknown): boolean {
-  return typeof err === 'object' && err !== null && (err as { code?: number }).code === DUPLICATE_KEY;
+  if (err instanceof ConflictError) return err.code === 'duplicate-key';
+  return err instanceof Error && err.name === 'MongoServerError' && (err as { code?: number }).code === 11000;
 }
 
 @Injectable()
@@ -29,7 +29,7 @@ export class MongoUserRepository extends MongoBaseRepository<User, UserDocument>
 
   async findByName(name: string): Promise<User | null> {
     const doc = await this.model.findOne({ name }).collation(USER_NAME_COLLATION);
-    return doc ? this.mapToEntity(doc) : null;
+    return doc ? this.toEntity(doc) : null;
   }
 
   async existsByName(name: string, excludeId?: string): Promise<boolean> {
@@ -61,16 +61,16 @@ export class MongoUserRepository extends MongoBaseRepository<User, UserDocument>
     try {
       return await super.save(entity);
     } catch (err) {
-      if (isDuplicateKey(err)) throw new ConflictError(`User ${entity.id} or name ${entity.name} already exists`);
+      if (isDuplicateKey(err)) throw new ConflictError(`User ${entity.id} or name ${entity.name} already exists`, 'duplicate-key');
       throw err;
     }
   }
 
-  async update(id: string, entity: Partial<User>): Promise<User> {
+  async update(entity: User): Promise<User> {
     try {
-      return await super.update(id, entity);
+      return await super.update(entity);
     } catch (err) {
-      if (isDuplicateKey(err)) throw new ConflictError(`User name ${entity.name} is already in use`);
+      if (isDuplicateKey(err)) throw new ConflictError(`User name ${entity.name} is already in use`, 'duplicate-key');
       throw err;
     }
   }
@@ -79,7 +79,7 @@ export class MongoUserRepository extends MongoBaseRepository<User, UserDocument>
     await this.model.updateOne({ _id: id }, { $set: { lastLoginAt: at } });
   }
 
-  protected mapToEntity(doc: UserDocument): User {
+  protected mapToEntity(doc: HydratedDocument<UserDocument>): User {
     return User.fromProps({
       id: String(doc._id),
       name: doc.name,

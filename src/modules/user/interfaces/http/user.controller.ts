@@ -59,10 +59,13 @@ export class UserController {
   @Patch('me')
   @ApiOperation({ operationId: 'updateCurrentUser', summary: 'Update current user profile (display name, settings, image)' })
   @ApiOkResponse({ type: UserDto, description: 'Success' })
-  @ApiErrors({ 404: 'Profile not found (call GET /v1/users/me first)', 409: 'Display name already in use' })
+  @ApiErrors({
+    404: 'Profile not found (call GET /v1/users/me first)',
+    409: 'Display name already in use, or stale version (version-conflict)',
+  })
   async updateCurrentUser(@CurrentUser() user: AuthenticatedUser, @Body() body: UpdateCurrentUserDto): Promise<UserDto> {
     const settings = body.settings?.measurementSystem ? new UserSettings(body.settings.measurementSystem) : undefined;
-    const command = new UpdateCurrentUserCommand(body.name, settings, body.imageUrl, user.id, user.roles);
+    const command = new UpdateCurrentUserCommand(body.name, settings, body.imageUrl, user.id, user.roles, body.version);
     const profile = await this.commandBus.execute<UpdateCurrentUserCommand, User>(command);
     return UserDto.fromEntity(profile);
   }

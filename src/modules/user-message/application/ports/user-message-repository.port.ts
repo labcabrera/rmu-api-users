@@ -13,6 +13,6 @@ export abstract class UserMessageRepository implements BaseRepository<UserMessag
     sort?: SortCriteria,
   ): Promise<Page<UserMessage>>;
   abstract save(message: UserMessage): Promise<UserMessage>;
-  abstract update(id: string, message: Partial<UserMessage>): Promise<UserMessage>;
+  abstract update(message: UserMessage): Promise<UserMessage>;
   abstract deleteById(id: string): Promise<UserMessage | null>;
 }

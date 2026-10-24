@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import type { HydratedDocument, Model } from 'mongoose';
 import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository.js';
 import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser.js';
 import { ActivationCode } from '../../domain/aggregates/activation-code.js';
@@ -19,23 +19,26 @@ export class MongoActivationCodeRepository
   async findByCode(code: string): Promise<ActivationCode | null> {
     if (typeof code !== 'string') return null;
     const doc = await this.model.findOne({ code: { $eq: code } });
-    return doc ? this.mapToEntity(doc) : null;
+    return doc ? this.toEntity(doc) : null;
   }
 
   async markActivated(id: string, userId: string, at: Date): Promise<ActivationCode | null> {
     const doc = await this.model.findOneAndUpdate(
       { _id: id, activatedAt: null, activatedBy: null },
-      { $set: { activatedAt: at, activatedBy: userId, updatedAt: at } },
-      { new: true },
+      { $set: { activatedAt: at, activatedBy: userId, updatedAt: at }, $inc: { version: 1 } },
+      { returnDocument: 'after' },
     );
-    return doc ? this.mapToEntity(doc) : null;
+    return doc ? this.toEntity(doc) : null;
   }
 
   async clearActivation(id: string, userId: string): Promise<void> {
-    await this.model.updateOne({ _id: id, activatedBy: userId }, { $set: { activatedAt: null, activatedBy: null, updatedAt: new Date() } });
+    await this.model.updateOne(
+      { _id: id, activatedBy: userId },
+      { $set: { activatedAt: null, activatedBy: null, updatedAt: new Date() }, $inc: { version: 1 } },
+    );
   }
 
-  protected mapToEntity(doc: ActivationCodeDocument): ActivationCode {
+  protected mapToEntity(doc: HydratedDocument<ActivationCodeDocument>): ActivationCode {
     return ActivationCode.fromProps({
       id: doc._id.toString(),
       code: doc.code,

@@ -15,6 +15,6 @@ export class MarkUserMessageReadHandler implements ICommandHandler<MarkUserMessa
       throw new NotFoundError('UserMessage', command.id);
     }
     message.markAsRead();
-    return this.userMessageRepository.update(message.id, message);
+    return this.userMessageRepository.update(message);
   }
 }

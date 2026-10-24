@@ -38,6 +38,9 @@ export class UserMessageDto {
   })
   createdAt: Date;
 
+  @ApiProperty({ description: 'Version of optimistic concurrency', example: 0 })
+  version: number;
+
   static fromEntity(message: UserMessage): UserMessageDto {
     const dto = new UserMessageDto();
     dto.id = message.id;
@@ -47,6 +50,7 @@ export class UserMessageDto {
     dto.type = message.type;
     dto.readed = message.readed;
     dto.createdAt = message.createdAt;
+    dto.version = message.version;
     return dto;
   }
 }

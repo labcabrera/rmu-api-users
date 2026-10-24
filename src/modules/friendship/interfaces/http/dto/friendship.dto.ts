@@ -22,6 +22,9 @@ export class FriendshipDto {
 
   updatedAt: Date | null;
 
+  @ApiProperty({ description: 'Version of optimistic concurrency: send it back in the PATCH to detect a concurrent change', example: 0 })
+  version: number;
+
   static fromEntity(friendship: Friendship): FriendshipDto {
     const dto = new FriendshipDto();
     dto.id = friendship.id;
@@ -33,6 +36,7 @@ export class FriendshipDto {
     dto.message = friendship.message;
     dto.createdAt = friendship.createdAt;
     dto.updatedAt = friendship.updatedAt;
+    dto.version = friendship.version;
     return dto;
   }
 }

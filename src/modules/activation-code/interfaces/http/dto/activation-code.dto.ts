@@ -73,6 +73,9 @@ export class ActivationCodeDto {
   })
   updatedAt?: Date | null;
 
+  @ApiProperty({ description: 'Version of optimistic concurrency: send it back in the PATCH to detect a concurrent change', example: 0 })
+  version: number;
+
   static fromEntity(activationCode: ActivationCode): ActivationCodeDto {
     const dto = new ActivationCodeDto();
     dto.id = activationCode.id;
@@ -84,6 +87,7 @@ export class ActivationCodeDto {
     dto.activatedAt = activationCode.activatedAt;
     dto.activatedBy = activationCode.activatedBy ?? null;
     dto.updatedAt = activationCode.updatedAt;
+    dto.version = activationCode.version;
     return dto;
   }
 }

@@ -60,6 +60,9 @@ export class UserDto {
   @IsOptional()
   updatedAt: Date | null;
 
+  @ApiProperty({ description: 'Version of optimistic concurrency: send it back in the PATCH to detect a concurrent change', example: 0 })
+  version: number;
+
   static fromEntity(user: User): UserDto {
     const dto = new UserDto();
     dto.id = user.id;
@@ -76,6 +79,7 @@ export class UserDto {
     dto.lastLoginAt = user.lastLoginAt;
     dto.createdAt = user.createdAt;
     dto.updatedAt = user.updatedAt;
+    dto.version = user.version;
     return dto;
   }
 }

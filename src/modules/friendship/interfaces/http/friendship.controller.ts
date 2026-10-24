@@ -64,11 +64,11 @@ export class FriendshipController {
   @Patch(':id')
   @ApiOperation({ operationId: 'updateFriendship', summary: 'Update friendship' })
   @ApiOkResponse({ type: FriendshipDto, description: 'Success' })
-  @ApiErrors({ 403: 'Forbidden friendship operation', 404: 'Friendship not found' })
+  @ApiErrors({ 403: 'Forbidden friendship operation', 404: 'Friendship not found', 409: 'Stale version (version-conflict)' })
   async update(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() body: UpdateFriendshipDto): Promise<FriendshipDto> {
     const userId = user.id;
     const roles = user.roles;
-    const command = new UpdateFriendshipCommand(id, body.status, userId, roles);
+    const command = new UpdateFriendshipCommand(id, body.status, userId, roles, body.version);
     const friendship = await this.commandBus.execute<UpdateFriendshipCommand, Friendship>(command);
     return FriendshipDto.fromEntity(friendship);
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import type { HydratedDocument, Model } from 'mongoose';
 import type { FriendshipRepository } from '../../application/ports/friendship-repository.port.js';
 import { Friendship } from '../../domain/aggregates/friendship.js';
 import { type FriendshipDocument, FriendshipModel } from '../persistence/models/friendship.model.js';
@@ -28,10 +28,10 @@ export class MongoFriendshipRepository extends MongoBaseRepository<Friendship, F
         { requesterId: friendId, addresseeId: userId },
       ],
     });
-    return doc ? this.mapToEntity(doc) : null;
+    return doc ? this.toEntity(doc) : null;
   }
 
-  protected mapToEntity(doc: FriendshipDocument): Friendship {
+  protected mapToEntity(doc: HydratedDocument<FriendshipDocument>): Friendship {
     return Friendship.fromProps({
       id: doc._id.toString(),
       requesterId: doc.requesterId,
