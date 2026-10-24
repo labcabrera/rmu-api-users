@@ -47,6 +47,36 @@ describe('OpenAPI', () => {
     expect(spec.components.schemas.ErrorDto.properties.path.example).toMatch(/^\/v1\/friendships\//);
   });
 
+  it('documents every field of a friendship [F-users-19]', async () => {
+    const spec = (await request(e2e.server).get('/api-spec')).body as {
+      components: { schemas: { FriendshipDto: { properties: Record<string, unknown>; required: string[] } } };
+    };
+    const fields = [
+      'id',
+      'requesterId',
+      'requesterName',
+      'addresseeId',
+      'addresseeName',
+      'status',
+      'message',
+      'createdAt',
+      'updatedAt',
+      'version',
+    ];
+    expect(Object.keys(spec.components.schemas.FriendshipDto.properties).sort()).toEqual([...fields].sort());
+  });
+
+  it('documents the success status that each endpoint answers [F-users-13, F-users-14]', async () => {
+    const paths = await operations();
+    const statuses = (path: string, method: string) => Object.keys(paths[path][method].responses ?? {}).filter(s => s.startsWith('2'));
+    expect(statuses('/v1/activation-codes/check', 'post')).toEqual(['200']);
+    expect(statuses('/v1/activation-codes/activate', 'post')).toEqual(['200']);
+    expect(statuses('/v1/activation-codes/{id}', 'delete')).toEqual(['204']);
+    expect(statuses('/v1/activation-codes', 'post')).toEqual(['201']);
+    expect(statuses('/v1/friendships/{id}', 'delete')).toEqual(['204']);
+    expect(statuses('/v1/user-messages/{id}', 'delete')).toEqual(['204']);
+  });
+
   it('serves the Swagger UI', async () => {
     const response = await request(e2e.server).get('/api-docs/');
     expect(response.status).toBe(200);
