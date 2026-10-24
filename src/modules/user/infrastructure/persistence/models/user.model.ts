@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { User } from '../../../domain/aggregates/user';
-import { UserSettings } from './user-settings.model';
+import { User } from '../../../domain/aggregates/user.js';
+import { UserSettings } from './user-settings.model.js';
 
 export type UserDocument = User & Document;
 

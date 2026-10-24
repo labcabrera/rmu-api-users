@@ -1,12 +1,12 @@
 import { Inject, Logger } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ConflictError, NotFoundError, ValidationError } from '../../../../shared/domain/errors/errors';
-import { User } from '../../../domain/aggregates/user';
-import { UserUpdatedEvent } from '../../../domain/events/user-events';
-import { DISPLAY_NAME_MAX_LENGTH, DISPLAY_NAME_MIN_LENGTH, DISPLAY_NAME_PATTERN } from '../../../domain/services/display-name';
-import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../../../shared/application/ports/domain-event-publisher.port';
-import { UserRepository } from '../../ports/user-repository.port';
-import { UpdateCurrentUserCommand } from '../commands/update-current-user.command';
+import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { ConflictError, NotFoundError, ValidationError } from '../../../../shared/domain/errors/errors.js';
+import { User } from '../../../domain/aggregates/user.js';
+import { UserUpdatedEvent } from '../../../domain/events/user-events.js';
+import { DISPLAY_NAME_MAX_LENGTH, DISPLAY_NAME_MIN_LENGTH, DISPLAY_NAME_PATTERN } from '../../../domain/services/display-name.js';
+import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../../../shared/application/ports/domain-event-publisher.port.js';
+import { UserRepository } from '../../ports/user-repository.port.js';
+import { UpdateCurrentUserCommand } from '../commands/update-current-user.command.js';
 
 /** Updates the RMU profile only. The Keycloak account (username included) is never touched. */
 @CommandHandler(UpdateCurrentUserCommand)

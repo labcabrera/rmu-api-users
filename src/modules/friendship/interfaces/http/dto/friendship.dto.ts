@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { Friendship } from '../../../domain/aggregates/friendship';
-import { FriendshipStatus } from '../../../domain/value-objects/friendship-status.vo';
+import { Friendship } from '../../../domain/aggregates/friendship.js';
+import type { FriendshipStatus } from '../../../domain/value-objects/friendship-status.vo.js';
 
 export class FriendshipDto {
   @ApiProperty({ description: 'Unique identifier of the friendship', required: true })

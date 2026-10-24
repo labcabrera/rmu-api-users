@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NotFoundError } from '../../../../shared/domain/errors/errors';
-import { Friendship } from '../../../domain/aggregates/friendship';
-import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port';
-import { DeleteFriendshipCommand } from '../commands/delete-friendship.command';
+import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { NotFoundError } from '../../../../shared/domain/errors/errors.js';
+import { Friendship } from '../../../domain/aggregates/friendship.js';
+import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port.js';
+import { DeleteFriendshipCommand } from '../commands/delete-friendship.command.js';
 
 @CommandHandler(DeleteFriendshipCommand)
 export class DeleteFriendshipHandler implements ICommandHandler<DeleteFriendshipCommand, Friendship> {

@@ -1,19 +1,19 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AuthModule } from '../shared/infrastructure/security/auth.module';
-import { SharedModule } from '../shared/shared.module';
-import { GetUserHandler } from './application/cqrs/handlers/get-user.handler';
-import { GetUsersHandler } from './application/cqrs/handlers/get-users.handler';
-import { SearchUsersHandler } from './application/cqrs/handlers/search-users.handler';
-import { UpdateCurrentUserHandler } from './application/cqrs/handlers/update-current-user.handler';
-import { IamUserPort } from './application/ports/iam-user.port';
-import { UserRepository } from './application/ports/user-repository.port';
-import { UserProvisioningService } from './application/services/user-provisioning.service';
-import { KeycloakIamUserAdapter } from './infrastructure/api-clients/keycloak.iam-user.adapter';
-import { MongoUserRepository } from './infrastructure/db/mongo.user.repository';
-import { UserModel, UserSchema } from './infrastructure/persistence/models/user.model';
-import { UserController } from './interfaces/http/user.controller';
+import { AuthModule } from '../shared/infrastructure/security/auth.module.js';
+import { SharedModule } from '../shared/shared.module.js';
+import { GetUserHandler } from './application/cqrs/handlers/get-user.handler.js';
+import { GetUsersHandler } from './application/cqrs/handlers/get-users.handler.js';
+import { SearchUsersHandler } from './application/cqrs/handlers/search-users.handler.js';
+import { UpdateCurrentUserHandler } from './application/cqrs/handlers/update-current-user.handler.js';
+import { IamUserPort } from './application/ports/iam-user.port.js';
+import { UserRepository } from './application/ports/user-repository.port.js';
+import { UserProvisioningService } from './application/services/user-provisioning.service.js';
+import { KeycloakIamUserAdapter } from './infrastructure/api-clients/keycloak.iam-user.adapter.js';
+import { MongoUserRepository } from './infrastructure/db/mongo.user.repository.js';
+import { UserModel, UserSchema } from './infrastructure/persistence/models/user.model.js';
+import { UserController } from './interfaces/http/user.controller.js';
 
 export const USER_HANDLERS = [GetUserHandler, GetUsersHandler, SearchUsersHandler, UpdateCurrentUserHandler];
 

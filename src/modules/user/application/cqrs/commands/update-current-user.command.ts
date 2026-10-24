@@ -1,5 +1,5 @@
-import { AuthenticatedCommand } from '../../../../shared/application/cqrs/authenticated-command';
-import { UserSettings } from '../../../domain/value-objects/user-settings.vo';
+import { AuthenticatedCommand } from '../../../../shared/application/cqrs/authenticated-command.js';
+import { UserSettings } from '../../../domain/value-objects/user-settings.vo.js';
 
 export class UpdateCurrentUserCommand extends AuthenticatedCommand {
   constructor(

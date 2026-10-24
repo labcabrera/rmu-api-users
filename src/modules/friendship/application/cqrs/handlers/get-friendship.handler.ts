@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
-import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { NotFoundError } from '../../../../shared/domain/errors/errors';
-import { Friendship } from '../../../domain/aggregates/friendship';
-import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port';
-import { GetFriendshipQuery } from '../queries/get-friendship.query';
+import { type IQueryHandler, QueryHandler } from '@nestjs/cqrs';
+import { NotFoundError } from '../../../../shared/domain/errors/errors.js';
+import { Friendship } from '../../../domain/aggregates/friendship.js';
+import { type FriendshipRepository, FRIENDSHIP_REPOSITORY } from '../../ports/friendship-repository.port.js';
+import { GetFriendshipQuery } from '../queries/get-friendship.query.js';
 
 @QueryHandler(GetFriendshipQuery)
 export class GetFriendshipHandler implements IQueryHandler<GetFriendshipQuery, Friendship> {

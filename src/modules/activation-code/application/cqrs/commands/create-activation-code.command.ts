@@ -1,4 +1,4 @@
-import { ActivationFeature } from '../../../domain/aggregates/activation-code-props';
+import type { ActivationFeature } from '../../../domain/aggregates/activation-code-props.js';
 
 export class CreateActivationCodeCommand {
   constructor(

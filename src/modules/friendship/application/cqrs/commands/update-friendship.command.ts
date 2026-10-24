@@ -1,5 +1,5 @@
-import { AuthenticatedCommand } from '../../../../shared/application/cqrs/authenticated-command';
-import { FriendshipStatus } from '../../../domain/value-objects/friendship-status.vo';
+import { AuthenticatedCommand } from '../../../../shared/application/cqrs/authenticated-command.js';
+import type { FriendshipStatus } from '../../../domain/value-objects/friendship-status.vo.js';
 
 export class UpdateFriendshipCommand extends AuthenticatedCommand {
   constructor(

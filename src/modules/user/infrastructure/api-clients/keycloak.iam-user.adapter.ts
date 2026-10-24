@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TokenService } from '../../../shared/infrastructure/security/token.service';
-import { IamUserPort, UserApiResponse, UserGroup } from '../../application/ports/iam-user.port';
+import { TokenService } from '../../../shared/infrastructure/security/token.service.js';
+import { IamUserPort, type UserApiResponse, type UserGroup } from '../../application/ports/iam-user.port.js';
 
 interface KeycloakUserRepresentation {
   readonly id: string;

@@ -1,4 +1,4 @@
-import { MessageType } from '../value-objects/message-type.vo';
+import type { MessageType } from '../value-objects/message-type.vo.js';
 
 export interface UserMessageProps {
   id: string;

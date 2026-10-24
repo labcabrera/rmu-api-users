@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Page } from '../../../../shared/application/pagination/page';
-import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto';
-import { Friendship } from '../../../domain/aggregates/friendship';
-import { FriendshipDto } from './friendship.dto';
+import { Page } from '../../../../shared/application/pagination/page.js';
+import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto.js';
+import { Friendship } from '../../../domain/aggregates/friendship.js';
+import { FriendshipDto } from './friendship.dto.js';
 
 export class FriendshipPageDto {
   @ApiProperty({ type: [FriendshipDto] })

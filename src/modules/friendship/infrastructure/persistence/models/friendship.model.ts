@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Friendship } from '../../../domain/aggregates/friendship';
-import type { FriendshipStatus } from '../../../domain/value-objects/friendship-status.vo';
+import { Friendship } from '../../../domain/aggregates/friendship.js';
+import type { FriendshipStatus } from '../../../domain/value-objects/friendship-status.vo.js';
 
 export type FriendshipDocument = Friendship & Document;
 

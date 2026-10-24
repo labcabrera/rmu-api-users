@@ -1,6 +1,6 @@
-import { InvalidSearchExpression } from '../../../src/modules/shared/domain/errors/errors';
-import { RsqlParser } from '../../../src/modules/shared/infrastructure/db/rsql-parser';
-import { escapeRegex } from '../../../src/modules/user/infrastructure/db/mongo.user.repository';
+import { InvalidSearchExpression } from '../../../src/modules/shared/domain/errors/errors.js';
+import { RsqlParser } from '../../../src/modules/shared/infrastructure/db/rsql-parser.js';
+import { escapeRegex } from '../../../src/modules/user/infrastructure/db/mongo.user.repository.js';
 
 describe('query hardening', () => {
   const parser = new RsqlParser();

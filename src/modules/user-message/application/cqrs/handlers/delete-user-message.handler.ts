@@ -1,9 +1,9 @@
 import { Inject } from '@nestjs/common';
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { NotFoundError } from '../../../../shared/domain/errors/errors';
-import { UserMessage } from '../../../domain/aggregates/user-message';
-import { UserMessageRepository } from '../../ports/user-message-repository.port';
-import { DeleteUserMessageCommand } from '../commands/delete-user-message.command';
+import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { NotFoundError } from '../../../../shared/domain/errors/errors.js';
+import { UserMessage } from '../../../domain/aggregates/user-message.js';
+import { UserMessageRepository } from '../../ports/user-message-repository.port.js';
+import { DeleteUserMessageCommand } from '../commands/delete-user-message.command.js';
 
 @CommandHandler(DeleteUserMessageCommand)
 export class DeleteUserMessageHandler implements ICommandHandler<DeleteUserMessageCommand, UserMessage> {

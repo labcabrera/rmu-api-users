@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ACTIVATION_FEATURES, ActivationFeature } from '../../../domain/aggregates/activation-code-props';
+import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
+import { ACTIVATION_FEATURES, type ActivationFeature } from '../../../domain/aggregates/activation-code-props.js';
 
 export class ActivationCodeDto {
   @ApiProperty({

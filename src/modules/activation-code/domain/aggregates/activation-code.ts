@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
-import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate';
-import { ActivationCodeProps, ActivationFeature } from './activation-code-props';
+import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate.js';
+import type { ActivationCodeProps, ActivationFeature } from './activation-code-props.js';
 
 export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
   constructor(

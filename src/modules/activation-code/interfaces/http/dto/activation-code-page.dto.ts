@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Page } from '../../../../shared/application/pagination/page';
-import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto';
-import { ActivationCode } from '../../../domain/aggregates/activation-code';
-import { ActivationCodeDto } from './activation-code.dto';
+import { Page } from '../../../../shared/application/pagination/page.js';
+import { PaginationDto } from '../../../../shared/interfaces/http/dto/page.dto.js';
+import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
+import { ActivationCodeDto } from './activation-code.dto.js';
 
 export class ActivationCodePageDto {
   @ApiProperty({ type: [ActivationCodeDto] })

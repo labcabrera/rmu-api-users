@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy, StrategyOptionsWithoutRequest } from 'passport-jwt';
+import { ExtractJwt, Strategy, type StrategyOptionsWithoutRequest } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import jwksRsa from 'jwks-rsa';
-import type { AuthenticatedUser } from '../../interfaces/http/authenticated-request';
+import type { AuthenticatedUser } from '../../interfaces/http/authenticated-request.js';
 
 export const LOCAL_IDENTITY_PROVIDER = 'local';
 

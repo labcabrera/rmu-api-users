@@ -1,6 +1,6 @@
-import { Page } from '../../../shared/application/pagination/page';
-import { QueryCriteria } from '../../../shared/application/criteria/query-criteria';
-import { Friendship } from '../../domain/aggregates/friendship';
+import { Page } from '../../../shared/application/pagination/page.js';
+import { QueryCriteria } from '../../../shared/application/criteria/query-criteria.js';
+import { Friendship } from '../../domain/aggregates/friendship.js';
 
 export interface FriendshipRepository {
   findById(id: string): Promise<Friendship | null>;

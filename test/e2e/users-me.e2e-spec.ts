@@ -3,19 +3,22 @@ import { CqrsModule } from '@nestjs/cqrs';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
 import { createServer, Server } from 'http';
-import { AddressInfo } from 'net';
+import type { AddressInfo } from 'net';
 import { createSign, generateKeyPairSync, KeyObject } from 'crypto';
 import request from 'supertest';
-import type { App } from 'supertest/types';
-import { configureHttp } from '../../src/bootstrap/http';
-import { JwtStrategy } from '../../src/modules/shared/infrastructure/security/jwt.strategy';
-import { IamUserPort } from '../../src/modules/user/application/ports/iam-user.port';
-import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../src/modules/shared/application/ports/domain-event-publisher.port';
-import { UserRepository } from '../../src/modules/user/application/ports/user-repository.port';
-import { UserProvisioningService } from '../../src/modules/user/application/services/user-provisioning.service';
-import { UserController } from '../../src/modules/user/interfaces/http/user.controller';
-import { USER_HANDLERS } from '../../src/modules/user/user.module';
-import { InMemoryUserRepository } from '../support/in-memory-user.repository';
+import type { App } from 'supertest/types.js';
+import { configureHttp } from '../../src/bootstrap/http.js';
+import { JwtStrategy } from '../../src/modules/shared/infrastructure/security/jwt.strategy.js';
+import { IamUserPort } from '../../src/modules/user/application/ports/iam-user.port.js';
+import {
+  DOMAIN_EVENT_PUBLISHER,
+  type DomainEventPublisher,
+} from '../../src/modules/shared/application/ports/domain-event-publisher.port.js';
+import { UserRepository } from '../../src/modules/user/application/ports/user-repository.port.js';
+import { UserProvisioningService } from '../../src/modules/user/application/services/user-provisioning.service.js';
+import { UserController } from '../../src/modules/user/interfaces/http/user.controller.js';
+import { USER_HANDLERS } from '../../src/modules/user/user.module.js';
+import { InMemoryUserRepository } from '../support/in-memory-user.repository.js';
 
 const ISSUER = 'http://localhost/sso/realms/rmu';
 const AUDIENCE = 'rmu-api';

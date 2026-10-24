@@ -1,6 +1,6 @@
-import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate';
-import { UserSettings } from '../value-objects/user-settings.vo';
-import { UserProps } from './user-props';
+import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate.js';
+import { UserSettings } from '../value-objects/user-settings.vo.js';
+import type { UserProps } from './user-props.js';
 
 export type CreateUserProps = Omit<
   UserProps,

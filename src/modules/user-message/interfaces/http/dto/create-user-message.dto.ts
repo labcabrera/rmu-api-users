@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsIn, IsString, MaxLength } from 'class-validator';
-import { MESSAGE_TYPES } from '../../../domain/value-objects/message-type.vo';
-import type { MessageType } from '../../../domain/value-objects/message-type.vo';
+import { MESSAGE_TYPES } from '../../../domain/value-objects/message-type.vo.js';
+import type { MessageType } from '../../../domain/value-objects/message-type.vo.js';
 
 export class CreateUserMessageDto {
   @ApiProperty({ description: 'Message text', example: 'Your activation code has been redeemed' })

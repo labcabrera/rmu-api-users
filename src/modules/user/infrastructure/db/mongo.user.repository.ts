@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { QueryFilter, Model } from 'mongoose';
-import { QueryCriteria, SortCriteria } from '../../../shared/application/criteria/query-criteria';
-import { Page } from '../../../shared/application/pagination/page';
-import { ConflictError } from '../../../shared/domain/errors/errors';
-import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository';
-import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser';
-import { UserSummary } from '../../application/models/user-summary';
-import { UserRepository } from '../../application/ports/user-repository.port';
-import { User } from '../../domain/aggregates/user';
-import { USER_NAME_COLLATION, UserDocument, UserModel } from '../persistence/models/user.model';
+import { QueryCriteria, type SortCriteria } from '../../../shared/application/criteria/query-criteria.js';
+import { Page } from '../../../shared/application/pagination/page.js';
+import { ConflictError } from '../../../shared/domain/errors/errors.js';
+import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository.js';
+import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser.js';
+import type { UserSummary } from '../../application/models/user-summary.js';
+import { UserRepository } from '../../application/ports/user-repository.port.js';
+import { User } from '../../domain/aggregates/user.js';
+import { USER_NAME_COLLATION, type UserDocument, UserModel } from '../persistence/models/user.model.js';
 
 const DUPLICATE_KEY = 11000;
 

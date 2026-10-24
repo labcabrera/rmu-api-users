@@ -1,4 +1,4 @@
-import { UserSettings } from '../value-objects/user-settings.vo';
+import { UserSettings } from '../value-objects/user-settings.vo.js';
 
 export interface UserProps {
   id: string;

@@ -1,16 +1,16 @@
 import type { Mock } from 'vitest';
-import { ActivateActivationCodeHandler } from '../../../../../../src/modules/activation-code/application/cqrs/handlers/activate-activation-code.handler';
-import { CheckActivationCodeHandler } from '../../../../../../src/modules/activation-code/application/cqrs/handlers/check-activation-code.handler';
-import { ActivateActivationCodeCommand } from '../../../../../../src/modules/activation-code/application/cqrs/commands/activate-activation-code.command';
-import { CheckActivationCodeQuery } from '../../../../../../src/modules/activation-code/application/cqrs/queries/check-activation-code.query';
-import { ActivationCodeRepository } from '../../../../../../src/modules/activation-code/application/ports/activation-code-repository.port';
-import { ActivationCode } from '../../../../../../src/modules/activation-code/domain/aggregates/activation-code';
-import { ActivationCodeProps } from '../../../../../../src/modules/activation-code/domain/aggregates/activation-code-props';
-import { ConflictError, NotFoundError, ValidationError } from '../../../../../../src/modules/shared/domain/errors/errors';
-import { IamUserPort } from '../../../../../../src/modules/user/application/ports/iam-user.port';
-import { User } from '../../../../../../src/modules/user/domain/aggregates/user';
-import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo';
-import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository';
+import { ActivateActivationCodeHandler } from '../../../../../../src/modules/activation-code/application/cqrs/handlers/activate-activation-code.handler.js';
+import { CheckActivationCodeHandler } from '../../../../../../src/modules/activation-code/application/cqrs/handlers/check-activation-code.handler.js';
+import { ActivateActivationCodeCommand } from '../../../../../../src/modules/activation-code/application/cqrs/commands/activate-activation-code.command.js';
+import { CheckActivationCodeQuery } from '../../../../../../src/modules/activation-code/application/cqrs/queries/check-activation-code.query.js';
+import { ActivationCodeRepository } from '../../../../../../src/modules/activation-code/application/ports/activation-code-repository.port.js';
+import { ActivationCode } from '../../../../../../src/modules/activation-code/domain/aggregates/activation-code.js';
+import type { ActivationCodeProps } from '../../../../../../src/modules/activation-code/domain/aggregates/activation-code-props.js';
+import { ConflictError, NotFoundError, ValidationError } from '../../../../../../src/modules/shared/domain/errors/errors.js';
+import { IamUserPort } from '../../../../../../src/modules/user/application/ports/iam-user.port.js';
+import { User } from '../../../../../../src/modules/user/domain/aggregates/user.js';
+import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo.js';
+import { InMemoryUserRepository } from '../../../../../support/in-memory-user.repository.js';
 
 /** Minimal repository with the same atomic claim semantics as the Mongo one. */
 class InMemoryActivationCodeRepository {
