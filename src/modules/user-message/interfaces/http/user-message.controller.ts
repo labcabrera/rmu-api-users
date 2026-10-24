@@ -26,7 +26,11 @@ export class MessageController {
   ) {}
 
   @Get('')
-  @ApiOperation({ operationId: 'listMessages', summary: 'List user messages' })
+  @ApiOperation({
+    operationId: 'listMessages',
+    summary: 'List the messages of the caller, newest first',
+    description: 'q filters with RSQL inside the messages of the caller: `readed==null` gives the unread ones.',
+  })
   @ApiOkResponse({ type: UserMessagePageDto, description: 'Success' })
   @ApiErrors()
   async findUnread(@CurrentUser() user: AuthenticatedUser, @Query() dto: PagedQueryDto): Promise<UserMessagePageDto> {

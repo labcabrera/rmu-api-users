@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { HydratedDocument, Model } from 'mongoose';
-import { QueryCriteria } from '../../../shared/application/criteria/query-criteria.js';
-import { Page } from '../../../shared/application/pagination/page.js';
 import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository.js';
 import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser.js';
 import { type UserMessageRepository } from '../../application/ports/user-message-repository.port.js';
@@ -13,12 +11,6 @@ import { type UserMessageDocument, UserMessageModel } from '../persistence/model
 export class MongoUserMessageRepository extends MongoBaseRepository<UserMessage, UserMessageDocument> implements UserMessageRepository {
   constructor(@InjectModel(UserMessageModel.name) messageModel: Model<UserMessageDocument>, rsqlParser: RsqlParser) {
     super(messageModel, rsqlParser);
-  }
-
-  async findUnreadByUser(userId: string, page: number, size: number): Promise<Page<UserMessage>> {
-    return this.findByRsql('', page, size, QueryCriteria.allOf([QueryCriteria.eq('userId', userId), QueryCriteria.eq('readed', null)]), {
-      createdAt: 'desc',
-    });
   }
 
   protected mapToEntity(doc: HydratedDocument<UserMessageDocument>): UserMessage {
