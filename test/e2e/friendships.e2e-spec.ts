@@ -93,13 +93,16 @@ describe('request', () => {
   it('answers 400 to a requester without a profile', async () => {
     const response = await request(e2e.server)
       .post('/v1/friendships')
-      .set('Authorization', e2e.auth({ sub: 'e2e-no-profile', preferred_username: 'ghost' }))
+      .set('Authorization', e2e.auth({ sub: 'e2e-no-profile', preferred_username: 'ghost', groups: ['rmu-user'] }))
       .send({ addresseeName: 'bob' });
     expect(response.status).toBe(400);
   });
 
-  it('is open to users without roles', async () => {
-    expect((await befriend('noRole', 'bob')).status).toBe(201);
+  // Spec 021, decision 2: creating needs rmu-user or rmu-admin; a token without groups is read-only.
+  it('is forbidden to users without roles', async () => {
+    const response = await befriend('noRole', 'bob');
+    expect(response.status).toBe(403);
+    expect((response.body as { code: string }).code).toBe('forbidden');
   });
 });
 
@@ -155,14 +158,14 @@ describe('answer', () => {
   it('forbids the requester and other users to answer', async () => {
     const created = (await befriend('admin', 'bob')).body as FriendshipBody;
     expect((await patch('admin', created.id, 'accepted')).status).toBe(403);
-    // F-users-18: a user outside the friendship gets 403, not 404, so it learns that the id exists.
-    expect((await patch('owner', created.id, 'accepted')).status).toBe(403);
     expect((await patch('owner', 'unknown', 'accepted')).status).toBe(404);
   });
 
-  it.skip('answers 404 to a user outside the friendship [F-users-18]', async () => {
-    const created = (await befriend('admin', 'bob')).body as FriendshipBody;
-    expect((await patch('owner', created.id, 'accepted')).status).toBe(404);
+  it('answers 404 to a user outside the friendship [F-users-18]', async () => {
+    const created = (await befriend('owner', 'guest')).body as FriendshipBody;
+    const response = await patch('other', created.id, 'accepted');
+    expect(response.status).toBe(404);
+    expect((response.body as { code: string }).code).toBe('not-found');
   });
 
   it('rejects an unknown status', async () => {
@@ -209,13 +212,63 @@ describe('answer', () => {
 
 describe('delete', () => {
   it('lets either participant delete a friendship, and nobody else', async () => {
-    const created = (await befriend('noRole', 'dave')).body as FriendshipBody;
+    const created = (await befriend('other', 'dave')).body as FriendshipBody;
     expect((await request(e2e.server).delete(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth('owner'))).status).toBe(404);
-    expect((await request(e2e.server).delete(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth('noRole'))).status).toBe(204);
-    expect((await get('noRole', created.id)).status).toBe(404);
+    expect((await request(e2e.server).delete(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth('other'))).status).toBe(204);
+    expect((await get('other', created.id)).status).toBe(404);
   });
 });
 
 it('requires a token', async () => {
   expect((await request(e2e.server).get('/v1/friendships')).status).toBe(401);
+});
+
+// Spec 021, decision 2: owner (the requester), the addressee, another user, an admin outside the friendship, a user
+// without roles and no token, for each change.
+describe('permission matrix', () => {
+  const carol = { sub: 'e2e-carol', preferred_username: 'carol', email: 'carol@example.com', groups: ['rmu-user'] };
+  const outsiderAdmin = { sub: 'e2e-admin-out', preferred_username: 'admin-out', groups: ['rmu-admin'] };
+  const as = (claims: object) => e2e.auth(claims as never);
+
+  beforeAll(async () => {
+    for (const claims of [carol, outsiderAdmin]) await request(e2e.server).get('/v1/users/me').set('Authorization', as(claims));
+  });
+
+  it('creates with rmu-user or rmu-admin only', async () => {
+    expect((await befriend('owner', 'carol')).status).toBe(201);
+    expect(
+      (await request(e2e.server).post('/v1/friendships').set('Authorization', as(outsiderAdmin)).send({ addresseeName: 'bob' })).status,
+    ).toBe(201);
+    expect((await befriend('noRole', 'carol')).status).toBe(403);
+    expect((await request(e2e.server).post('/v1/friendships').send({ addresseeName: 'carol' })).status).toBe(401);
+  });
+
+  it('lets only the addressee answer: 403 to the requester, 404 to anybody else', async () => {
+    const created = (await request(e2e.server).post('/v1/friendships').set('Authorization', as(carol)).send({ addresseeName: 'bob' }))
+      .body as FriendshipBody;
+    const answer = (auth: string | undefined) => {
+      const req = request(e2e.server).patch(`/v1/friendships/${created.id}`);
+      return (auth ? req.set('Authorization', auth) : req).send({ status: 'accepted' });
+    };
+    expect((await answer(as(carol))).status).toBe(403);
+    expect((await answer(e2e.auth('owner'))).status).toBe(404);
+    expect((await answer(as(outsiderAdmin))).status).toBe(404);
+    expect((await answer(e2e.auth('noRole'))).status).toBe(404);
+    expect((await answer(undefined)).status).toBe(401);
+    expect((await answer(e2e.auth('other'))).status).toBe(200);
+  });
+
+  it('lets only the participants delete: 404 to anybody else', async () => {
+    const created = (await request(e2e.server).post('/v1/friendships').set('Authorization', as(carol)).send({ addresseeName: 'guest' }))
+      .body as FriendshipBody;
+    const remove = (auth?: string) => {
+      const req = request(e2e.server).delete(`/v1/friendships/${created.id}`);
+      return auth ? req.set('Authorization', auth) : req;
+    };
+    expect((await remove(e2e.auth('owner'))).status).toBe(404);
+    expect((await remove(as(outsiderAdmin))).status).toBe(404);
+    expect((await remove()).status).toBe(401);
+    // The addressee has no roles, but the friendship is its own.
+    expect((await remove(e2e.auth('noRole'))).status).toBe(204);
+  });
 });

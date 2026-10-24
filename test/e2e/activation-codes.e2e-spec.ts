@@ -48,7 +48,7 @@ describe('create', () => {
     expect(new Set(codes.map(code => code.code)).size).toBe(3);
   });
 
-  it.each(['owner', 'noRole'] as const)('is forbidden to %s', async user => {
+  it.each(['owner', 'other', 'noRole'] as const)('is forbidden to %s', async user => {
     expect((await create(user)).status).toBe(403);
   });
 
@@ -127,26 +127,47 @@ describe('read, update and delete', () => {
     expect((await request(e2e.server).get(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth('admin'))).status).toBe(404);
   });
 
-  it('hides a code from everybody but the admin that created it', async () => {
+  it('forbids every user that is not rmu-admin to read, change or delete a code', async () => {
     const code = await createOne();
-    const otherAdmin = { sub: 'e2e-admin-2', preferred_username: 'admin2', groups: ['rmu-admin'] };
-    for (const user of ['owner', 'noRole'] as const) {
-      expect((await request(e2e.server).get(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth(user))).status).toBe(404);
+    for (const user of ['owner', 'other', 'noRole'] as const) {
+      expect((await request(e2e.server).get(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth(user))).status).toBe(403);
       const patch = await request(e2e.server)
         .patch(`/v1/activation-codes/${code.id}`)
         .set('Authorization', e2e.auth(user))
         .send({ code: 'HACKED1' });
-      expect(patch.status).toBe(404);
-      expect((await request(e2e.server).delete(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth(user))).status).toBe(404);
+      expect(patch.status).toBe(403);
+      expect((await request(e2e.server).delete(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth(user))).status).toBe(403);
     }
-    // F-users-10: another admin lists the code but cannot read, change or delete it.
-    expect((await request(e2e.server).get(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth(otherAdmin))).status).toBe(404);
+    expect((await request(e2e.server).get(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth('admin'))).body).toMatchObject({
+      code: code.code,
+    });
   });
 
-  it.skip('lets any rmu-admin read and delete a code [F-users-10]', async () => {
+  it('lets any rmu-admin read, change and delete a code [F-users-10]', async () => {
     const code = await createOne();
     const otherAdmin = { sub: 'e2e-admin-2', preferred_username: 'admin2', groups: ['rmu-admin'] };
     expect((await request(e2e.server).get(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth(otherAdmin))).status).toBe(200);
+    const patch = await request(e2e.server)
+      .patch(`/v1/activation-codes/${code.id}`)
+      .set('Authorization', e2e.auth(otherAdmin))
+      .send({ features: ['spell-law'] });
+    expect(patch.status).toBe(200);
+    expect((await request(e2e.server).delete(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth(otherAdmin))).status).toBe(
+      200,
+    );
+  });
+
+  it('requires a token to read, change or delete a code', async () => {
+    const code = await createOne();
+    expect((await request(e2e.server).get(`/v1/activation-codes/${code.id}`)).status).toBe(401);
+    expect(
+      (
+        await request(e2e.server)
+          .patch(`/v1/activation-codes/${code.id}`)
+          .send({ features: ['spell-law'] })
+      ).status,
+    ).toBe(401);
+    expect((await request(e2e.server).delete(`/v1/activation-codes/${code.id}`)).status).toBe(401);
   });
 
   it('answers 404 for an unknown code', async () => {

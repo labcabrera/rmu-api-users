@@ -30,7 +30,7 @@ export class FriendshipController {
   @Post('')
   @ApiOperation({ operationId: 'createFriendshipRequest', summary: 'Create friendship request' })
   @ApiCreatedResponse({ type: FriendshipDto, description: 'Created' })
-  @ApiErrors({ 409: 'Friendship already exists' })
+  @ApiErrors({ 403: 'Caller is not in the rmu-user or rmu-admin group', 409: 'Friendship already exists' })
   async create(@CurrentUser() user: AuthenticatedUser, @Body() body: CreateFriendshipRequestDto): Promise<FriendshipDto> {
     const userId = user.id;
     const roles = user.roles;
@@ -64,7 +64,11 @@ export class FriendshipController {
   @Patch(':id')
   @ApiOperation({ operationId: 'updateFriendship', summary: 'Update friendship' })
   @ApiOkResponse({ type: FriendshipDto, description: 'Success' })
-  @ApiErrors({ 403: 'Forbidden friendship operation', 404: 'Friendship not found', 409: 'Stale version (version-conflict)' })
+  @ApiErrors({
+    403: 'Caller is the requester, not the addressee',
+    404: 'Friendship not found or caller outside it',
+    409: 'Stale version (version-conflict)',
+  })
   async update(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string, @Body() body: UpdateFriendshipDto): Promise<FriendshipDto> {
     const userId = user.id;
     const roles = user.roles;

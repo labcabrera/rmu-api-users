@@ -92,12 +92,24 @@ logged and never fails the request.
 
 == Activation codes
 
-* `POST /v1/activation-codes` is reserved to `rmu-admin` (`403` otherwise).
+* Creating, listing, reading, changing and deleting codes (`/v1/activation-codes`, `/{id}`) is reserved to `rmu-admin`
+  (`403` otherwise). Any admin manages every code, whoever created it.
 * `POST /v1/activation-codes/check` with `{ "code" }` looks the code up by exact value: `400` when unknown or expired, `409` when
   already used.
 * `POST /v1/activation-codes/activate` with `{ "code" }` redeems a code once: it records `activatedBy` and `activatedAt` atomically,
   then adds the user to the Keycloak groups of the code's features. A used code answers `409`, an unknown one `404`, an expired
   one `400`. If the group assignment fails the code is released.
+
+== Friendships and messages
+
+Creating (a friendship request, a message) needs the `rmu-user` or `rmu-admin` group: a token without groups is read-only
+(`403`). Everything else is personal and needs no group:
+
+* a friendship is read and deleted by its two participants, and answered (`PATCH`) by its addressee (`403` to the requester).
+  Anybody else, admins included, gets `404`, as if it did not exist;
+* a message goes to a user that exists (`404` otherwise) and is an accepted friend of the sender (`403 not-friends`
+  otherwise); an `rmu-admin` (the service account among them) sends to any user. Only the recipient reads, marks as read and
+  deletes it; anybody else gets `404`.
 
 == Errors
 
