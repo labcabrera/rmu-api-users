@@ -130,6 +130,19 @@ DRY_RUN=1 node scripts/friendship-blocked-by.mjs   # report only
 node scripts/friendship-blocked-by.mjs             # set blockedBy
 ----
 
+=== Unique display names in an existing database
+
+Display names are unique ignoring case (index `name_1`), but Mongoose silently skips creating the index when the
+collection already holds a duplicate name. A friendship request by name then reaches either user.
+`scripts/user-name-unique-index.mjs` lists the duplicates, renames all but the user that logged in last with the
+collision suffix of the API (`-2`, `-3`...) and creates the index (same connection string as above; idempotent).
+
+[source,bash]
+----
+DRY_RUN=1 node scripts/user-name-unique-index.mjs   # report only
+node scripts/user-name-unique-index.mjs             # rename the duplicates and create the index
+----
+
 == Friendships and messages
 
 Creating (a friendship request, a message) needs the `rmu-user` or `rmu-admin` group: a token without groups is read-only
