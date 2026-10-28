@@ -8,6 +8,7 @@ type FriendshipBody = {
   addresseeId: string;
   addresseeName: string;
   status: string;
+  blockedBy: string | null;
   message: string | null;
   version: number;
 };
@@ -248,6 +249,69 @@ describe('delete', () => {
     expect((await request(e2e.server).delete(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth('owner'))).status).toBe(404);
     expect((await request(e2e.server).delete(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth('other'))).status).toBe(204);
     expect((await get('other', created.id)).status).toBe(404);
+  });
+});
+
+// Spec 044, decision 9 (F-users-28): either participant blocks, and only whoever blocked sees and deletes the block.
+describe('block', () => {
+  const user = (name: string) => ({ sub: `kc-${name}`, preferred_username: name, email: `${name}@example.com`, groups: ['rmu-user'] });
+  const gina = user('gina');
+  const hank = user('hank');
+  const ivy = user('ivy');
+  const as = (claims: object) => e2e.auth(claims as never);
+  const ask = (from: object, addresseeName: string) =>
+    request(e2e.server).post('/v1/friendships').set('Authorization', as(from)).send({ addresseeName });
+  const update = (by: object, id: string, status: string) =>
+    request(e2e.server).patch(`/v1/friendships/${id}`).set('Authorization', as(by)).send({ status });
+  const remove = (by: object, id: string) => request(e2e.server).delete(`/v1/friendships/${id}`).set('Authorization', as(by));
+  const blockedList = (by: { sub: string }) =>
+    request(e2e.server)
+      .get('/v1/friendships')
+      .query({ q: `blockedBy==${by.sub};status==blocked` })
+      .set('Authorization', as(by));
+
+  beforeAll(async () => {
+    for (const claims of [gina, hank, ivy]) await request(e2e.server).get('/v1/users/me').set('Authorization', as(claims));
+  });
+
+  it('lets the requester block an accepted friendship and records it as blockedBy', async () => {
+    const created = (await ask(gina, 'hank')).body as FriendshipBody;
+    expect(created.blockedBy).toBeNull();
+    expect((await update(hank, created.id, 'accepted')).status).toBe(200);
+    const blocked = await update(gina, created.id, 'blocked');
+    expect(blocked.status).toBe(200);
+    expect(blocked.body).toMatchObject({ status: 'blocked', blockedBy: gina.sub });
+
+    // Only the blocker lists it as blocked; the blocked user can neither delete nor unblock it.
+    expect(ids((await blockedList(gina)).body)).toEqual([created.id]);
+    expect(ids((await blockedList(hank)).body)).toEqual([]);
+    const denied = await remove(hank, created.id);
+    expect(denied.status).toBe(403);
+    expect((denied.body as { code: string }).code).toBe('forbidden');
+    expect((await update(hank, created.id, 'accepted')).status).toBe(400);
+    expect((await remove(gina, created.id)).status).toBe(204);
+  });
+
+  it('lets the requester block a pending request, and still keeps accept and reject for the addressee', async () => {
+    const created = (await ask(gina, 'ivy')).body as FriendshipBody;
+    expect((await update(gina, created.id, 'accepted')).status).toBe(403);
+    expect((await update(gina, created.id, 'rejected')).status).toBe(403);
+    const blocked = await update(gina, created.id, 'blocked');
+    expect(blocked.status).toBe(200);
+    expect((blocked.body as FriendshipBody).blockedBy).toBe(gina.sub);
+    expect((await remove(ivy, created.id)).status).toBe(403);
+    expect((await remove(gina, created.id)).status).toBe(204);
+  });
+
+  it('lets the addressee block, and then only the addressee unblocks', async () => {
+    const created = (await ask(hank, 'ivy')).body as FriendshipBody;
+    const blocked = await update(ivy, created.id, 'blocked');
+    expect(blocked.status).toBe(200);
+    expect((blocked.body as FriendshipBody).blockedBy).toBe(ivy.sub);
+    expect((await get('owner', created.id)).status).toBe(404);
+    expect((await remove(hank, created.id)).status).toBe(403);
+    expect(ids((await blockedList(ivy)).body)).toEqual([created.id]);
+    expect((await remove(ivy, created.id)).status).toBe(204);
   });
 });
 

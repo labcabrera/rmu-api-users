@@ -58,6 +58,7 @@ describe('OpenAPI', () => {
       'addresseeId',
       'addresseeName',
       'status',
+      'blockedBy',
       'message',
       'createdAt',
       'updatedAt',

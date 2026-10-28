@@ -29,6 +29,10 @@ export class FriendshipModel {
   @Prop({ type: String, required: true })
   status: FriendshipStatus;
 
+  /** Participant that blocked the friendship; null unless blocked (spec 044, decision 9). */
+  @Prop({ type: String, required: false, default: null })
+  blockedBy: string | null;
+
   @Prop({ type: String, required: false })
   message: string | null;
 

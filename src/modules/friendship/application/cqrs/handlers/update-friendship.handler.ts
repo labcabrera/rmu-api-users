@@ -13,9 +13,14 @@ export class UpdateFriendshipHandler implements ICommandHandler<UpdateFriendship
   ) {}
 
   async execute(command: UpdateFriendshipCommand): Promise<Friendship> {
-    const friendship = this.guard.checkUpdate(await this.friendshipRepository.findById(command.id), command.id, command.userId);
+    const friendship = this.guard.checkUpdate(
+      await this.friendshipRepository.findById(command.id),
+      command.id,
+      command.userId,
+      command.status,
+    );
     friendship.checkVersion(command.expectedVersion);
-    friendship.update({ status: command.status });
+    friendship.update({ status: command.status }, command.userId);
     if (!friendship.hasChanges()) return friendship;
     return this.friendshipRepository.update(friendship);
   }

@@ -19,11 +19,20 @@ export class FriendshipDto {
   addresseeName: string;
 
   @ApiProperty({
-    description: 'pending -> accepted | rejected | blocked, accepted -> blocked; a new request reopens a rejected one',
+    description:
+      'pending -> accepted | rejected | blocked, accepted -> blocked; a new request reopens a rejected one. Either participant can block; only the addressee can accept or reject',
     enum: FRIENDSHIP_STATUSES,
     example: 'pending',
   })
   status: FriendshipStatus;
+
+  @ApiProperty({
+    type: String,
+    description: 'Id of the participant that blocked the friendship: only that user can delete the block. Null unless blocked',
+    nullable: true,
+    example: null,
+  })
+  blockedBy: string | null;
 
   @ApiProperty({ type: String, description: 'Message of the request', example: 'Shall we play?', nullable: true })
   message: string | null;
@@ -45,6 +54,7 @@ export class FriendshipDto {
     dto.addresseeId = friendship.addresseeId;
     dto.addresseeName = friendship.addresseeName;
     dto.status = friendship.status;
+    dto.blockedBy = friendship.blockedBy;
     dto.message = friendship.message;
     dto.createdAt = friendship.createdAt;
     dto.updatedAt = friendship.updatedAt;

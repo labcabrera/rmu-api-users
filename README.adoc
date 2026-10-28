@@ -124,6 +124,8 @@ Creating (a friendship request, a message) needs the `rmu-user` or `rmu-admin` g
 (`403`). Everything else is personal and needs no group:
 
 * a friendship is read and deleted by its two participants, and answered (`PATCH`) by its addressee (`403` to the requester).
+  Either participant can block it (`PATCH` to `blocked`), which records them as `blockedBy`: a blocked friendship is
+  deleted (unblocked) only by `blockedBy` (`403` to the other one), and the blocked list is `q=blockedBy==<id>;status==blocked`.
   Anybody else, admins included, gets `404`, as if it did not exist;
 * the status follows `pending` -> `accepted` | `rejected` | `blocked` and `accepted` -> `blocked`; the same status again is no
   change, anything else a `400 invalid-status-transition`. A new request between two users answers `409` while their

@@ -70,7 +70,7 @@ export class FriendshipController {
   @ApiOkResponse({ type: FriendshipDto, description: 'Success' })
   @ApiErrors({
     400: 'Status that cannot follow the current one (invalid-status-transition)',
-    403: 'Caller is the requester, not the addressee',
+    403: 'Caller is the requester, not the addressee (either participant can block)',
     404: 'Friendship not found or caller outside it',
     409: 'Stale version (version-conflict)',
   })
@@ -86,7 +86,7 @@ export class FriendshipController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ operationId: 'deleteFriendship', summary: 'Delete friendship' })
   @ApiNoContentResponse({ description: 'Deleted' })
-  @ApiErrors({ 404: 'Friendship not found' })
+  @ApiErrors({ 403: 'Blocked friendship and the caller is not the participant that blocked it', 404: 'Friendship not found' })
   async delete(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string): Promise<void> {
     const userId = user.id;
     const roles = user.roles;

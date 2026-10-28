@@ -37,6 +37,7 @@ export class MongoFriendshipRepository extends MongoBaseRepository<Friendship, F
       addresseeId: doc.addresseeId,
       addresseeName: doc.addresseeName,
       status: doc.status,
+      blockedBy: doc.blockedBy ?? null,
       message: doc.message,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,

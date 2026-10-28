@@ -14,7 +14,7 @@ export class DeleteFriendshipHandler implements ICommandHandler<DeleteFriendship
   ) {}
 
   async execute(command: DeleteFriendshipCommand): Promise<Friendship> {
-    this.guard.checkParticipant(await this.friendshipRepository.findById(command.id), command.id, command.userId);
+    this.guard.checkDelete(await this.friendshipRepository.findById(command.id), command.id, command.userId);
     const deleted = await this.friendshipRepository.deleteById(command.id);
     if (!deleted) {
       throw new NotFoundError('Friendship', command.id);
