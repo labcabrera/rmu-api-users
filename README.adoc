@@ -118,12 +118,26 @@ DRY_RUN=1 node scripts/activation-code-unique-index.mjs   # report only
 node scripts/activation-code-unique-index.mjs             # create the unique index (idempotent)
 ----
 
+=== Filling blockedBy in an existing database
+
+Since spec 044 a blocked friendship records who blocked it. Before, only the addressee could block, so
+`scripts/friendship-blocked-by.mjs` sets `blockedBy = addresseeId` on the blocked friendships that have none (same
+connection string as above; idempotent).
+
+[source,bash]
+----
+DRY_RUN=1 node scripts/friendship-blocked-by.mjs   # report only
+node scripts/friendship-blocked-by.mjs             # set blockedBy
+----
+
 == Friendships and messages
 
 Creating (a friendship request, a message) needs the `rmu-user` or `rmu-admin` group: a token without groups is read-only
 (`403`). Everything else is personal and needs no group:
 
 * a friendship is read and deleted by its two participants, and answered (`PATCH`) by its addressee (`403` to the requester).
+  Either participant can block it (`PATCH` to `blocked`), which records them as `blockedBy`: a blocked friendship is
+  deleted (unblocked) only by `blockedBy` (`403` to the other one), and the blocked list is `q=blockedBy==<id>;status==blocked`.
   Anybody else, admins included, gets `404`, as if it did not exist;
 * the status follows `pending` -> `accepted` | `rejected` | `blocked` and `accepted` -> `blocked`; the same status again is no
   change, anything else a `400 invalid-status-transition`. A new request between two users answers `409` while their

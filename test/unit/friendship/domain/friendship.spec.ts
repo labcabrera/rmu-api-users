@@ -1,7 +1,7 @@
 import { Friendship } from '../../../../src/modules/friendship/domain/aggregates/friendship.js';
 import type { FriendshipStatus } from '../../../../src/modules/friendship/domain/value-objects/friendship-status.vo.js';
 
-const friendship = (status: FriendshipStatus = 'pending') =>
+const friendship = (status: FriendshipStatus = 'pending', blockedBy: string | null = null) =>
   Friendship.fromProps({
     id: 'f-1',
     requesterId: 'u-1',
@@ -9,6 +9,7 @@ const friendship = (status: FriendshipStatus = 'pending') =>
     addresseeId: 'u-2',
     addresseeName: 'bob',
     status,
+    blockedBy,
     message: 'Hi',
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: null,
@@ -22,8 +23,38 @@ describe('Friendship', () => {
     ['accepted', 'blocked'],
   ] as const)('moves from %s to %s [F-users-16]', (from, to) => {
     const f = friendship(from);
-    f.update({ status: to });
+    f.update({ status: to }, 'u-2');
     expect(f.status).toBe(to);
+  });
+
+  it.each(['u-1', 'u-2'])('records %s as blockedBy when it blocks [spec 044, decision 9]', by => {
+    const f = friendship('accepted');
+    expect(f.blockedBy).toBeNull();
+    f.update({ status: 'blocked' }, by);
+    expect(f.blockedBy).toBe(by);
+    expect(f.getProps().blockedBy).toBe(by);
+  });
+
+  it('refuses a block without a participant as author', () => {
+    expect(() => friendship('accepted').update({ status: 'blocked' })).toThrow(expect.objectContaining({ statusCode: 400 }) as Error);
+    expect(() => friendship('accepted').update({ status: 'blocked' }, 'u-3')).toThrow(
+      expect.objectContaining({ statusCode: 400 }) as Error,
+    );
+  });
+
+  it('leaves blockedBy empty on other transitions and keeps it on the same status again', () => {
+    const accepted = friendship('pending');
+    accepted.update({ status: 'accepted' }, 'u-2');
+    expect(accepted.blockedBy).toBeNull();
+    const blocked = friendship('blocked', 'u-1');
+    blocked.update({ status: 'blocked' }, 'u-2');
+    expect(blocked.blockedBy).toBe('u-1');
+  });
+
+  it('reads a stored friendship without blockedBy as null', () => {
+    const props = { ...friendship().getProps() } as Partial<ReturnType<Friendship['getProps']>>;
+    delete props.blockedBy;
+    expect(Friendship.fromProps(props as ReturnType<Friendship['getProps']>).blockedBy).toBeNull();
   });
 
   it.each([

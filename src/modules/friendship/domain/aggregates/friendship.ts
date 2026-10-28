@@ -12,6 +12,7 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
     public addresseeId: string,
     public addresseeName: string,
     public status: FriendshipStatus,
+    public blockedBy: string | null,
     public message: string | null,
     public createdAt: Date,
     public updatedAt: Date | null,
@@ -19,7 +20,7 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
     super(id);
   }
 
-  static create(props: Omit<FriendshipProps, 'id' | 'status' | 'createdAt' | 'updatedAt'>): Friendship {
+  static create(props: Omit<FriendshipProps, 'id' | 'status' | 'blockedBy' | 'createdAt' | 'updatedAt'>): Friendship {
     if (props.requesterId === props.addresseeId) {
       throw new ValidationError('Requester and addressee must be different users');
     }
@@ -30,6 +31,7 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
       addresseeId: props.addresseeId,
       addresseeName: props.addresseeName,
       status: 'pending',
+      blockedBy: null,
       message: props.message,
       createdAt: new Date(),
       updatedAt: null,
@@ -44,6 +46,7 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
       props.addresseeId,
       props.addresseeName,
       props.status,
+      props.blockedBy ?? null,
       props.message,
       props.createdAt,
       props.updatedAt,
@@ -57,12 +60,16 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
 
   /**
    * Changes the status along FRIENDSHIP_TRANSITIONS (F-users-16). The same status again is no change; any other move is
-   * a ValidationError (`invalid-status-transition`).
+   * a ValidationError (`invalid-status-transition`). Moving to blocked records `by` as `blockedBy` (spec 044, decision 9).
    */
-  public update(props: { status?: FriendshipStatus; message?: string | null }): void {
+  public update(props: { status?: FriendshipStatus; message?: string | null }, by?: string): void {
     if (props.status !== undefined && props.status !== this.status) {
       if (!FRIENDSHIP_TRANSITIONS[this.status].includes(props.status)) {
         throw new ValidationError(`A ${this.status} friendship cannot become ${props.status}`, 'invalid-status-transition');
+      }
+      if (props.status === 'blocked') {
+        if (!by || !this.hasParticipant(by)) throw new ValidationError('A friendship is blocked by one of its participants');
+        this.blockedBy = by;
       }
       this.status = props.status;
     }
@@ -85,6 +92,7 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
     this.addresseeId = addressee.id;
     this.addresseeName = addressee.name;
     this.status = 'pending';
+    this.blockedBy = null;
     this.message = message;
     this.updatedAt = new Date();
   }
@@ -97,6 +105,7 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
       addresseeId: this.addresseeId,
       addresseeName: this.addresseeName,
       status: this.status,
+      blockedBy: this.blockedBy,
       message: this.message,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

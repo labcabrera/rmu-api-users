@@ -10,6 +10,7 @@ const props = (): FriendshipProps => ({
   addresseeId: 'u-2',
   addresseeName: 'bob',
   status: 'pending',
+  blockedBy: null,
   message: null,
   createdAt: new Date('2026-01-01T00:00:00Z'),
   updatedAt: null,
