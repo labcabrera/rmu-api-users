@@ -25,6 +25,7 @@ export class UpdateActivationCodeHandler implements ICommandHandler<UpdateActiva
       features: command.features,
       expiresAt: command.expiresAt,
       activatedAt: command.activatedAt,
+      note: command.note,
     });
     if (!activationCode.hasChanges()) return activationCode;
     return this.activationCodeRepository.update(activationCode);

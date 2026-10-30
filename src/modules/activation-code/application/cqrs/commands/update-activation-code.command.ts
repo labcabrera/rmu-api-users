@@ -12,6 +12,7 @@ export class UpdateActivationCodeCommand extends AuthenticatedCommand {
     public readonly activatedAt?: Date | null,
     /** Version the client read; a different stored version is a ConflictError (`version-conflict`). */
     public readonly expectedVersion?: number,
+    public readonly note?: string | null,
   ) {
     super(userId, roles);
   }

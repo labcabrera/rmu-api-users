@@ -16,8 +16,8 @@ export interface UserGroup {
 }
 
 /**
- * Keycloak admin API. Only used as a fallback for users that have no RMU profile yet and to assign groups
- * when an activation code is redeemed. Never called on the GET /me hot path.
+ * Keycloak admin API. Used as a fallback for users that have no RMU profile yet, to assign groups when an activation
+ * code is redeemed and for the user administration (spec 053). Never called on the GET /me hot path.
  */
 export interface IamUserPort {
   findById(id: string): Promise<UserApiResponse | null>;
@@ -26,7 +26,13 @@ export interface IamUserPort {
   /** Exact email match. */
   findByEmail(email: string): Promise<UserApiResponse | null>;
   addUserToGroup(userId: string, groupId: string): Promise<void>;
+  removeUserFromGroup(userId: string, groupId: string): Promise<void>;
+  /** Groups of the realm. */
   findGroups(): Promise<UserGroup[]>;
+  /** Groups the user belongs to. */
+  findUserGroups(userId: string): Promise<UserGroup[]>;
+  /** Enables or disables the account: a disabled one cannot sign in. */
+  setEnabled(userId: string, enabled: boolean): Promise<void>;
 }
 
 export const IAM_USER_PORT = Symbol('IamUserPort');

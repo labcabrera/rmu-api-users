@@ -7,5 +7,6 @@ export class CreateActivationCodeCommand {
     public readonly features: ActivationFeature[],
     public readonly expiresAt?: Date,
     public readonly count: number = 1,
+    public readonly note?: string,
   ) {}
 }

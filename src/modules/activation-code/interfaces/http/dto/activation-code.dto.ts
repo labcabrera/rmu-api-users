@@ -64,6 +64,9 @@ export class ActivationCodeDto {
   })
   activatedBy?: string | null;
 
+  @ApiPropertyOptional({ type: String, description: 'Note of the administrator: who the code was given to, or why', nullable: true })
+  note?: string | null;
+
   @ApiPropertyOptional({
     description: 'Date when the activation code was last updated',
     example: '2026-06-01T08:15:00.000Z',
@@ -86,6 +89,7 @@ export class ActivationCodeDto {
     dto.expiresAt = activationCode.expiresAt;
     dto.activatedAt = activationCode.activatedAt;
     dto.activatedBy = activationCode.activatedBy ?? null;
+    dto.note = activationCode.note ?? null;
     dto.updatedAt = activationCode.updatedAt;
     dto.version = activationCode.version;
     return dto;

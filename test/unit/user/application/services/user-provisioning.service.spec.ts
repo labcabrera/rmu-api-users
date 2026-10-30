@@ -49,6 +49,9 @@ describe('UserProvisioningService', () => {
       findByEmail: vi.fn<() => Promise<UserApiResponse | null>>().mockResolvedValue(null),
       addUserToGroup: vi.fn(),
       findGroups: vi.fn(),
+      removeUserFromGroup: vi.fn(),
+      findUserGroups: vi.fn(),
+      setEnabled: vi.fn(),
     };
     service = new UserProvisioningService(repository, iam, { publish, publishChanges: vi.fn() });
   });

@@ -199,10 +199,11 @@ describe('activate', () => {
     expect(response.status).toBe(200); // F-users-14
     expect(response.body).toMatchObject({ id: code.id, activatedBy: USERS.owner.sub });
     expect((response.body as CodeBody).activatedAt).toEqual(expect.any(String));
-    // treasure-law has no Keycloak group in the realm: it is skipped.
+    // Each feature grants the realm group with the rmu- prefix (spec 053: they did not match before).
     expect(e2e.keycloak.assignments.filter(a => a.userId === USERS.owner.sub)).toEqual([
       { userId: USERS.owner.sub, groupId: 'g-core-law' },
       { userId: USERS.owner.sub, groupId: 'g-spell-law' },
+      { userId: USERS.owner.sub, groupId: 'g-treasure-law' },
     ]);
 
     expect((await post('activate', 'other', { code: code.code })).status).toBe(409);
@@ -280,5 +281,26 @@ describe('activate', () => {
     const indexes = await e2e.connection.collection('activation-codes').indexes();
     expect(indexes.find(index => index.name === 'code_1')).toMatchObject({ key: { code: 1 }, unique: true });
     expect(indexes.some(index => index.name === 'owner_1_code_1')).toBe(false);
+  });
+});
+
+describe('administration (spec 053)', () => {
+  it('keeps the note of the administrator on create and update, and clears it with null', async () => {
+    const code = (await createOne({ features: ['core-law'], note: '  Club night  ' })) as CodeBody & { note: string | null };
+    expect(code.note).toBe('Club night');
+    const auth = e2e.auth('admin');
+    const changed = await request(e2e.server).patch(`/v1/activation-codes/${code.id}`).set('Authorization', auth).send({ note: 'Table 2' });
+    expect((changed.body as { note: string }).note).toBe('Table 2');
+    const cleared = await request(e2e.server).patch(`/v1/activation-codes/${code.id}`).set('Authorization', auth).send({ note: null });
+    expect((cleared.body as { note: string | null }).note).toBeNull();
+    expect((await create('admin', { features: ['core-law'], note: 'x'.repeat(201) })).status).toBe(400);
+  });
+
+  it('refuses to delete a used code, which stays as the record of who redeemed it', async () => {
+    const code = await createOne({ features: ['core-law'] });
+    expect((await post('activate', 'other', { code: code.code })).status).toBe(200);
+    const response = await request(e2e.server).delete(`/v1/activation-codes/${code.id}`).set('Authorization', e2e.auth('admin'));
+    expect(response.status).toBe(409);
+    expect((response.body as { code: string }).code).toBe('activation-code-used');
   });
 });
