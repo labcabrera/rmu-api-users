@@ -7,6 +7,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { AuthModule } from './infrastructure/security/auth.module.js';
 import { KafkaProducerService } from './infrastructure/messaging/kafka-producer.service.js';
 import { HealthController } from './interfaces/http/health.controller.js';
+import { InfoController } from './interfaces/http/info.controller.js';
 import { TerminusModule } from '@nestjs/terminus';
 import { KafkaDomainEventPublisher } from './infrastructure/messaging/kafka.domain-event.publisher.js';
 import { DOMAIN_EVENT_PUBLISHER } from './application/ports/domain-event-publisher.port.js';
@@ -28,7 +29,7 @@ import { HttpClient } from './infrastructure/http/http-client.js';
       },
     }),
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, InfoController],
   providers: [
     { provide: APP_GUARD, useClass: HttpThrottlerGuard },
     RsqlParser,
