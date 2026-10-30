@@ -39,7 +39,7 @@ export class ActivationCodeController {
     const roles = user.roles;
     const expiresAt = body.expiresAt ? new Date(body.expiresAt) : undefined;
     const count = body.count ?? 1;
-    const command = new CreateActivationCodeCommand(owner, roles, body.features, expiresAt, count);
+    const command = new CreateActivationCodeCommand(owner, roles, body.features, expiresAt, count, body.note);
     const activationCodes = await this.commandBus.execute<CreateActivationCodeCommand, ActivationCode[]>(command);
     return activationCodes.map(ac => ActivationCodeDto.fromEntity(ac));
   }
@@ -98,6 +98,7 @@ export class ActivationCodeController {
       body.expiresAt ? new Date(body.expiresAt) : undefined,
       body.activatedAt === undefined ? undefined : body.activatedAt === null ? null : new Date(body.activatedAt),
       body.version,
+      body.note,
     );
     const activationCode = await this.commandBus.execute<UpdateActivationCodeCommand, ActivationCode>(command);
     return ActivationCodeDto.fromEntity(activationCode);
@@ -120,7 +121,11 @@ export class ActivationCodeController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ operationId: 'deleteActivationCode', summary: 'Delete activation code' })
   @ApiNoContentResponse({ description: 'Deleted' })
-  @ApiErrors({ 403: 'Caller is not in the rmu-admin group', 404: 'Activation code not found' })
+  @ApiErrors({
+    403: 'Caller is not in the rmu-admin group',
+    404: 'Activation code not found',
+    409: 'The code was used (activation-code-used)',
+  })
   async delete(@CurrentUser() user: AuthenticatedUser, @Param('id') id: string): Promise<void> {
     await this.commandBus.execute<DeleteActivationCodeCommand, ActivationCode>(new DeleteActivationCodeCommand(id, user.id, user.roles));
   }

@@ -82,6 +82,20 @@ describe('KeycloakIamUserAdapter', () => {
     expect(fetch.mock.calls[1]).toEqual([`${ADMIN}/users/u-1/groups/g`, expect.objectContaining({ method: 'PUT', body: '{}' })]);
   });
 
+  it('removes a user from a group, lists the groups of a user and enables or disables the account', async () => {
+    const fetch = stubKeycloak((url, init) =>
+      init?.method === 'GET' ? json([{ id: 'g', name: 'rmu-core-law', path: '/rmu-core-law' }]) : new Response(null, { status: 204 }),
+    );
+    const keycloak = adapter();
+
+    await keycloak.removeUserFromGroup('u-1', 'g');
+    expect(await keycloak.findUserGroups('u-1')).toEqual([{ id: 'g', name: 'rmu-core-law' }]);
+    await keycloak.setEnabled('u-1', false);
+    expect(fetch.mock.calls[1]).toEqual([`${ADMIN}/users/u-1/groups/g`, expect.objectContaining({ method: 'DELETE' })]);
+    expect(fetch.mock.calls[2][0]).toBe(`${ADMIN}/users/u-1/groups`);
+    expect(fetch.mock.calls[3]).toEqual([`${ADMIN}/users/u-1`, expect.objectContaining({ method: 'PUT', body: '{"enabled":false}' })]);
+  });
+
   it('turns a failed admin call into a bad gateway error', async () => {
     stubKeycloak(() => new Response('down', { status: 503 }));
     await expect(adapter().addUserToGroup('u-1', 'g')).rejects.toBeInstanceOf(BadGatewayError);

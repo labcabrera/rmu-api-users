@@ -49,6 +49,7 @@ export class CreateActivationCodeHandler implements ICommandHandler<CreateActiva
         owner: command.owner,
         features: command.features,
         expiresAt: command.expiresAt,
+        note: command.note,
       });
       try {
         return await this.activationCodeRepository.save(activationCode);

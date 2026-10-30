@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsDateString, IsInt, IsOptional, IsIn, Matches, Min, IsString } from 'class-validator';
+import { IsArray, IsDateString, IsInt, IsOptional, IsIn, Matches, Min, IsString, MaxLength } from 'class-validator';
 import { ACTIVATION_FEATURES, type ActivationFeature } from '../../../domain/aggregates/activation-code-props.js';
 
 export class UpdateActivationCodeDto {
@@ -25,6 +25,18 @@ export class UpdateActivationCodeDto {
   @IsIn(ACTIVATION_FEATURES, { each: true })
   @IsOptional()
   features?: ActivationFeature[];
+
+  @ApiPropertyOptional({
+    description: 'Note of the administrator: who the code was given to, or why',
+    example: 'Club night, table 2',
+    maxLength: 200,
+    nullable: true,
+    type: String,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  note?: string | null;
 
   @ApiPropertyOptional({ description: 'Version the client read (from the GET); a different stored version is a 409', example: 3 })
   @Type(() => Number)

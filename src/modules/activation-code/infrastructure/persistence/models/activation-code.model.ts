@@ -35,6 +35,9 @@ export class ActivationCodeModel {
   @Prop({ type: Date, required: false })
   activatedAt: Date | null;
 
+  @Prop({ type: String, required: false })
+  note?: string | null;
+
   @Prop({ type: Date, required: false })
   updatedAt: Date | null;
 }

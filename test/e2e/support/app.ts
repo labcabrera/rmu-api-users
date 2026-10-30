@@ -72,10 +72,15 @@ export class InMemoryEventPublisher implements DomainEventPublisher {
 export class FakeKeycloak implements IamUserPort {
   readonly users = new Map<string, UserApiResponse>();
   readonly groups: UserGroup[] = [
-    { id: 'g-core-law', name: 'core-law' },
-    { id: 'g-spell-law', name: 'spell-law' },
+    { id: 'g-core-law', name: 'rmu-core-law' },
+    { id: 'g-spell-law', name: 'rmu-spell-law' },
+    { id: 'g-treasure-law', name: 'rmu-treasure-law' },
+    { id: 'g-creature-law-i', name: 'rmu-creature-law-i' },
+    { id: 'g-user', name: 'rmu-user' },
+    { id: 'g-admin', name: 'rmu-admin' },
   ];
   readonly assignments: { userId: string; groupId: string }[] = [];
+  readonly enabledChanges: { userId: string; enabled: boolean }[] = [];
   /** When set, addUserToGroup fails (Keycloak down). */
   failGroupAssignment = false;
 
@@ -101,6 +106,22 @@ export class FakeKeycloak implements IamUserPort {
 
   findGroups(): Promise<UserGroup[]> {
     return Promise.resolve(this.groups);
+  }
+
+  removeUserFromGroup(userId: string, groupId: string): Promise<void> {
+    const index = this.assignments.findIndex(a => a.userId === userId && a.groupId === groupId);
+    if (index >= 0) this.assignments.splice(index, 1);
+    return Promise.resolve();
+  }
+
+  findUserGroups(userId: string): Promise<UserGroup[]> {
+    const ids = new Set(this.assignments.filter(a => a.userId === userId).map(a => a.groupId));
+    return Promise.resolve(this.groups.filter(group => ids.has(group.id)));
+  }
+
+  setEnabled(userId: string, enabled: boolean): Promise<void> {
+    this.enabledChanges.push({ userId, enabled });
+    return Promise.resolve();
   }
 }
 

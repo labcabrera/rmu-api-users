@@ -13,12 +13,24 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
     public activatedAt?: Date | null,
     public activatedBy?: string | null,
     public updatedAt?: Date | null,
+    public note: string | null = null,
   ) {
     super(id);
   }
 
   static create(props: Omit<ActivationCodeProps, 'id' | 'createdAt' | 'activatedAt' | 'updatedAt' | 'activatedBy'>): ActivationCode {
-    return new ActivationCode(randomUUID(), props.code, props.owner, props.features, new Date(), props.expiresAt, null, null, null);
+    return new ActivationCode(
+      randomUUID(),
+      props.code,
+      props.owner,
+      props.features,
+      new Date(),
+      props.expiresAt,
+      null,
+      null,
+      null,
+      props.note?.trim() || null,
+    );
   }
 
   static fromProps(props: ActivationCodeProps): ActivationCode {
@@ -32,6 +44,7 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
       props.activatedAt,
       props.activatedBy ?? null,
       props.updatedAt,
+      props.note ?? null,
     );
   }
 
@@ -41,6 +54,7 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
     if (props.expiresAt !== undefined) this.expiresAt = props.expiresAt;
     if (props.activatedAt !== undefined) this.activatedAt = props.activatedAt;
     if (props.activatedBy !== undefined) this.activatedBy = props.activatedBy ?? null;
+    if (props.note !== undefined) this.note = props.note?.trim() || null;
     // Clearing the activation date releases the code: without the user it can be redeemed again (F-users-12).
     if (props.activatedAt === null) this.activatedBy = null;
     this.updatedAt = new Date();
@@ -70,6 +84,7 @@ export class ActivationCode extends BaseAggregateRoot<ActivationCodeProps> {
       expiresAt: this.expiresAt,
       activatedAt: this.activatedAt,
       activatedBy: this.activatedBy,
+      note: this.note,
       updatedAt: this.updatedAt,
     };
   }

@@ -6,7 +6,12 @@ import { CheckActivationCodeQuery } from '../../../../../../src/modules/activati
 import { type ActivationCodeRepository } from '../../../../../../src/modules/activation-code/application/ports/activation-code-repository.port.js';
 import { ActivationCode } from '../../../../../../src/modules/activation-code/domain/aggregates/activation-code.js';
 import type { ActivationCodeProps } from '../../../../../../src/modules/activation-code/domain/aggregates/activation-code-props.js';
-import { ConflictError, NotFoundError, ValidationError } from '../../../../../../src/modules/shared/domain/errors/errors.js';
+import {
+  BadGatewayError,
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from '../../../../../../src/modules/shared/domain/errors/errors.js';
 import { type IamUserPort } from '../../../../../../src/modules/user/application/ports/iam-user.port.js';
 import { User } from '../../../../../../src/modules/user/domain/aggregates/user.js';
 import { UserSettings } from '../../../../../../src/modules/user/domain/value-objects/user-settings.vo.js';
@@ -71,8 +76,8 @@ describe('activation codes', () => {
     codes.add(code);
     iam = {
       findGroups: vi.fn<() => Promise<{ id: string; name: string }[]>>().mockResolvedValue([
-        { id: 'g1', name: 'core-law' },
-        { id: 'g2', name: 'spell-law' },
+        { id: 'g1', name: 'rmu-core-law' },
+        { id: 'g2', name: 'rmu-spell-law' },
       ]),
       addUserToGroup: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
     };
@@ -112,6 +117,26 @@ describe('activation codes', () => {
     iam.addUserToGroup.mockRejectedValueOnce(new Error('keycloak down'));
 
     await expect(handler.execute(new ActivateActivationCodeCommand('ABCD1234', 'user-1', []))).rejects.toThrow('keycloak down');
+    expect(codes.store.get(code.id)!.activatedBy).toBeNull();
+  });
+
+  it('adds the rmu- group of each feature, not a group named like the feature', async () => {
+    iam.findGroups.mockResolvedValue([
+      { id: 'bare', name: 'core-law' },
+      { id: 'g1', name: 'rmu-core-law' },
+      { id: 'g2', name: 'rmu-spell-law' },
+    ]);
+    await handler.execute(new ActivateActivationCodeCommand('ABCD1234', 'user-1', []));
+    expect(iam.addUserToGroup.mock.calls).toEqual([
+      ['user-1', 'g1'],
+      ['user-1', 'g2'],
+    ]);
+  });
+
+  it('fails and releases the code when the group of a feature does not exist', async () => {
+    iam.findGroups.mockResolvedValue([{ id: 'g1', name: 'rmu-core-law' }]);
+    await expect(handler.execute(new ActivateActivationCodeCommand('ABCD1234', 'user-1', []))).rejects.toBeInstanceOf(BadGatewayError);
+    expect(iam.addUserToGroup).not.toHaveBeenCalled();
     expect(codes.store.get(code.id)!.activatedBy).toBeNull();
   });
 

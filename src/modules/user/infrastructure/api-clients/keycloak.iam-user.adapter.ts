@@ -44,8 +44,22 @@ export class KeycloakIamUserAdapter implements IamUserPort {
     await this.request('PUT', `/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupId)}`, { body: {} });
   }
 
+  async removeUserFromGroup(userId: string, groupId: string): Promise<void> {
+    await this.request('DELETE', `/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupId)}`);
+  }
+
   async findGroups(): Promise<UserGroup[]> {
     return (await this.request<UserGroup[]>('GET', '/groups')) ?? [];
+  }
+
+  async findUserGroups(userId: string): Promise<UserGroup[]> {
+    const groups = await this.request<UserGroup[]>('GET', `/users/${encodeURIComponent(userId)}/groups`);
+    return (groups ?? []).map(group => ({ id: group.id, name: group.name }));
+  }
+
+  async setEnabled(userId: string, enabled: boolean): Promise<void> {
+    // Keycloak takes a partial representation: only `enabled` changes.
+    await this.request('PUT', `/users/${encodeURIComponent(userId)}`, { body: { enabled } });
   }
 
   private async findExact(
@@ -65,14 +79,16 @@ export class KeycloakIamUserAdapter implements IamUserPort {
    * 404 when `notFoundAsNull` is set. An empty body is undefined.
    */
   private async request<T>(
-    method: 'GET' | 'PUT',
+    method: 'GET' | 'PUT' | 'DELETE',
     path: string,
     options: { body?: unknown; notFoundAsNull?: boolean } = {},
   ): Promise<T | undefined> {
     const url = `${this.keycloakBaseUrl}${path}`;
     const token = await this.tokenService.getToken();
     try {
-      return method === 'GET' ? await this.http.get<T>(url, { token }) : await this.http.put<T>(url, options.body, { token });
+      if (method === 'GET') return await this.http.get<T>(url, { token });
+      if (method === 'DELETE') return await this.http.delete<T>(url, { token });
+      return await this.http.put<T>(url, options.body, { token });
     } catch (err) {
       if (options.notFoundAsNull && isUpstreamHttpError(err) && err.status === 404) return undefined;
       throw err;

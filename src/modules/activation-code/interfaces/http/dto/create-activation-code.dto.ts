@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsDateString, IsIn, IsInt, Min, Max, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsDateString, IsIn, IsInt, Min, Max, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ACTIVATION_FEATURES, MAX_CODES_PER_REQUEST, type ActivationFeature } from '../../../domain/aggregates/activation-code-props.js';
 
 export class CreateActivationCodeDto {
@@ -19,4 +19,14 @@ export class CreateActivationCodeDto {
   @Min(1)
   @Max(MAX_CODES_PER_REQUEST)
   count?: number;
+
+  @ApiPropertyOptional({
+    description: 'Note of the administrator: who the code was given to, or why',
+    example: 'Club night, table 2',
+    maxLength: 200,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  note?: string;
 }
