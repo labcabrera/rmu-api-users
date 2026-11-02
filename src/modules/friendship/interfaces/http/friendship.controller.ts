@@ -12,6 +12,7 @@ import { DeleteFriendshipCommand } from '../../application/cqrs/commands/delete-
 import { UpdateFriendshipCommand } from '../../application/cqrs/commands/update-friendship.command.js';
 import { GetFriendshipQuery } from '../../application/cqrs/queries/get-friendship.query.js';
 import { ListFriendshipsQuery } from '../../application/cqrs/queries/list-friendships.query.js';
+import { GetFriendshipBetweenQuery } from '../../application/cqrs/queries/get-friendship-between.query.js';
 import { Friendship } from '../../domain/aggregates/friendship.js';
 import { CreateFriendshipRequestDto } from './dto/create-friendship-request.dto.js';
 import { FriendshipDto } from './dto/friendship.dto.js';
@@ -53,6 +54,24 @@ export class FriendshipController {
       new ListFriendshipsQuery(userId, query.q, query.page, query.size),
     );
     return FriendshipPageDto.fromPage(friendships);
+  }
+
+  @Get('between/:userA/:userB')
+  @ApiOperation({
+    operationId: 'getFriendshipBetween',
+    summary: 'Friendship of two users, in either direction (admins: other APIs with the service token, spec 069)',
+  })
+  @ApiOkResponse({ type: FriendshipDto, description: 'Success' })
+  @ApiErrors({ 403: 'Caller is not an admin', 404: 'The users have no friendship' })
+  async findBetween(
+    @CurrentUser() user: AuthenticatedUser,
+    @Param('userA') userA: string,
+    @Param('userB') userB: string,
+  ): Promise<FriendshipDto> {
+    const friendship = await this.queryBus.execute<GetFriendshipBetweenQuery, Friendship>(
+      new GetFriendshipBetweenQuery(userA, userB, user.roles),
+    );
+    return FriendshipDto.fromEntity(friendship);
   }
 
   @Get(':id')

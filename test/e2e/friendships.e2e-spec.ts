@@ -368,3 +368,46 @@ describe('permission matrix', () => {
     expect((await remove(e2e.auth('noRole'))).status).toBe(204);
   });
 });
+
+// Spec 069: core asks for the friendship of two users with its service account, and reads the friendship events.
+describe('between and events (spec 069)', () => {
+  const between = (user: UserName, a: string, b: string) =>
+    request(e2e.server).get(`/v1/friendships/between/${a}/${b}`).set('Authorization', e2e.auth(user));
+
+  it('answers the friendship of two users in either direction, to admins only', async () => {
+    // Earlier tests may have left one between admin and alice: start from a fresh request.
+    const previous = await between('admin', USERS.admin.sub, USERS.owner.sub);
+    if (previous.status === 200) {
+      await request(e2e.server)
+        .delete(`/v1/friendships/${(previous.body as FriendshipBody).id}`)
+        .set('Authorization', e2e.auth('admin'))
+        .expect(204);
+    }
+    const created = (await befriend('admin', 'alice')).body as FriendshipBody;
+    expect((await between('admin', USERS.owner.sub, USERS.admin.sub)).body).toMatchObject({ id: created.id, status: 'pending' });
+    expect((await between('admin', USERS.admin.sub, USERS.owner.sub)).body).toMatchObject({ id: created.id });
+    expect((await between('owner', USERS.owner.sub, USERS.admin.sub)).status).toBe(403);
+    expect((await between('admin', USERS.admin.sub, 'nobody')).status).toBe(404);
+    expect((await request(e2e.server).get(`/v1/friendships/between/a/b`)).status).toBe(401);
+  });
+
+  it('publishes friendship.updated on each change of status and friendship.deleted', async () => {
+    const created = (await between('admin', USERS.owner.sub, USERS.admin.sub)).body as FriendshipBody;
+    e2e.events.events.splice(0);
+
+    expect((await patch('owner', created.id, 'accepted')).status).toBe(200);
+    expect((await patch('owner', created.id, 'accepted')).status).toBe(200);
+    expect((await patch('admin', created.id, 'blocked')).status).toBe(200);
+    expect(e2e.events.types()).toEqual(['friendship.updated', 'friendship.updated']);
+    expect(e2e.events.events[1].event.data).toMatchObject({
+      id: created.id,
+      requesterId: USERS.admin.sub,
+      addresseeId: USERS.owner.sub,
+      status: 'blocked',
+    });
+
+    const removed = await request(e2e.server).delete(`/v1/friendships/${created.id}`).set('Authorization', e2e.auth('admin'));
+    expect(removed.status).toBe(204);
+    expect(e2e.events.types()).toEqual(['friendship.updated', 'friendship.updated', 'friendship.deleted']);
+  });
+});
