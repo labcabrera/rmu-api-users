@@ -21,7 +21,7 @@ describe('OpenAPI', () => {
     expect(spec.body).toEqual(legacy.body);
     const paths = Object.keys((spec.body as { paths: object }).paths);
     expect(paths).toEqual(
-      expect.arrayContaining(['/v1/users/me', '/v1/users/search', '/v1/activation-codes', '/v1/friendships', '/v1/user-messages']),
+      expect.arrayContaining(['/v1/users/me', '/v1/activation-codes', '/v1/friendships', '/v1/friend-invites', '/v1/user-messages']),
     );
   });
 

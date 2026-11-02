@@ -2,7 +2,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateFriendshipRequestDto {
-  @ApiProperty({ description: 'Display name (or Keycloak username/email) of the user receiving the request', example: 'alice' })
+  @ApiProperty({
+    description:
+      'Exact display name (case-insensitive) of the user receiving the request; emails and Keycloak usernames find nobody (spec 070)',
+    example: 'alice',
+  })
   @IsString()
   @MaxLength(254)
   addresseeName: string;

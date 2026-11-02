@@ -13,17 +13,13 @@ import { UpdateUserGroupsCommand } from '../../application/cqrs/commands/update-
 import { GetUserByIdQuery } from '../../application/cqrs/queries/get-user-by-id.query.js';
 import { GetUserQuery } from '../../application/cqrs/queries/get-user.query.js';
 import { GetUsersQuery } from '../../application/cqrs/queries/get-users.query.js';
-import { SearchUsersQuery } from '../../application/cqrs/queries/search-users.query.js';
 import type { UserClaims } from '../../application/models/user-claims.js';
-import type { UserSummary } from '../../application/models/user-summary.js';
 import { User } from '../../domain/aggregates/user.js';
 import { UserSettings } from '../../domain/value-objects/user-settings.vo.js';
-import { SearchUsersDto } from './dto/search-users.dto.js';
 import { UpdateCurrentUserDto } from './dto/update-current-user.dto.js';
 import { UpdateUserGroupsDto } from './dto/update-user-groups.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { UserPageDto } from './dto/user-page.dto.js';
-import { UserSummaryPageDto } from './dto/user-summary.dto.js';
 import { UserDto } from './dto/user.dto.js';
 
 function toClaims(user: AuthenticatedUser): UserClaims {
@@ -73,16 +69,6 @@ export class UserController {
     const command = new UpdateCurrentUserCommand(body.name, settings, body.imageUrl, user.id, user.roles, body.version);
     const profile = await this.commandBus.execute<UpdateCurrentUserCommand, User>(command);
     return UserDto.fromEntity(profile);
-  }
-
-  @Get('search')
-  @ApiOperation({ operationId: 'searchUsersByName', summary: 'Search users by display name prefix (public projection)' })
-  @ApiOkResponse({ type: UserSummaryPageDto, description: 'Success' })
-  @ApiErrors()
-  async searchByName(@CurrentUser() user: AuthenticatedUser, @Query() dto: SearchUsersDto): Promise<UserSummaryPageDto> {
-    const query = new SearchUsersQuery(dto.name, dto.page, dto.size, user.id, user.roles);
-    const page = await this.queryBus.execute<SearchUsersQuery, Page<UserSummary>>(query);
-    return UserSummaryPageDto.fromPage(page);
   }
 
   @Get('')

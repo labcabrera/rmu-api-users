@@ -3,10 +3,9 @@ import { createHash, randomBytes } from 'crypto';
 import { ConflictError } from '../../../shared/domain/errors/errors.js';
 import { User } from '../../domain/aggregates/user.js';
 import { UserCreatedEvent, UserUpdatedEvent } from '../../domain/events/user-events.js';
-import { deriveBaseDisplayName, displayNameCandidate, looksLikeEmail } from '../../domain/services/display-name.js';
+import { deriveBaseDisplayName, displayNameCandidate } from '../../domain/services/display-name.js';
 import { UserSettings } from '../../domain/value-objects/user-settings.vo.js';
 import type { UserClaims } from '../models/user-claims.js';
-import { type IamUserPort, IAM_USER_PORT, type UserApiResponse } from '../ports/iam-user.port.js';
 import { DOMAIN_EVENT_PUBLISHER, type DomainEventPublisher } from '../../../shared/application/ports/domain-event-publisher.port.js';
 import { type UserRepository, USER_REPOSITORY } from '../ports/user-repository.port.js';
 
@@ -16,8 +15,8 @@ const MAX_NAME_ATTEMPTS = 100;
 const MAX_SAVE_ATTEMPTS = 3;
 
 /**
- * Keeps the RMU profiles in step with Keycloak: from the token claims on GET /me (no admin call), and from the admin
- * representation only for users that never logged into RMU.
+ * Keeps the RMU profiles in step with Keycloak from the token claims on GET /me (no admin call). A user that never
+ * logged into RMU has no profile, and cannot be found by other users (spec 070).
  */
 @Injectable()
 export class UserProvisioningService {
@@ -25,7 +24,6 @@ export class UserProvisioningService {
 
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
-    @Inject(IAM_USER_PORT) private readonly iamUserPort: IamUserPort,
     @Inject(DOMAIN_EVENT_PUBLISHER) private readonly events: DomainEventPublisher,
   ) {}
 
@@ -82,27 +80,6 @@ export class UserProvisioningService {
     return existing;
   }
 
-  /**
-   * Resolves a user referenced by display name. When no profile has that name, falls back to the Keycloak admin API
-   * (exact username, or exact email when the input looks like one) and provisions the profile.
-   */
-  async findOrProvisionByName(name: string): Promise<User | null> {
-    const local = await this.userRepository.findByName(name);
-    if (local) return local;
-
-    let iamUser = await this.iamUserPort.findByUsername(name);
-    if (!iamUser && looksLikeEmail(name)) {
-      iamUser = await this.iamUserPort.findByEmail(name);
-    }
-    if (!iamUser || !iamUser.enabled) {
-      return null;
-    }
-    const existing = await this.userRepository.findById(iamUser.id);
-    if (existing) return existing;
-    this.logger.log(`Provisioning profile ${iamUser.id} from the Keycloak admin API`);
-    return this.createFromIam(iamUser);
-  }
-
   /** Unique display name starting at `base`, with `-2`, `-3`... on collision. */
   async resolveUniqueName(base: string, excludeId?: string): Promise<string> {
     for (let attempt = 1; attempt <= MAX_NAME_ATTEMPTS; attempt++) {
@@ -131,29 +108,6 @@ export class UserProvisioningService {
         lastName: claims.familyName ?? null,
         lastLoginAt: now,
         claimsFingerprint: UserProvisioningService.fingerprint(claims),
-      }),
-    );
-  }
-
-  private async createFromIam(iamUser: UserApiResponse): Promise<User> {
-    const identityProvider = iamUser.identityProvider ?? 'local';
-    const base = deriveBaseDisplayName(iamUser.username, iamUser.email, identityProvider);
-    return this.saveNew(base, iamUser.id, name =>
-      User.create({
-        id: iamUser.id,
-        name,
-        email: iamUser.email ?? '',
-        emailVerified: iamUser.emailVerified ?? false,
-        enabled: iamUser.enabled,
-        // Groups are not part of the user representation; they are synced on the user's first GET /me.
-        features: [],
-        settings: UserSettings.default(),
-        imageUrl: null,
-        identityProvider,
-        firstName: iamUser.firstName ?? null,
-        lastName: iamUser.lastName ?? null,
-        lastLoginAt: null,
-        claimsFingerprint: null,
       }),
     );
   }

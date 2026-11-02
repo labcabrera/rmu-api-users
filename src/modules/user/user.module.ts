@@ -5,7 +5,6 @@ import { AuthModule } from '../shared/infrastructure/security/auth.module.js';
 import { SharedModule } from '../shared/shared.module.js';
 import { GetUserHandler } from './application/cqrs/handlers/get-user.handler.js';
 import { GetUsersHandler } from './application/cqrs/handlers/get-users.handler.js';
-import { SearchUsersHandler } from './application/cqrs/handlers/search-users.handler.js';
 import { UpdateCurrentUserHandler } from './application/cqrs/handlers/update-current-user.handler.js';
 import { GetUserByIdHandler, SetUserEnabledHandler, UpdateUserGroupsHandler } from './application/cqrs/handlers/user-admin.handlers.js';
 import { IAM_USER_PORT } from './application/ports/iam-user.port.js';
@@ -19,7 +18,6 @@ import { UserController } from './interfaces/http/user.controller.js';
 export const USER_HANDLERS = [
   GetUserHandler,
   GetUsersHandler,
-  SearchUsersHandler,
   UpdateCurrentUserHandler,
   GetUserByIdHandler,
   UpdateUserGroupsHandler,

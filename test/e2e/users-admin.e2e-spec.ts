@@ -30,9 +30,8 @@ describe('user administration (spec 053)', () => {
     expect((await request(e2e.server).get('/v1/users/nobody').set('Authorization', as('admin'))).status).toBe(404);
   });
 
-  it('keeps /me and /search ahead of the id route', async () => {
+  it('keeps /me ahead of the id route', async () => {
     expect((await request(e2e.server).get('/v1/users/me').set('Authorization', as('other'))).status).toBe(200);
-    expect((await request(e2e.server).get('/v1/users/search?name=a').set('Authorization', as('other'))).status).toBe(200);
   });
 
   it('adds and removes managed groups in Keycloak and copies them to the profile', async () => {

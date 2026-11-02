@@ -36,7 +36,6 @@ describe('explicit conversion', () => {
   it('still converts page and size from the query', async () => {
     const listings: [UserName, string][] = [
       ['admin', '/v1/users'],
-      ['owner', '/v1/users/search?name=a&'],
       ['owner', '/v1/friendships'],
       ['owner', '/v1/user-messages'],
       ['admin', '/v1/activation-codes'],

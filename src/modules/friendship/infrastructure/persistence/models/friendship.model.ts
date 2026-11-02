@@ -41,9 +41,14 @@ export class FriendshipModel {
 
   @Prop({ type: Date, required: false })
   updatedAt: Date | null;
+
+  /** When the current request was sent (spec 070): counts the requests of a user per day. */
+  @Prop({ type: Date, required: false, default: null })
+  requestedAt: Date | null;
 }
 
 export const FriendshipSchema = SchemaFactory.createForClass(FriendshipModel);
 FriendshipSchema.index({ requesterId: 1, addresseeId: 1 });
 FriendshipSchema.index({ addresseeId: 1, requesterId: 1 });
 FriendshipSchema.index({ status: 1 });
+FriendshipSchema.index({ requesterId: 1, requestedAt: 1 });

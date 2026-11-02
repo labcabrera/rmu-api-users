@@ -6,14 +6,9 @@ import { Page } from '../../../shared/application/pagination/page.js';
 import { ConflictError } from '../../../shared/domain/errors/errors.js';
 import { MongoBaseRepository } from '../../../shared/infrastructure/db/mongo.base.repository.js';
 import { RsqlParser } from '../../../shared/infrastructure/db/rsql-parser.js';
-import type { UserSummary } from '../../application/models/user-summary.js';
 import { type UserRepository } from '../../application/ports/user-repository.port.js';
 import { User } from '../../domain/aggregates/user.js';
 import { USER_NAME_COLLATION, type UserDocument, UserModel } from '../persistence/models/user.model.js';
-
-export function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 /** A duplicate key, as the base maps it on save (ConflictError) or as Mongo reports it on update (E11000). */
 function isDuplicateKey(err: unknown): boolean {
@@ -39,21 +34,6 @@ export class MongoUserRepository extends MongoBaseRepository<User, UserDocument>
     const filter: QueryFilter<UserDocument> = excludeId ? { name, _id: { $ne: excludeId } } : { name };
     const doc = await this.model.findOne(filter, { _id: 1 }).collation(USER_NAME_COLLATION).lean();
     return doc !== null;
-  }
-
-  async searchByNamePrefix(prefix: string, page: number, size: number): Promise<Page<UserSummary>> {
-    const filter: QueryFilter<UserDocument> = { name: { $regex: `^${escapeRegex(prefix)}`, $options: 'i' }, enabled: true };
-    const [docs, total] = await Promise.all([
-      this.model
-        .find(filter, { _id: 1, name: 1, imageUrl: 1 })
-        .sort({ name: 1 })
-        .skip(page * size)
-        .limit(size)
-        .lean<{ _id: string; name: string; imageUrl?: string | null }[]>(),
-      this.model.countDocuments(filter),
-    ]);
-    const content = docs.map(doc => ({ id: doc._id, name: doc.name, imageUrl: doc.imageUrl ?? null }));
-    return new Page<UserSummary>(content, page, size, total);
   }
 
   findByRsql(rsql: string | undefined, page: number, size: number, filter?: QueryCriteria, sort?: SortCriteria): Promise<Page<User>> {

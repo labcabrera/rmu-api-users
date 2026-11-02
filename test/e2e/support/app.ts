@@ -88,14 +88,6 @@ export class FakeKeycloak implements IamUserPort {
     return Promise.resolve(this.users.get(id) ?? null);
   }
 
-  findByUsername(username: string): Promise<UserApiResponse | null> {
-    return Promise.resolve([...this.users.values()].find(user => user.username.toLowerCase() === username.toLowerCase()) ?? null);
-  }
-
-  findByEmail(email: string): Promise<UserApiResponse | null> {
-    return Promise.resolve([...this.users.values()].find(user => user.email.toLowerCase() === email.toLowerCase()) ?? null);
-  }
-
   addUserToGroup(userId: string, groupId: string): Promise<void> {
     // What KeycloakIamUserAdapter throws for a 503 of the admin API (the HttpClient mapping).
     if (this.failGroupAssignment)
