@@ -198,7 +198,7 @@ describe('PATCH /v1/users/me', () => {
   });
 
   it('never calls the Keycloak admin API', async () => {
-    const calls = [vi.spyOn(e2e.keycloak, 'findById'), vi.spyOn(e2e.keycloak, 'findByUsername'), vi.spyOn(e2e.keycloak, 'addUserToGroup')];
+    const calls = [vi.spyOn(e2e.keycloak, 'findById'), vi.spyOn(e2e.keycloak, 'addUserToGroup')];
     await patchMe('owner', { settings: { measurementSystem: 'imperial' } });
     for (const call of calls) expect(call).not.toHaveBeenCalled();
     vi.restoreAllMocks();
@@ -221,34 +221,11 @@ describe('lastLoginAt', () => {
   });
 });
 
-describe('GET /v1/users/search', () => {
-  it('returns the public projection of the profiles whose name starts with the prefix', async () => {
-    const response = await request(e2e.server)
-      .get('/v1/users/search')
-      .query({ name: 'car', size: 5 })
-      .set('Authorization', e2e.auth('owner'));
-    expect(response.status).toBe(200);
-    const page = response.body as PageBody<unknown>;
-    expect(page.content).toEqual([{ id: 'google-user', name: 'carol.smith', imageUrl: null }]);
-    expect(page.pagination).toMatchObject({ page: 0, size: 5, totalElements: 1 });
-  });
-
-  it('is open to users without roles', async () => {
-    const response = await request(e2e.server).get('/v1/users/search').query({ name: 'b' }).set('Authorization', e2e.auth('noRole'));
-    expect(response.status).toBe(200);
-    expect(ids(response.body)).toEqual([USERS.other.sub]);
-  });
-
-  it('treats the prefix as text, not as a pattern', async () => {
-    const response = await request(e2e.server).get('/v1/users/search').query({ name: '.*' }).set('Authorization', e2e.auth('owner'));
-    expect(response.status).toBe(200);
-    expect((response.body as PageBody<unknown>).content).toEqual([]);
-  });
-
-  it('requires a name and caps the page at 20', async () => {
-    expect((await request(e2e.server).get('/v1/users/search').set('Authorization', e2e.auth('owner'))).status).toBe(400);
-    const tooBig = await request(e2e.server).get('/v1/users/search').query({ name: 'a', size: 21 }).set('Authorization', e2e.auth('owner'));
-    expect(tooBig.status).toBe(400);
+describe('GET /v1/users/search (removed in spec 070)', () => {
+  it('no longer lists users by name prefix', async () => {
+    const response = await request(e2e.server).get('/v1/users/search').query({ name: 'car' }).set('Authorization', e2e.auth('owner'));
+    // The id route takes it, and it is reserved to admins.
+    expect(response.status).toBe(403);
   });
 });
 

@@ -21,6 +21,12 @@ let e2e: E2eApp;
 beforeAll(async () => {
   e2e = await startApp();
   await provision(e2e, 'owner', 'other', 'noRole', 'admin');
+  // dave and erin logged in once, so they have an RMU profile (spec 070: nobody else can be found).
+  for (const name of ['dave', 'erin'])
+    await request(e2e.server)
+      .get('/v1/users/me')
+      .set('Authorization', e2e.auth({ sub: `kc-${name}`, preferred_username: name, email: `${name}@example.com`, groups: ['rmu-user'] }))
+      .expect(200);
 });
 
 afterAll(async () => {
@@ -63,32 +69,25 @@ describe('request', () => {
     expect((await request(e2e.server).post('/v1/friendships').set('Authorization', e2e.auth('owner')).send({})).status).toBe(400);
   });
 
-  it('provisions the addressee from Keycloak when it never logged into RMU', async () => {
-    e2e.keycloak.users.set('kc-dave', {
-      id: 'kc-dave',
-      username: 'dave',
-      email: 'dave@example.com',
-      emailVerified: true,
-      enabled: true,
-      firstName: 'Dave',
-    });
-    const response = await befriend('owner', 'dave');
-    expect(response.status).toBe(201);
-    expect(response.body).toMatchObject({ addresseeId: 'kc-dave', addresseeName: 'dave' });
-    expect(e2e.events.types()).toContain('user.created');
+  // Spec 070, decision 1: only the exact display name of an RMU profile finds somebody.
+  it('finds nobody by email, by a Keycloak username without a profile or by a name prefix', async () => {
+    e2e.events.events.splice(0);
+    e2e.keycloak.users.set('kc-zoe', { id: 'kc-zoe', username: 'zoe', email: 'zoe@example.com', emailVerified: true, enabled: true });
+    for (const name of ['bob@example.com', 'zoe', 'zoe@example.com', 'bo']) {
+      const response = await befriend('owner', name);
+      expect(response.status).toBe(400);
+      expect((response.body as { code: string }).code).toBe('addressee-not-found');
+    }
+    expect(e2e.events.types()).not.toContain('user.created');
+    const self = await befriend('owner', 'ALICE');
+    expect((self.body as { code: string }).code).toBe('friendship-self');
   });
 
-  it('finds a Keycloak user by email and ignores a disabled one', async () => {
-    e2e.keycloak.users.set('kc-erin', { id: 'kc-erin', username: 'erin', email: 'erin@example.com', emailVerified: true, enabled: true });
-    e2e.keycloak.users.set('kc-frank', {
-      id: 'kc-frank',
-      username: 'frank',
-      email: 'frank@example.com',
-      emailVerified: true,
-      enabled: false,
-    });
-    expect((await befriend('other', 'erin@example.com')).status).toBe(201);
-    expect((await befriend('other', 'frank')).status).toBe(400);
+  it('finds the profile by its display name in any case', async () => {
+    const response = await befriend('owner', 'DAVE');
+    expect(response.status).toBe(201);
+    expect(response.body).toMatchObject({ addresseeId: 'kc-dave', addresseeName: 'dave' });
+    expect((await befriend('other', 'erin')).status).toBe(201);
   });
 
   it('answers 400 to a requester without a profile', async () => {

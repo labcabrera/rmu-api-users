@@ -30,7 +30,7 @@ describe('HTTP setup', () => {
     for (let i = 0; i < 5; i++) expect((await request(e2e.server).get('/v1/health')).status).toBe(200);
     const statuses: number[] = [];
     for (let i = 0; i < 4; i++)
-      statuses.push((await request(e2e.server).get('/v1/users/search?name=a').set('Authorization', e2e.auth('owner'))).status);
+      statuses.push((await request(e2e.server).get('/v1/friendships').set('Authorization', e2e.auth('owner'))).status);
     expect(statuses.slice(0, 3)).toEqual([200, 200, 200]);
     expect(statuses[3]).toBe(429);
   });

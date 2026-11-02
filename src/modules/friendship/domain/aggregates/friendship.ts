@@ -1,7 +1,7 @@
 import { BaseAggregateRoot } from '../../../shared/domain/aggregates/base-aggregate.js';
 import { FRIENDSHIP_TRANSITIONS, type FriendshipStatus } from '../value-objects/friendship-status.vo.js';
 import { randomUUID } from 'crypto';
-import { ValidationError } from '../../../shared/domain/errors/errors.js';
+import { ConflictError, ValidationError } from '../../../shared/domain/errors/errors.js';
 import type { FriendshipProps } from './friendship-props.js';
 
 export class Friendship extends BaseAggregateRoot<FriendshipProps> {
@@ -16,14 +16,16 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
     public message: string | null,
     public createdAt: Date,
     public updatedAt: Date | null,
+    public requestedAt: Date | null = null,
   ) {
     super(id);
   }
 
-  static create(props: Omit<FriendshipProps, 'id' | 'status' | 'blockedBy' | 'createdAt' | 'updatedAt'>): Friendship {
+  static create(props: Omit<FriendshipProps, 'id' | 'status' | 'blockedBy' | 'createdAt' | 'updatedAt' | 'requestedAt'>): Friendship {
     if (props.requesterId === props.addresseeId) {
-      throw new ValidationError('Requester and addressee must be different users');
+      throw new ValidationError('Requester and addressee must be different users', 'friendship-self');
     }
+    const now = new Date();
     return Friendship.fromProps({
       id: randomUUID(),
       requesterId: props.requesterId,
@@ -33,8 +35,32 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
       status: 'pending',
       blockedBy: null,
       message: props.message,
+      createdAt: now,
+      updatedAt: null,
+      requestedAt: now,
+    });
+  }
+
+  /**
+   * An accepted friendship made from an invite (spec 070, decision 5): the inviter consented when creating the link and
+   * the invitee when accepting it. The inviter is the requester.
+   */
+  static fromInvite(inviter: { id: string; name: string }, invitee: { id: string; name: string }): Friendship {
+    if (inviter.id === invitee.id) {
+      throw new ValidationError('An invite cannot be accepted by its own inviter', 'friend-invite-self');
+    }
+    return Friendship.fromProps({
+      id: randomUUID(),
+      requesterId: inviter.id,
+      requesterName: inviter.name,
+      addresseeId: invitee.id,
+      addresseeName: invitee.name,
+      status: 'accepted',
+      blockedBy: null,
+      message: null,
       createdAt: new Date(),
       updatedAt: null,
+      requestedAt: null,
     });
   }
 
@@ -50,6 +76,7 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
       props.message,
       props.createdAt,
       props.updatedAt,
+      props.requestedAt ?? null,
     );
   }
 
@@ -95,6 +122,23 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
     this.blockedBy = null;
     this.message = message;
     this.updatedAt = new Date();
+    this.requestedAt = this.updatedAt;
+  }
+
+  /**
+   * Accepts a pending or rejected friendship from an invite (spec 070, decision 5), with the inviter as the requester.
+   * An accepted one is a ConflictError (`already-friends`), and a blocked one too (`friendship-blocked`).
+   */
+  public acceptInvite(inviter: { id: string; name: string }, invitee: { id: string; name: string }): void {
+    if (this.status === 'accepted') throw new ConflictError('Users are already friends', 'already-friends');
+    if (this.status === 'blocked') throw new ConflictError('Friendship is blocked', 'friendship-blocked');
+    this.requesterId = inviter.id;
+    this.requesterName = inviter.name;
+    this.addresseeId = invitee.id;
+    this.addresseeName = invitee.name;
+    this.status = 'accepted';
+    this.blockedBy = null;
+    this.updatedAt = new Date();
   }
 
   public getProps(): FriendshipProps {
@@ -109,6 +153,7 @@ export class Friendship extends BaseAggregateRoot<FriendshipProps> {
       message: this.message,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
+      requestedAt: this.requestedAt,
     };
   }
 }

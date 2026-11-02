@@ -60,6 +60,15 @@ export class ForbiddenError extends DomainError {
   }
 }
 
+/** A per-user limit of the domain was reached (spec 070: friend requests per day): 429. */
+export class TooManyRequestsError extends DomainError {
+  constructor(message: string, code = 'too-many-requests') {
+    super(message, 429, code);
+    this.name = 'TooManyRequestsError';
+    Object.setPrototypeOf(this, TooManyRequestsError.prototype);
+  }
+}
+
 export class BadGatewayError extends DomainError {
   constructor(message: string) {
     super(message, 502, 'bad-gateway');

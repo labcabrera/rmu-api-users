@@ -61,16 +61,6 @@ describe('KeycloakIamUserAdapter', () => {
     expect(await adapter().findById('u-x')).toBeNull();
   });
 
-  it('finds a user by exact username or email', async () => {
-    const fetch = stubKeycloak(() => json([{ id: 'u-2', username: 'Bob', email: 'bob@x.test' }]));
-    const keycloak = adapter();
-
-    expect((await keycloak.findByUsername('bob'))?.id).toBe('u-2');
-    expect((await keycloak.findByEmail('BOB@x.test'))?.id).toBe('u-2');
-    expect(await keycloak.findByUsername('bobby')).toBeNull();
-    expect(fetch.mock.calls[1][0]).toBe(`${ADMIN}/users?username=bob&exact=true&briefRepresentation=false&max=2`);
-  });
-
   it('adds a user to a group and lists the groups', async () => {
     const fetch = stubKeycloak((url, init) =>
       init?.method === 'PUT' ? new Response(null, { status: 204 }) : json([{ id: 'g', name: 'core-law' }]),

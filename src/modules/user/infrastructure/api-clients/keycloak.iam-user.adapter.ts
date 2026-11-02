@@ -32,14 +32,6 @@ export class KeycloakIamUserAdapter implements IamUserPort {
     return user ? this.map(user) : null;
   }
 
-  findByUsername(username: string): Promise<UserApiResponse | null> {
-    return this.findExact('username', username, user => user.username.toLowerCase() === username.toLowerCase());
-  }
-
-  findByEmail(email: string): Promise<UserApiResponse | null> {
-    return this.findExact('email', email, user => (user.email ?? '').toLowerCase() === email.toLowerCase());
-  }
-
   async addUserToGroup(userId: string, groupId: string): Promise<void> {
     await this.request('PUT', `/users/${encodeURIComponent(userId)}/groups/${encodeURIComponent(groupId)}`, { body: {} });
   }
@@ -60,17 +52,6 @@ export class KeycloakIamUserAdapter implements IamUserPort {
   async setEnabled(userId: string, enabled: boolean): Promise<void> {
     // Keycloak takes a partial representation: only `enabled` changes.
     await this.request('PUT', `/users/${encodeURIComponent(userId)}`, { body: { enabled } });
-  }
-
-  private async findExact(
-    param: 'username' | 'email',
-    value: string,
-    matches: (user: KeycloakUserRepresentation) => boolean,
-  ): Promise<UserApiResponse | null> {
-    const params = new URLSearchParams({ [param]: value, exact: 'true', briefRepresentation: 'false', max: '2' });
-    const users = await this.request<KeycloakUserRepresentation[]>('GET', `/users?${params.toString()}`);
-    const user = (users ?? []).find(matches);
-    return user ? this.map(user) : null;
   }
 
   /**

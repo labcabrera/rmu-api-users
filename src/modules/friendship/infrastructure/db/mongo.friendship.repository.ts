@@ -29,6 +29,10 @@ export class MongoFriendshipRepository extends MongoBaseRepository<Friendship, F
     return doc ? this.toEntity(doc) : null;
   }
 
+  countRequestedSince(requesterId: string, since: Date): Promise<number> {
+    return this.model.countDocuments({ requesterId, requestedAt: { $gte: since } });
+  }
+
   protected mapToEntity(doc: HydratedDocument<FriendshipDocument>): Friendship {
     return Friendship.fromProps({
       id: doc._id.toString(),
@@ -41,6 +45,7 @@ export class MongoFriendshipRepository extends MongoBaseRepository<Friendship, F
       message: doc.message,
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
+      requestedAt: doc.requestedAt ?? null,
     });
   }
 }

@@ -1,6 +1,5 @@
 import { Page } from '../../src/modules/shared/application/pagination/page.js';
 import { ConflictError, NotFoundError } from '../../src/modules/shared/domain/errors/errors.js';
-import type { UserSummary } from '../../src/modules/user/application/models/user-summary.js';
 import { type UserRepository } from '../../src/modules/user/application/ports/user-repository.port.js';
 import { User } from '../../src/modules/user/domain/aggregates/user.js';
 import type { UserProps } from '../../src/modules/user/domain/aggregates/user-props.js';
@@ -34,14 +33,6 @@ export class InMemoryUserRepository implements UserRepository {
 
   existsByName(name: string, excludeId?: string): Promise<boolean> {
     return Promise.resolve([...this.store.values()].some(p => p.id !== excludeId && p.name.toLowerCase() === name.toLowerCase()));
-  }
-
-  searchByNamePrefix(prefix: string, page: number, size: number): Promise<Page<UserSummary>> {
-    const matches = [...this.store.values()]
-      .filter(p => p.enabled && p.name.toLowerCase().startsWith(prefix.toLowerCase()))
-      .sort((a, b) => a.name.localeCompare(b.name));
-    const content = matches.slice(page * size, page * size + size).map(p => ({ id: p.id, name: p.name, imageUrl: p.imageUrl }));
-    return Promise.resolve(new Page(content, page, size, matches.length));
   }
 
   findByRsql(_rsql: string | undefined, page: number, size: number): Promise<Page<User>> {

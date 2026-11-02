@@ -2,7 +2,6 @@ import type { BaseRepository } from '../../../shared/application/ports/base-repo
 import { User } from '../../domain/aggregates/user.js';
 import { QueryCriteria, type SortCriteria } from '../../../shared/application/criteria/query-criteria.js';
 import { Page } from '../../../shared/application/pagination/page.js';
-import type { UserSummary } from '../models/user-summary.js';
 
 export interface UserRepository extends BaseRepository<User> {
   findById(id: string): Promise<User | null>;
@@ -10,8 +9,6 @@ export interface UserRepository extends BaseRepository<User> {
   findByName(name: string): Promise<User | null>;
   /** True when another profile (other than `excludeId`) already uses the display name (case-insensitive). */
   existsByName(name: string, excludeId?: string): Promise<boolean>;
-  /** Case-insensitive prefix search by display name, returning the public projection only. */
-  searchByNamePrefix(prefix: string, page: number, size: number): Promise<Page<UserSummary>>;
   findByRsql(rsql: string | undefined, page: number, size: number, filter?: QueryCriteria, sort?: SortCriteria): Promise<Page<User>>;
   /** Throws ConflictError when the id or the display name already exists. */
   save(entity: User): Promise<User>;

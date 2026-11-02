@@ -1,6 +1,5 @@
 import type { Mock } from 'vitest';
 import type { UserClaims } from '../../../../../src/modules/user/application/models/user-claims.js';
-import { type IamUserPort, type UserApiResponse } from '../../../../../src/modules/user/application/ports/iam-user.port.js';
 import type { DomainEventPublisher } from '../../../../../src/modules/shared/application/ports/domain-event-publisher.port.js';
 import {
   LAST_LOGIN_REFRESH_MS,
@@ -37,23 +36,12 @@ const existingUser = (id: string, name: string) =>
 describe('UserProvisioningService', () => {
   let repository: InMemoryUserRepository;
   let publish: Mock<DomainEventPublisher['publish']>;
-  let iam: { [K in keyof IamUserPort]: Mock };
   let service: UserProvisioningService;
 
   beforeEach(() => {
     repository = new InMemoryUserRepository();
     publish = vi.fn<DomainEventPublisher['publish']>().mockResolvedValue(undefined);
-    iam = {
-      findById: vi.fn(),
-      findByUsername: vi.fn<() => Promise<UserApiResponse | null>>().mockResolvedValue(null),
-      findByEmail: vi.fn<() => Promise<UserApiResponse | null>>().mockResolvedValue(null),
-      addUserToGroup: vi.fn(),
-      findGroups: vi.fn(),
-      removeUserFromGroup: vi.fn(),
-      findUserGroups: vi.fn(),
-      setEnabled: vi.fn(),
-    };
-    service = new UserProvisioningService(repository, iam, { publish, publishChanges: vi.fn() });
+    service = new UserProvisioningService(repository, { publish, publishChanges: vi.fn() });
   });
 
   describe('provisionFromClaims', () => {
@@ -72,7 +60,6 @@ describe('UserProvisioningService', () => {
       expect(repository.store.has('user-1')).toBe(true);
       expect(publish).toHaveBeenCalledTimes(1);
       expect(publish.mock.calls[0][1].eventType).toBe('created');
-      expect(Object.values(iam).every(fn => fn.mock.calls.length === 0)).toBe(true);
     });
 
     it('derives the name from the email local part for brokered logins', async () => {
@@ -166,65 +153,6 @@ describe('UserProvisioningService', () => {
 
       expect(user.name).toBe('alice-from-other-request');
       expect(publish).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('findOrProvisionByName', () => {
-    const iamUser: UserApiResponse = {
-      id: 'kc-9',
-      username: 'carol',
-      email: 'carol@example.com',
-      emailVerified: true,
-      enabled: true,
-      firstName: 'Carol',
-    };
-
-    it('returns the local profile without calling Keycloak', async () => {
-      repository.seed(existingUser('user-2', 'bob'));
-      const user = await service.findOrProvisionByName('BOB');
-      expect(user?.id).toBe('user-2');
-      expect(iam.findByUsername).not.toHaveBeenCalled();
-    });
-
-    it('provisions a profile from the admin representation when there is no local profile', async () => {
-      iam.findByUsername.mockResolvedValue(iamUser);
-
-      const user = await service.findOrProvisionByName('carol');
-
-      expect(iam.findByUsername).toHaveBeenCalledWith('carol');
-      expect(user?.id).toBe('kc-9');
-      expect(user?.name).toBe('carol');
-      expect(user?.identityProvider).toBe('local');
-      expect(user?.claimsFingerprint).toBeNull();
-      expect(repository.store.has('kc-9')).toBe(true);
-      expect(publish).toHaveBeenCalledTimes(1);
-    });
-
-    it('searches by email when the input looks like one', async () => {
-      iam.findByEmail.mockResolvedValue({ ...iamUser, username: 'carol@example.com', identityProvider: 'google' });
-
-      const user = await service.findOrProvisionByName('carol@example.com');
-
-      expect(iam.findByEmail).toHaveBeenCalledWith('carol@example.com');
-      expect(user?.name).toBe('carol');
-      expect(user?.identityProvider).toBe('google');
-    });
-
-    it('returns the existing profile when the Keycloak user already has one under another name', async () => {
-      repository.seed(existingUser('kc-9', 'carol-renamed'));
-      iam.findByUsername.mockResolvedValue(iamUser);
-
-      const user = await service.findOrProvisionByName('carol');
-
-      expect(user?.name).toBe('carol-renamed');
-      expect(publish).not.toHaveBeenCalled();
-    });
-
-    it('returns null for unknown or disabled users', async () => {
-      expect(await service.findOrProvisionByName('nobody')).toBeNull();
-      iam.findByUsername.mockResolvedValue({ ...iamUser, enabled: false });
-      expect(await service.findOrProvisionByName('carol')).toBeNull();
-      expect(repository.store.size).toBe(0);
     });
   });
 });
