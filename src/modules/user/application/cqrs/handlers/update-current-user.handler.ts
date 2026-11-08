@@ -1,5 +1,6 @@
 import { Inject, Logger } from '@nestjs/common';
-import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { CommandBus, CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { RenameFriendshipParticipantCommand } from '../../../../friendship/application/cqrs/commands/rename-friendship-participant.command.js';
 import { ConflictError, NotFoundError, ValidationError } from '../../../../shared/domain/errors/errors.js';
 import { User } from '../../../domain/aggregates/user.js';
 import { UserUpdatedEvent } from '../../../domain/events/user-events.js';
@@ -16,6 +17,7 @@ export class UpdateCurrentUserHandler implements ICommandHandler<UpdateCurrentUs
   constructor(
     @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository,
     @Inject(DOMAIN_EVENT_PUBLISHER) private readonly events: DomainEventPublisher,
+    private readonly commandBus: CommandBus,
   ) {}
 
   async execute(command: UpdateCurrentUserCommand): Promise<User> {
@@ -31,6 +33,7 @@ export class UpdateCurrentUserHandler implements ICommandHandler<UpdateCurrentUs
       throw new ConflictError(`User name ${name} is already in use`);
     }
 
+    const previousName = user.name;
     user.update({
       name,
       settings: command.settings,
@@ -39,8 +42,18 @@ export class UpdateCurrentUserHandler implements ICommandHandler<UpdateCurrentUs
     if (!user.hasChanges()) return user;
     const updated = await this.userRepository.update(user);
     this.logger.verbose(`Profile ${user.id} updated`);
+    if (updated.name !== previousName) await this.renameCopies(updated);
     void this.events.publish('user', new UserUpdatedEvent(updated.getProps()));
     return updated;
+  }
+
+  /** The name is saved already: a failure here leaves old copies, not a failed rename. Other APIs follow the event. */
+  private async renameCopies(user: User): Promise<void> {
+    try {
+      await this.commandBus.execute(new RenameFriendshipParticipantCommand(user.id, user.name));
+    } catch (error) {
+      this.logger.error(`Could not rename user ${user.id} in their friendships: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   private validate(command: UpdateCurrentUserCommand): string | undefined {

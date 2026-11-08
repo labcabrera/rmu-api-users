@@ -12,9 +12,9 @@ beforeAll(async () => {
   e2e = await startApp();
   const db = e2e.connection;
   await db.collection('users').insertMany([
-    { _id: 'u1', username: 'a', createdAt: NOW, lastLoginAt: NOW },
-    { _id: 'u2', username: 'b', createdAt: monthsAgo(2), lastLoginAt: monthsAgo(2) },
-    { _id: 'u3', username: 'c', createdAt: monthsAgo(24), lastLoginAt: null },
+    { _id: 'u1', name: 'a', username: 'a', createdAt: NOW, lastLoginAt: NOW },
+    { _id: 'u2', name: 'b', username: 'b', createdAt: monthsAgo(2), lastLoginAt: monthsAgo(2) },
+    { _id: 'u3', name: 'c', username: 'c', createdAt: monthsAgo(24), lastLoginAt: null },
   ] as never[]);
   const yesterday = new Date(NOW.getTime() - 24 * 60 * 60 * 1000);
   await db.collection('activation-codes').insertMany([

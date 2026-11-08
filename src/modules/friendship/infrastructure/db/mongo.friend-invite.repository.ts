@@ -13,6 +13,10 @@ export class MongoFriendInviteRepository extends MongoBaseRepository<FriendInvit
     super(model, rsqlParser);
   }
 
+  async renameInviter(userId: string, name: string): Promise<void> {
+    await this.model.updateMany({ inviterId: userId, inviterName: { $ne: name } }, { $set: { inviterName: name }, $inc: { version: 1 } });
+  }
+
   async findActiveByTokenHash(tokenHash: string, now: Date): Promise<FriendInvite | null> {
     const doc = await this.model.findOne({ tokenHash, expiresAt: { $gt: now } });
     return doc ? this.toEntity(doc) : null;

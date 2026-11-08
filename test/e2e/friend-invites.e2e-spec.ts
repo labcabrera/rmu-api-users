@@ -2,7 +2,7 @@ import request from 'supertest';
 import { provision, startApp, USERS, type E2eApp, type UserName } from './support/app.js';
 
 type InviteBody = { id: string; inviterId: string; inviterName: string; createdAt: string; expiresAt: string; token?: string };
-type FriendshipBody = { id: string; requesterId: string; addresseeId: string; status: string };
+type FriendshipBody = { version: number; id: string; requesterId: string; addresseeId: string; status: string };
 type ErrorBody = { code: string };
 
 let e2e: E2eApp;
@@ -171,5 +171,25 @@ describe('daily limit of friend requests', () => {
     expect((limit.body as ErrorBody).code).toBe('friend-request-limit');
     // Invites are not requests: they still work.
     expect((await createInvite(ivy)).status).toBe(201);
+  });
+});
+
+describe('renaming a user', () => {
+  it('updates the name in their friendships and invites', async () => {
+    const renamed = await newUser('rena');
+    const friend = await newUser('rufus');
+    await request(e2e.server).post('/v1/friendships').set('Authorization', auth(friend)).send({ addresseeName: 'rena' }).expect(201);
+    await createInvite(renamed).expect(201);
+    const before = await friendshipOf(renamed.sub, friend.sub);
+
+    await request(e2e.server).patch('/v1/users/me').set('Authorization', auth(renamed)).send({ name: 'Rena Nueva' }).expect(200);
+
+    const after = await friendshipOf(renamed.sub, friend.sub);
+    expect(after).toMatchObject({ addresseeName: 'Rena Nueva', requesterName: 'rufus', version: before!.version + 1 });
+    expect((await listInvites(renamed)).body).toEqual([expect.objectContaining({ inviterName: 'Rena Nueva' })]);
+
+    // The same name again writes nothing.
+    await request(e2e.server).patch('/v1/users/me').set('Authorization', auth(renamed)).send({ name: 'Rena Nueva' }).expect(200);
+    expect((await friendshipOf(renamed.sub, friend.sub))!.version).toBe(after!.version);
   });
 });

@@ -21,6 +21,7 @@ import {
   DeleteFriendInviteHandler,
   ListFriendInvitesHandler,
 } from './application/cqrs/handlers/friend-invite.handlers.js';
+import { RenameFriendshipParticipantHandler } from './application/cqrs/handlers/rename-friendship-participant.handler.js';
 import { FRIEND_INVITE_REPOSITORY } from './application/ports/friend-invite-repository.port.js';
 import { MongoFriendInviteRepository } from './infrastructure/db/mongo.friend-invite.repository.js';
 import { FriendInviteModel, FriendInviteSchema } from './infrastructure/persistence/models/friend-invite.model.js';
@@ -34,6 +35,7 @@ const CommandHandlers = [
   CreateFriendInviteHandler,
   DeleteFriendInviteHandler,
   AcceptFriendInviteHandler,
+  RenameFriendshipParticipantHandler,
 ];
 const QueryHandlers = [
   GetFriendshipHandler,

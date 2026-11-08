@@ -19,6 +19,17 @@ export class MongoFriendshipRepository extends MongoBaseRepository<Friendship, F
     return super.findByRsql(rsql ?? '', page, size, filter);
   }
 
+  async renameParticipant(userId: string, name: string): Promise<void> {
+    await this.model.updateMany(
+      { requesterId: userId, requesterName: { $ne: name } },
+      { $set: { requesterName: name }, $inc: { version: 1 } },
+    );
+    await this.model.updateMany(
+      { addresseeId: userId, addresseeName: { $ne: name } },
+      { $set: { addresseeName: name }, $inc: { version: 1 } },
+    );
+  }
+
   async findByParticipants(userId: string, friendId: string): Promise<Friendship | null> {
     const doc = await this.model.findOne({
       $or: [

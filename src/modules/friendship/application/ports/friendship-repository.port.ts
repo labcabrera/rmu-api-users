@@ -11,6 +11,8 @@ export interface FriendshipRepository {
   save(friendship: Friendship): Promise<Friendship>;
   /** Throws ConflictError (`version-conflict`) when the friendship changed since it was loaded. */
   update(friendship: Friendship): Promise<Friendship>;
+  /** Writes the new name of a user in their friendships, on either side. */
+  renameParticipant(userId: string, name: string): Promise<void>;
   deleteById(id: string): Promise<Friendship | null>;
 }
 
