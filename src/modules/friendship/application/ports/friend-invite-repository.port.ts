@@ -13,6 +13,8 @@ export interface FriendInviteRepository {
    * for any other (spec 070, decision 4).
    */
   consume(id: string, now: Date): Promise<boolean>;
+  /** Writes the new name of a user in the invites they created. */
+  renameInviter(userId: string, name: string): Promise<void>;
   deleteById(id: string): Promise<FriendInvite | null>;
 }
 
