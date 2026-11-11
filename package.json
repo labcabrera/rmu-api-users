@@ -1,6 +1,6 @@
 {
   "name": "rmu-api-users",
-  "version": "0.2.0",
+  "version": "0.2.1-SNAPSHOT",
   "description": "User API for RMU",
   "author": {
     "name": "Luis Cabrera",
