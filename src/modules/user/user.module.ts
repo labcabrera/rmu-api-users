@@ -1,44 +1,38 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { UserController } from './interfaces/http/user.controller';
-import { UserModel, UserSchema } from './infrastructure/persistence/models/user.model';
-import { KeycloakUserSearchClient } from './infrastructure/api-clients/keycloak-user-client';
-import { AuthModule } from 'src/modules/auth/auth.module';
-import { MongoFriendshipRepository } from './infrastructure/db/mongo-friendship.repository';
-import { FriendshipModel, FriendshipSchema } from './infrastructure/persistence/models/friendship.model';
-import { MongoUserRepository } from './infrastructure/db/mongo-user.repository';
-import { TerminusModule } from '@nestjs/terminus';
 import { CqrsModule } from '@nestjs/cqrs';
-import { SharedModule } from '../shared/shared.module';
-import { KafkaUserEventConsumer } from './infrastructure/messaging/kafka.user-event-consumer';
-import { GetUserHandler } from './application/cqrs/handlers/get-user.handler';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AuthModule } from '../shared/infrastructure/security/auth.module.js';
+import { SharedModule } from '../shared/shared.module.js';
+import { GetUserHandler } from './application/cqrs/handlers/get-user.handler.js';
+import { GetUsersHandler } from './application/cqrs/handlers/get-users.handler.js';
+import { UpdateCurrentUserHandler } from './application/cqrs/handlers/update-current-user.handler.js';
+import { GetUserByIdHandler, SetUserEnabledHandler, UpdateUserGroupsHandler } from './application/cqrs/handlers/user-admin.handlers.js';
+import { IAM_USER_PORT } from './application/ports/iam-user.port.js';
+import { USER_REPOSITORY } from './application/ports/user-repository.port.js';
+import { UserProvisioningService } from './application/services/user-provisioning.service.js';
+import { KeycloakIamUserAdapter } from './infrastructure/api-clients/keycloak.iam-user.adapter.js';
+import { MongoUserRepository } from './infrastructure/db/mongo.user.repository.js';
+import { UserModel, UserSchema } from './infrastructure/persistence/models/user.model.js';
+import { UserController } from './interfaces/http/user.controller.js';
+
+export const USER_HANDLERS = [
+  GetUserHandler,
+  GetUsersHandler,
+  UpdateCurrentUserHandler,
+  GetUserByIdHandler,
+  UpdateUserGroupsHandler,
+  SetUserEnabledHandler,
+];
 
 @Module({
-  imports: [
-    TerminusModule,
-    CqrsModule,
-    MongooseModule.forFeature([
-      { name: UserModel.name, schema: UserSchema },
-      { name: FriendshipModel.name, schema: FriendshipSchema },
-    ]),
-    AuthModule,
-    SharedModule,
-  ],
-  controllers: [UserController, KafkaUserEventConsumer],
+  imports: [CqrsModule, MongooseModule.forFeature([{ name: UserModel.name, schema: UserSchema }]), AuthModule, SharedModule],
+  controllers: [UserController],
   providers: [
-    GetUserHandler,
-    {
-      provide: 'UserRepository',
-      useClass: MongoUserRepository,
-    },
-    {
-      provide: 'FriendshipRepository',
-      useClass: MongoFriendshipRepository,
-    },
-    {
-      provide: 'UserSearchPort',
-      useClass: KeycloakUserSearchClient,
-    },
+    ...USER_HANDLERS,
+    UserProvisioningService,
+    { provide: USER_REPOSITORY, useClass: MongoUserRepository },
+    { provide: IAM_USER_PORT, useClass: KeycloakIamUserAdapter },
   ],
+  exports: [USER_REPOSITORY, IAM_USER_PORT, UserProvisioningService],
 })
 export class UserModule {}

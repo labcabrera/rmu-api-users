@@ -1,0 +1,29 @@
+import { Inject } from '@nestjs/common';
+import { CommandHandler, type ICommandHandler } from '@nestjs/cqrs';
+import { ConflictError, NotFoundError } from '../../../../shared/domain/errors/errors.js';
+import { ActivationCode } from '../../../domain/aggregates/activation-code.js';
+import { type ActivationCodeRepository, ACTIVATION_CODE_REPOSITORY } from '../../ports/activation-code-repository.port.js';
+import { ActivationCodeGuardAdapter } from '../../../infrastructure/security/activation-code-guard.adapter.js';
+import { DeleteActivationCodeCommand } from '../commands/delete-activation-code.command.js';
+
+@CommandHandler(DeleteActivationCodeCommand)
+export class DeleteActivationCodeHandler implements ICommandHandler<DeleteActivationCodeCommand, ActivationCode> {
+  constructor(
+    @Inject(ACTIVATION_CODE_REPOSITORY) private readonly activationCodeRepository: ActivationCodeRepository,
+    @Inject(ActivationCodeGuardAdapter) private readonly guard: ActivationCodeGuardAdapter,
+  ) {}
+
+  async execute(command: DeleteActivationCodeCommand): Promise<ActivationCode> {
+    this.guard.checkDelete(null, command.userId, command.roles);
+    // A used code stays as the record of who redeemed it; an unused one can be revoked by deleting it (spec 053).
+    const existing = await this.activationCodeRepository.findById(command.id);
+    if (!existing) throw new NotFoundError('ActivationCode', command.id);
+    if (existing.isUsed())
+      throw new ConflictError(`Activation code ${existing.code} was used and cannot be deleted`, 'activation-code-used');
+    const deleted = await this.activationCodeRepository.deleteById(command.id);
+    if (!deleted) {
+      throw new NotFoundError('ActivationCode', command.id);
+    }
+    return deleted;
+  }
+}

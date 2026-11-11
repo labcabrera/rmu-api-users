@@ -1,38 +1,22 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DomainExceptionFilter } from './modules/shared/interfaces/http/domain-exception.filter';
+import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { AppModule } from './app.module.js';
+import { configureHttp } from './bootstrap/http.js';
+import { configureLogger } from './bootstrap/logger.js';
+import { configureOpenApi } from './bootstrap/openapi.js';
 
+// users only publishes to Kafka (KafkaProducerService): it has no consumers, so no microservice is connected.
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
-  const openApiConfig = new DocumentBuilder().setTitle('User API').setDescription('API para gestión de usuarios').setVersion('1.0').build();
-  const document = SwaggerModule.createDocument(app, openApiConfig);
-  SwaggerModule.setup('api-docs', app, document);
-
-  const clientId = app.get(ConfigService).get<string>('KAFKA_CLIENT_ID') || 'rmu-api-users';
-  const brokers = app.get(ConfigService).get<string>('KAFKA_BROKERS')?.split(',') || ['localhost:9092'];
-  const consumerGroupId = app.get(ConfigService).get<string>('KAFKA_CONSUMER_GROUP_ID') || 'user-consumer';
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        clientId: clientId,
-        brokers: brokers,
-      },
-      consumer: {
-        groupId: consumerGroupId,
-      },
-    },
-  });
-
-  app.useGlobalFilters(new DomainExceptionFilter());
-  await app.listen(3010);
-  await app.startAllMicroservices();
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { logger: configureLogger(process.env.LOG_LEVEL) });
+  configureHttp(app);
+  configureOpenApi(app);
+  await app.listen(app.get(ConfigService).get<number>('PORT')!);
 }
-bootstrap();
+
+// A failed start (Mongo, Kafka, a port in use) ends the process, so the container restarts instead of hanging.
+bootstrap().catch((error: unknown) => {
+  new Logger('Bootstrap').fatal(error instanceof Error ? (error.stack ?? error.message) : String(error));
+  process.exit(1);
+});

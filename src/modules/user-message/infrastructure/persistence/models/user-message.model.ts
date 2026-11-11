@@ -1,0 +1,37 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+import { UserMessage } from '../../../domain/aggregates/user-message.js';
+import type { MessageType } from '../../../domain/value-objects/message-type.vo.js';
+
+export type UserMessageDocument = UserMessage & Document;
+
+@Schema({ collection: 'user-messages', _id: false, versionKey: false })
+export class UserMessageModel {
+  @Prop({ type: String, required: true })
+  _id: string;
+
+  /** Optimistic concurrency: +1 on each write. Documents stored before it existed have none (version 0). */
+  @Prop({ type: Number, default: 0 })
+  version: number;
+
+  @Prop({ type: String, required: true })
+  userId: string;
+
+  @Prop({ type: String, required: true })
+  from: string;
+
+  @Prop({ type: String, required: true })
+  message: string;
+
+  @Prop({ type: String, required: true })
+  type: MessageType;
+
+  @Prop({ type: Date, required: false })
+  readed: Date | null;
+
+  @Prop({ type: Date, required: true })
+  createdAt: Date;
+}
+
+export const UserMessageSchema = SchemaFactory.createForClass(UserMessageModel);
+UserMessageSchema.index({ userId: 1, readed: 1, createdAt: -1 });
